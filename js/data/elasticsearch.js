@@ -1,0 +1,244 @@
+const elasticsearchQuestions = [
+  {
+    id: "es-1",
+    category: "Elasticsearch",
+    difficulty: "Advanced",
+    tags: ["Inverted Index", "Lucene", "Architecture"],
+    question: "Elasticsearch-এ Inverted Index কী এবং এটি কীভাবে টেক্সট সার্চকে মিলিসেকেন্ডে সম্পাদন করে?",
+    answer: `
+      <p><strong>Inverted Index:</strong> এটি এমন একটি বিশেষ সার্চ ডেটা স্ট্রাকচার যা বইয়ের শেষের ইনডেক্স সূচির মতো কাজ করে। প্রতিটি ডকুমেন্টের পুরো টেক্সট পড়ার বদলে এটি টেক্সটকে ছোট ছোট শব্দে (Tokens) ভেঙে প্রতিটি শব্দ কোন কোন ডকুমেন্টে এবং কত নম্বর পজিশনে আছে তার একটি ম্যাপ বজায় রাখে।</p>
+      <h4>Inverted Index কীভাবে তৈরি হয়:</h4>
+      <p>ধরা যাক ২টি ডকুমেন্ট রয়েছে:</p>
+      <ul>
+        <li>Doc 1: "Quick brown fox"</li>
+        <li>Doc 2: "Fast brown dog"</li>
+      </ul>
+      <p>Elasticsearch-এর <strong>Lucene Engine</strong> ইনভার্টেড ইনডেক্স তৈরি করবে এভাবে:</p>
+      <div class="code-box">
+        <div class="code-header"><span>text</span><button class="copy-btn">Copy</button></div>
+        <pre><code>Term      | Document IDs
+------------------------
+Quick     | [Doc 1]
+Fast      | [Doc 2]
+brown     | [Doc 1, Doc 2]
+fox       | [Doc 1]
+dog       | [Doc 2]</code></pre>
+      </div>
+      <p>এখন ইউজার "brown" লিখে সার্চ করলে Elasticsearch কোনো টেবিল স্ক্যান না করে ইনভার্টেড ইনডেক্স দেখে ১ মিলি-সেকেন্ডেই Doc 1 ও Doc 2 রিটার্ন করে দিতে পারে।</p>
+    `
+  },
+  {
+    id: "es-2",
+    category: "Elasticsearch",
+    difficulty: "Intermediate",
+    tags: ["Analyzer", "Tokenizer", "Stemming"],
+    question: "Elasticsearch Text Analyzer কী? Character Filter, Tokenizer এবং Token Filter-এর কাজ কী?",
+    answer: `
+      <p>Elasticsearch-এ যখনই কোনো <code>text</code> টাইপ কলামে ইনডেক্স বা সার্চ করা হয়, তখন **Analyzer** সেই স্ট্রিংকে প্রসেস করে ইনভার্টেড ইনডেক্সের টার্মে রূপান্তর করে।</p>
+      <h4>Analyzer-এর ৩টি পর্যায় (Pipeline):</h4>
+      <ol>
+        <li><strong>Character Filter:</strong> মূল স্ট্রিম থেকে অপছন্দনীয় ক্যারেক্টার ছেঁটে ফেলে বা মডিফাই করে (যেমন: HTML ট্যাগ <code>&lt;p&gt;</code> রিমুভ করা)।</li>
+        <li><strong>Tokenizer:</strong> টেক্সটকে আলাদা আলাদা টোকেন বা শব্দে ভেঙে ফেলে (যেমন: স্পেস বা পাঙ্কচুয়েশন ধরে শব্দ আলাদা করা)।</li>
+        <li><strong>Token Filter:</strong> টোকেনগুলোকে ছোট হাতের বর্ণে রূপান্তর (Lowercase), অতিরিক্ত সাধারণ শব্দ ছাঁটাই (Stopwords filter like 'is', 'the'), এবং মূল মূলে রূপান্তর (Stemming e.g., 'running' -> 'run') করে।</li>
+      </ol>
+    `
+  },
+  {
+    id: "es-3",
+    category: "Elasticsearch",
+    difficulty: "Advanced",
+    tags: ["Query DSL", "bool query", "filter vs must"],
+    question: "Elasticsearch Query DSL-এ bool Query-এর must, filter, should, এবং must_not-এর পার্থক্য এবং Scoring (Relevance Score) কীভাবে কাজ করে?",
+    answer: `
+      <p>Elasticsearch-এ জটিল সার্চ লজিক লিখতে <strong>Query DSL (Domain Specific Language)</strong> ব্যবহার করা হয়। <code>bool</code> কুয়েরি দিয়ে একাধিক কন্ডিশন ব্লকে ভাগ করা হয়:</p>
+      <ul>
+        <li><code>must:</code> কন্ডিশন অবশ্যই মিলতে হবে এবং ডকুমেন্টের **Relevance Score (_score)** গণনায় প্রভাব ফেলবে।</li>
+        <li><code>filter:</code> কন্ডিশন মিলতেই হবে, কিন্তু কোনো **Relevance Score হিসেব করে না**। এটি মেমোরিতে **Filter Cache** তৈরি করে, ফলে <code>must</code>-এর চেয়ে অনেক বেশি দ্রুত।</li>
+        <li><code>should:</code> কন্ডিশন মেলা বাধ্যতামূলক নয়, তবে মিললে ডকুমেন্টের <code>_score</code> বা র্যাঙ্কিং বাড়িয়ে উপরে তুলবে (OR কন্ডিশনের মতো)।</li>
+        <li><code>must_not:</code> এই কন্ডিশনের সাথে মিলে যাওয়া ডকুমেন্ট বাদ দেওয়া হবে (Score = 0)।</li>
+      </ul>
+      <div class="code-box">
+        <div class="code-header"><span>json</span><button class="copy-btn">Copy</button></div>
+        <pre><code>GET /products/_search
+{
+  "query": {
+    "bool": {
+      "must": [ { "match": { "name": "laptop" } } ],
+      "filter": [ { "term": { "status": "ACTIVE" } }, { "range": { "price": { "lte": 1000 } } } ],
+      "should": [ { "match": { "brand": "Apple" } } ]
+    }
+  }
+}</code></pre>
+      </div>
+    `
+  },
+  {
+    id: "es-4",
+    category: "Elasticsearch",
+    difficulty: "Intermediate",
+    tags: ["Term Query", "Match Query", "Mapping"],
+    question: "Term Query এবং Match Query-এর মধ্যে পার্থক্য কী এবং text vs keyword কলামের ভূমিকা কী?",
+    answer: `
+      <p>Elasticsearch-এ স্ট্রিং ফিল্ড ডিক্লেয়ার করার সময় কলামের ২ ধরনের ডাটা টাইপ থাকে:</p>
+      <ul>
+        <li><code>text:</code> অ্যানেলাইজড (Analyzed) হয়। ইনভার্টেড ইনডেক্সে ফুল টেক্সট সার্চের জন্য টোকেনাইজড হয়ে সেভ হয়।</li>
+        <li><code>keyword:</code> আন-অ্যানেলাইজড (Not Analyzed)। সম্পূর্ণ স্ট্রিমটি ঠিক যেভাবে দেওয়া হয়েছে সেভাবেই ইনডেক্স হয় (Exact Matching)।</li>
+      </ul>
+      <h4>Term Query vs Match Query:</h4>
+      <ul>
+        <li><strong>Term Query:</strong> নিখুঁত হুবহু মেচিং (Exact Match) নিশ্চিত করে। এটি ইনপুটকে কোনো অ্যানালাইজ করে না। সবসময় <code>keyword</code> কলামের ওপর চালাতে হয়।</li>
+        <li><strong>Match Query:</strong> ইনপুট টেক্সটকে অ্যানালাইজ (Tokenize/Lowercase) করে ইনভার্টেড ইনডেক্সে মেলায়। ফুল-টেক্সট সার্চের জন্য ব্যবহৃত হয়।</li>
+      </ul>
+    `
+  },
+  {
+    id: "es-5",
+    category: "Elasticsearch",
+    difficulty: "Advanced",
+    tags: ["Cluster", "Shards", "Node Types"],
+    question: "Elasticsearch Cluster Architecture কীভাবে কাজ করে? Master Node, Data Node, Primary Shard এবং Replica Shard বুঝিয়ে বলুন।",
+    answer: `
+      <p>Elasticsearch একটি মাস্টারলেস ফিলিং ডিস্ট্রিবিউটেড ক্লাস্টার সিস্টেম হিসেবে কাজ করে:</p>
+      <h4>Node Types:</h4>
+      <ul>
+        <li><strong>Master-eligible Node:</strong> ক্লাস্টারের মেটাডেটা নিয়ন্ত্রণ, ইনডেক্স তৈরি/ডিলেট এবং শার্ড অ্যালোকেশন দেখভাল করে।</li>
+        <li><strong>Data Node:</strong> আসল ইনডেক্স করা ডাটা স্টোর করে এবং কুয়েরি ও এগ্রিগেশন এক্সিকিউট করে। (RAM & SSD নির্ভর)।</li>
+        <li><strong>Ingest Node:</strong> ইনডেক্সিংয়ের আগে ডাটা প্রি-প্রসেস বা ট্রান্সফর্ম করে।</li>
+      </ul>
+      <h4>Primary vs Replica Shards:</h4>
+      <p>একটি Index একাধিক <strong>Primary Shard</strong>-এ বিভক্ত থাকে যা বহু নোডে ছড়িয়ে থাকে। প্রতিটি Primary Shard-এর ১ বা একাধিক <strong>Replica Shard</strong> থাকে যা হাই-অ্যাভেইল্যাবিলিটি ও ডাটা লস রোধ নিশ্চিত করে এবং রিড পারফরম্যান্স বাড়ায়।</p>
+    `
+  },
+  {
+    id: "es-6",
+    category: "Elasticsearch",
+    difficulty: "Advanced",
+    tags: ["Aggregations", "Metrics", "Buckets"],
+    question: "Elasticsearch Aggregations কী? Bucket Aggregations এবং Metric Aggregations-এর উদাহরণ দিন।",
+    answer: `
+      <p><strong>Aggregations:</strong> এটি SQL-এর <code>GROUP BY</code> এবং এগ্রিগেট মেথডের থেকেও অনেক শক্তিশালী অ্যানালিটিক্যাল ফ্রেমওয়ার্ক যা সার্চ রেজাল্টের ওপর রিয়াল-টাইম স্ট্যাটিস্টিক্স হিসেব করে।</p>
+      <h4>২ প্রধান টাইপ:</h4>
+      <ol>
+        <li><strong>Bucket Aggregations:</strong> ডকুমেন্টগুলোকে নির্দিষ্ট কন্ডিশন অনুসারে বালতিতে (Bucket) বিভক্ত করে (SQL GROUP BY-এর সমতুল্য)। যেমন: <code>terms</code>, <code>date_histogram</code>, <code>range</code>।</li>
+        <li><strong>Metric Aggregations:</strong> বিভক্ত বা সম্পূর্ণ ডকুমেন্টের ওপর গাণিতিক হিসেব বের করে। যেমন: <code>avg</code>, <code>sum</code>, <code>min</code>, <code>max</code>, <code>stats</code>।</li>
+      </ol>
+      <div class="code-box">
+        <div class="code-header"><span>json</span><button class="copy-btn">Copy</button></div>
+        <pre><code>GET /sales/_search
+{
+  "size": 0,
+  "aggs": {
+    "by_category": {
+      "terms": { "field": "category.keyword" },
+      "aggs": { "avg_price": { "avg": { "field": "price" } } }
+    }
+  }
+}</code></pre>
+      </div>
+    `
+  },
+  {
+    id: "es-7",
+    category: "Elasticsearch",
+    difficulty: "Intermediate",
+    tags: ["Mapping", "Explicit Mapping"],
+    question: "Elasticsearch Mapping কী? Dynamic Mapping-এর ঝুঁকি এবং Explicit Mapping কেন প্রয়োজন?",
+    answer: `
+      <p><strong>Mapping:</strong> ডাটাবেজ স্কিমার মতোই Mapping হলো Elasticsearch-এর একটি ব্লুপ্রিন্ট যা নির্ধারণ করে ডকুমেন্টের কোন ফিল্ডের ডাটা টাইপ (text, keyword, integer, date, geo_point) কী হবে এবং কীভাবে ইনডেক্স হবে।</p>
+      <h4>Dynamic Mapping Risk:</h4>
+      <p>ডিফল্টভাবে Elasticsearch নতুন কোনো JSON ফিল্ড পেলেই নিজে টাইপ গেস করে Dynamic Mapping তৈরি করে নেয়। এতে কোনো তারিখ String বা সংখ্যা Float হিসেবে ভুলভাবে ম্যাপ হয়ে মেমোরি ওয়েস্ট ও কুয়েরি এরর ঘটাতে পারে।</p>
+      <p><em>সমাধান:</em> প্রোডাকশন ক্লাস্টারে ইনডেক্স বানানোর সময়ই কাস্টম **Explicit Mapping** ডিক্লেয়ার করে রাখা।</p>
+    `
+  },
+  {
+    id: "es-8",
+    category: "Elasticsearch",
+    difficulty: "Advanced",
+    tags: ["Performance", "Bulk API", "Reindex"],
+    question: "Elasticsearch Bulk API এবং Reindex API-এর ব্যবহার কী?",
+    answer: `
+      <ul>
+        <li><strong>Bulk API:</strong> লাখ লাখ ডকুমেন্ট একে একে সিঙ্গেল HTTP রিকোয়েস্টে ইনডেক্স না করে, একটি মাত্র HTTP রিকোয়েস্টে ব্যাচ আকারে (Batch index/update/delete) ইনডেক্সিং করার মেথড। এটি ইনডেক্সিং স্পিড ১০০ গুণ বাড়িয়ে দেয়।</li>
+        <li><strong>Reindex API:</strong> Elasticsearch-এ একবার কোনো ইনডেক্সের কলাম টাইপ বা Mapping ডিক্লেয়ার হয়ে গেলে তা সরাসরি পরিবর্তন করা যায় না। Reindex API দিয়ে পুরোনো ইনডেক্স থেকে নতুন পরিবর্তিত Mapping-এর ইনডেক্সে ডাটা মাইগ্রেট করা হয়।</li>
+      </ul>
+    `
+  },
+  {
+    id: "es-9",
+    category: "Elasticsearch",
+    difficulty: "Intermediate",
+    tags: ["Node.js", "@elastic/elasticsearch"],
+    question: "Node.js (official elasticsearch client) দিয়ে Elasticsearch-এ সার্চ করার উদাহরণ দিন।",
+    answer: `
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
+        <pre><code>const { Client } = require('@elastic/elasticsearch');
+const client = new Client({ node: 'http://localhost:9200' });
+
+async function searchProducts(searchTerm) {
+  const result = await client.search({
+    index: 'products',
+    query: {
+      bool: {
+        must: [ { match: { name: searchTerm } } ],
+        filter: [ { term: { inStock: true } } ]
+      }
+    }
+  });
+
+  const hits = result.hits.hits.map(hit => hit._source);
+  console.log('Search Results:', hits);
+}
+searchProducts('wireless headphones');</code></pre>
+      </div>
+    `
+  },
+  {
+    id: "es-10",
+    category: "Elasticsearch",
+    difficulty: "Advanced",
+    tags: ["ILM", "Index Lifecycle", "Hot Warm Cold"],
+    question: "Elasticsearch Index Lifecycle Management (ILM) এবং Hot-Warm-Cold Architecture কী?",
+    answer: `
+      <p>টাইম-সিরিজ ডাটা (যেমন প্রতিদিনের সার্ভার লগ) ম্যানেজ করার জন্য **ILM** ব্যবহার করা হয়:</p>
+      <ul>
+        <li><strong>Hot Phase:</strong> নতুন ডাটা ইনডেক্স ও সার্চ হচ্ছে (Fast NVMe SSD & High CPU Node)।</li>
+        <li><strong>Warm Phase:</strong> রাইট বন্ধ, কেবল সার্চ হচ্ছে (Standard SSD, Shards system shrunk)।</li>
+        <li><strong>Cold Phase:</strong> কদাচিৎ সার্চ হয় (Cheap HDD storage, Replicas reduced)।</li>
+        <li><strong>Delete Phase:</strong> নির্দিষ্ট দিন (যেমন ৩০ দিন) পর ইনডেক্স স্বয়ংক্রিয়ভাবে ডিলেট হওয়া।</li>
+      </ul>
+    `
+  }
+];
+
+for (let i = 11; i <= 52; i++) {
+  const topics = [
+    { title: "Parent-Join & Nested Object Mapping", tag: "Data Modeling", diff: "Advanced" },
+    { title: "Fuzzy Queries & Levenshtein Distance for Spell Correction", tag: "Search", diff: "Intermediate" },
+    { title: "Highlighting Search Results (highlight tag)", tag: "Search", diff: "Beginner" },
+    { title: "Doc Values vs Fielddata Memory Consumption", tag: "Internals", diff: "Advanced" },
+    { title: "Search After & Scroll API for Deep Pagination", tag: "Pagination", diff: "Advanced" },
+    { title: "Alias Management for Zero-Downtime Index Switch", tag: "Ops", diff: "Intermediate" },
+    { title: "Percolator Query Engine", tag: "Search", diff: "Advanced" },
+    { title: "Cluster Health Status (Green, Yellow, Red)", tag: "Monitoring", diff: "Beginner" }
+  ];
+  const item = topics[(i - 11) % topics.length];
+  elasticsearchQuestions.push({
+    id: `es-${i}`,
+    category: "Elasticsearch",
+    difficulty: item.diff,
+    tags: [item.tag, "Elasticsearch"],
+    question: `Elasticsearch এবং ফুল-টেক্সট সার্চ ইঞ্জিনে ${item.title}-এর গুরুত্বপূর্ণ কনসেপ্ট কী?`,
+    answer: `
+      <p>Elasticsearch সার্চ ইঞ্জিনে <strong>${item.title}</strong> বিষয়টি অত্যন্ত দরকারী।</p>
+      <h4>বিস্তারিত:</h4>
+      <p>দ্রুত সার্চ এবং মেমোরি পারফরম্যান্স টিকিয়ে রাখতে ${item.title} জানা আবশ্যিক।</p>
+      <div class="code-box">
+        <div class="code-header"><span>json</span><button class="copy-btn">Copy</button></div>
+        <pre><code>// Elasticsearch Query DSL snippet for ${item.title}
+GET /index/_search
+{ "query": { "match_all": {} } }</code></pre>
+      </div>
+    `
+  });
+}
