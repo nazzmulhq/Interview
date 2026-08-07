@@ -72,6 +72,8 @@ function renderSidebarCategories() {
   const categories = [
     { name: "All", label: "📚 All Topics", icon: "" },
     { name: "JavaScript", label: "⚡ JavaScript" },
+    { name: "React.js", label: "⚛️ React.js" },
+    { name: "Next.js", label: "▲ Next.js" },
     { name: "Node.js", label: "🟩 Node.js" },
     { name: "Express.js", label: "🚂 Express.js" },
     { name: "NestJS", label: "🦁 NestJS" },
@@ -87,7 +89,12 @@ function renderSidebarCategories() {
 
   sidebarList.innerHTML = categories.map(cat => {
     const isAll = cat.name === "All";
-    const catQuestions = isAll ? allQuestions : allQuestions.filter(q => q.category === cat.name);
+    const catQuestions = isAll ? allQuestions : allQuestions.filter(q => {
+      if (cat.name === "Database") {
+        return q.category === "Database" || q.category.startsWith("Database");
+      }
+      return q.category === cat.name;
+    });
     const count = catQuestions.length;
     const isActive = currentCategory === cat.name;
 
@@ -198,7 +205,13 @@ function renderQuestions() {
 
   // Filter Logic
   let filtered = allQuestions.filter(q => {
-    if (currentCategory !== "All" && q.category !== currentCategory) return false;
+    if (currentCategory !== "All") {
+      if (currentCategory === "Database") {
+        if (q.category !== "Database" && !q.category.startsWith("Database")) return false;
+      } else if (q.category !== currentCategory) {
+        return false;
+      }
+    }
     if (selectedDifficulty !== "All" && q.difficulty !== selectedDifficulty) return false;
     if (selectedStatus === "Mastered" && !userProgress.mastered.includes(q.id)) return false;
     if (selectedStatus === "Review" && !userProgress.review.includes(q.id)) return false;

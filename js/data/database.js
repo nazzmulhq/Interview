@@ -265,7 +265,7 @@ FROM employees;</code></pre>
   },
   {
     id: "db-19",
-    category: "Database (SQL)",
+    category: "Database",
     difficulty: "Advanced",
     tags: ["Transactions", "Isolation Levels", "MVCC"],
     question: "ACID Transactions: 4 Isolation Levels (Read Uncommitted, Read Committed, Repeatable Read, Serializable) এবং Dirty Read, Non-Repeatable Read, Phantom Read কী?",
@@ -275,7 +275,7 @@ FROM employees;</code></pre>
   },
   {
     id: "db-20",
-    category: "Database (SQL)",
+    category: "Database",
     difficulty: "Advanced",
     tags: ["Indexing", "B-Tree vs Hash", "Composite Index"],
     question: "B-Tree Indexing Mechanism, Composite Indexing, Leftmost Prefix Rule এবং Index Scan vs Index Seek কী?",
@@ -285,7 +285,7 @@ FROM employees;</code></pre>
   },
   {
     id: "db-21",
-    category: "Database (SQL)",
+    category: "Database",
     difficulty: "Advanced",
     tags: ["Performance", "EXPLAIN ANALYZE", "Query Plan"],
     question: "EXPLAIN ANALYZE দিয়ে SQL Query Execution Plan এবং Performance Bottlenecks কীভাবে চিহ্নিত করবেন?",
@@ -295,7 +295,7 @@ FROM employees;</code></pre>
   },
   {
     id: "db-22",
-    category: "Database (SQL)",
+    category: "Database",
     difficulty: "Advanced",
     tags: ["Optimization", "Sharding", "Partitioning"],
     question: "Database Partitioning (Range, List, Hash) vs Database Sharding-এর মধ্যে মৌলিক পার্থক্য কী?",
@@ -305,7 +305,7 @@ FROM employees;</code></pre>
   },
   {
     id: "db-23",
-    category: "Database (SQL)",
+    category: "Database",
     difficulty: "Advanced",
     tags: ["PostgreSQL", "JSONB", "GIN Index"],
     question: "PostgreSQL JSON vs JSONB, GIN Indexing, এবং Expression Indexing কীভাবে সার্চ গতি বাড়ায়?",
@@ -315,7 +315,7 @@ FROM employees;</code></pre>
   },
   {
     id: "db-24",
-    category: "Database (SQL)",
+    category: "Database",
     difficulty: "Intermediate",
     tags: ["Window Functions", "OVER", "ROW_NUMBER"],
     question: "SQL Window Functions (ROW_NUMBER(), RANK(), DENSE_RANK(), LAG(), LEAD()) কীভাবে কাজ করে?",
@@ -325,7 +325,7 @@ FROM employees;</code></pre>
   },
   {
     id: "db-25",
-    category: "Database (SQL)",
+    category: "Database",
     difficulty: "Advanced",
     tags: ["Concurrency", "Pessimistic Locking", "Optimistic Locking"],
     question: "Pessimistic Locking (SELECT ... FOR UPDATE) vs Optimistic Locking (Version Column) কখন কোনটা ব্যবহার করবেন?",
@@ -335,7 +335,7 @@ FROM employees;</code></pre>
   },
   {
     id: "db-26",
-    category: "Database (SQL)",
+    category: "Database",
     difficulty: "Intermediate",
     tags: ["CTE", "WITH RECURSIVE", "Hierarchical"],
     question: "Common Table Expressions (CTE) এবং WITH RECURSIVE দিয়ে অসীম নেস্টেড ক্যাটাগরি ট্রি (Tree Structure) কীভাবে কোয়েরি করবেন?",
@@ -351,7 +351,7 @@ SELECT * FROM CategoryTree;</code></pre></div>
   },
   {
     id: "db-27",
-    category: "Database (SQL)",
+    category: "Database",
     difficulty: "Advanced",
     tags: ["Connection Pooling", "PgBouncer", "Idle Sockets"],
     question: "Database Connection Pooling (PgBouncer / HikariCP) এবং Max Connections Tuning কেন জরুরি?",
@@ -361,7 +361,7 @@ SELECT * FROM CategoryTree;</code></pre></div>
   },
   {
     id: "db-28",
-    category: "Database (SQL)",
+    category: "Database",
     difficulty: "Intermediate",
     tags: ["ORM", "N+1 Problem", "Eager Loading"],
     question: "ORM (Prisma / TypeORM / Sequelize)-এ N+1 Query Problem কী এবং Eager Loading / JOIN দিয়ে এটি কীভাবে সমাধান করবেন?",
@@ -371,7 +371,7 @@ SELECT * FROM CategoryTree;</code></pre></div>
   },
   {
     id: "db-29",
-    category: "Database (SQL)",
+    category: "Database",
     difficulty: "Advanced",
     tags: ["PostgreSQL", "WAL", "Checkpoints"],
     question: "Write-Ahead Logging (WAL) এবং PostgreSQL Checkpoints কীভাবে ক্র্যাশ রিকভারি নিশ্চিত করে?",
@@ -381,7 +381,7 @@ SELECT * FROM CategoryTree;</code></pre></div>
   },
   {
     id: "db-30",
-    category: "Database (SQL)",
+    category: "Database",
     difficulty: "Intermediate",
     tags: ["Schema", "Migrations", "Zero Downtime"],
     question: "Database Migrations (Zero Downtime Schema Migration Pattern) কীভাবে পরিচালনা করবেন?",
@@ -391,7 +391,7 @@ SELECT * FROM CategoryTree;</code></pre></div>
   },
   {
     id: "db-31",
-    category: "Database (SQL)",
+    category: "Database",
     difficulty: "Advanced",
     tags: ["Architecture", "CAP Theorem", "PACELC"],
     question: "CAP Theorem (Consistency, Availability, Partition Tolerance) এবং PACELC Theorem-এর আধুনিক ব্যাখ্যা কী?",
@@ -401,7 +401,7 @@ SELECT * FROM CategoryTree;</code></pre></div>
   },
   {
     id: "db-32",
-    category: "Database (SQL)",
+    category: "Database",
     difficulty: "Intermediate",
     tags: ["Replication", "Master-Slave", "Logical"],
     question: "Master-Slave Replication (Physical Streaming vs Logical Replication) এবং Replication Lag কী?",
@@ -411,7 +411,7 @@ SELECT * FROM CategoryTree;</code></pre></div>
   },
   {
     id: "db-33",
-    category: "Database (SQL)",
+    category: "Database",
     difficulty: "Advanced",
     tags: ["Foreign Keys", "CASCADE", "Triggers"],
     question: "ON DELETE CASCADE, ON DELETE SET NULL, এবং Foreign Key Constraint Triggers-এর সঠিক ব্যবহার কী?",
@@ -421,7 +421,7 @@ SELECT * FROM CategoryTree;</code></pre></div>
   },
   {
     id: "db-34",
-    category: "Database (SQL)",
+    category: "Database",
     difficulty: "Intermediate",
     tags: ["Normalization", "3NF", "Denormalization"],
     question: "Database Normalization (1NF, 2NF, 3NF, BCNF) vs Denormalization — পারফরম্যান্স ও ডেটা ইন্টিগ্রিটি ব্যালেন্স কীভাবে করবেন?",
@@ -431,7 +431,7 @@ SELECT * FROM CategoryTree;</code></pre></div>
   },
   {
     id: "db-35",
-    category: "Database (SQL)",
+    category: "Database",
     difficulty: "Advanced",
     tags: ["PostgreSQL", "VACUUM", "Bloat"],
     question: "PostgreSQL MVCC Bloat এবং Autovacuum / VACUUM FULL কীভাবে মেমোরি ফিনিক্স করে?",
@@ -441,7 +441,7 @@ SELECT * FROM CategoryTree;</code></pre></div>
   },
   {
     id: "db-36",
-    category: "Database (SQL)",
+    category: "Database",
     difficulty: "Intermediate",
     tags: ["Triggers", "UDF", "Stored Procedures"],
     question: "Stored Procedures vs User-Defined Functions (UDF) vs Database Triggers-এর কাজের পার্থক্য কী?",
@@ -451,7 +451,7 @@ SELECT * FROM CategoryTree;</code></pre></div>
   },
   {
     id: "db-37",
-    category: "Database (SQL)",
+    category: "Database",
     difficulty: "Advanced",
     tags: ["Indexing", "Partial Index", "Covering Index"],
     question: "Partial Index and Covering Index (INCLUDE Clause) কীভাবে কোয়েরি অপটিমাইজ করে?",
@@ -461,7 +461,7 @@ SELECT * FROM CategoryTree;</code></pre></div>
   },
   {
     id: "db-38",
-    category: "Database (SQL)",
+    category: "Database",
     difficulty: "Intermediate",
     tags: ["PostgreSQL", "pflow", "Listen/Notify"],
     question: "PostgreSQL LISTEN / NOTIFY দিয়ে রিয়েল-টাইম ডাটাবেজ চেঞ্জ নোটিফিকেশন কীভাবে ট্র্যাকিং করবেন?",
@@ -471,7 +471,7 @@ SELECT * FROM CategoryTree;</code></pre></div>
   },
   {
     id: "db-39",
-    category: "Database (SQL)",
+    category: "Database",
     difficulty: "Advanced",
     tags: ["Optimization", "Bulk Insert", "COPY"],
     question: "PostgreSQL COPY Command vs Bulk INSERT — ১ লাখ রেকর্ড ১ সেকেন্ডে আপলোডের উপায় কী?",
@@ -481,7 +481,7 @@ SELECT * FROM CategoryTree;</code></pre></div>
   },
   {
     id: "db-40",
-    category: "Database (SQL)",
+    category: "Database",
     difficulty: "Intermediate",
     tags: ["Types", "UUID vs AutoIncrement", "Performance"],
     question: "Primary Keys: Auto-increment INT vs UUID v4 vs UUID v7 (Time-ordered) — বি-ট্রি ইনডেক্স পারফরম্যান্স তুলনা কী?",
@@ -491,7 +491,7 @@ SELECT * FROM CategoryTree;</code></pre></div>
   },
   {
     id: "db-41",
-    category: "Database (SQL)",
+    category: "Database",
     difficulty: "Advanced",
     tags: ["Joins", "Nested Loop", "Hash Join"],
     question: "Database Join Algorithms: Nested Loop Join vs Hash Join vs Merge Join কীভাবে কাজ করে?",
@@ -501,7 +501,7 @@ SELECT * FROM CategoryTree;</code></pre></div>
   },
   {
     id: "db-42",
-    category: "Database (SQL)",
+    category: "Database",
     difficulty: "Intermediate",
     tags: ["PostgreSQL", "pg_stat_activity", "Slow Queries"],
     question: "PostgreSQL pg_stat_activity এবং pg_stat_statements দিয়ে স্লো কোয়েরি ও ডেডলক কীভাবে চিহ্নিত করবেন?",
@@ -511,7 +511,7 @@ SELECT * FROM CategoryTree;</code></pre></div>
   },
   {
     id: "db-43",
-    category: "Database (SQL)",
+    category: "Database",
     difficulty: "Advanced",
     tags: ["PostgreSQL", "Tablespace", "Storage"],
     question: "PostgreSQL Tablespaces দিয়ে আলাদা ফিজিক্যাল ডিস্কে (NVMe SSD vs HDD) টেবিল স্টোর কীভাবে করবেন?",
@@ -521,7 +521,7 @@ SELECT * FROM CategoryTree;</code></pre></div>
   },
   {
     id: "db-44",
-    category: "Database (SQL)",
+    category: "Database",
     difficulty: "Intermediate",
     tags: ["Queries", "GROUP BY", "HAVING"],
     question: "GROUP BY vs HAVING vs WHERE Clause-এর এক্সিকিউশন অর্ডার ও কাজের পার্থক্য কী?",
@@ -531,7 +531,7 @@ SELECT * FROM CategoryTree;</code></pre></div>
   },
   {
     id: "db-45",
-    category: "Database (SQL)",
+    category: "Database",
     difficulty: "Advanced",
     tags: ["Security", "SQL Injection", "Parameterized Queries"],
     question: "SQL Injection (SQLi) কীভাবে কাজ করে এবং Parameterized Prepared Statements এটি কেন শতভাগ প্রতিরোধ করে?",
@@ -541,7 +541,7 @@ SELECT * FROM CategoryTree;</code></pre></div>
   },
   {
     id: "db-46",
-    category: "Database (SQL)",
+    category: "Database",
     difficulty: "Intermediate",
     tags: ["PostgreSQL", "Extensions", "pg_trgm"],
     question: "PostgreSQL Extension: pg_trgm (Trigram Index) দিয়ে Fuzzy Text Search কীভাবে করবেন?",
@@ -551,7 +551,7 @@ SELECT * FROM CategoryTree;</code></pre></div>
   },
   {
     id: "db-47",
-    category: "Database (SQL)",
+    category: "Database",
     difficulty: "Advanced",
     tags: ["PostgreSQL", "FDW", "Foreign Data Wrapper"],
     question: "PostgreSQL Foreign Data Wrappers (postgres_fdw) দিয়ে ডিস্ট্রিবিউটেড ডাটাবেজ কোয়েরি কীভাবে করবেন?",
@@ -561,7 +561,7 @@ SELECT * FROM CategoryTree;</code></pre></div>
   },
   {
     id: "db-48",
-    category: "Database (SQL)",
+    category: "Database",
     difficulty: "Intermediate",
     tags: ["PostgreSQL", "COLLATE", "Case Insensitive"],
     question: "PostgreSQL CITEXT Data Type vs Lowercase Indexing — Case-Insensitive Search কীভাবে করবেন?",
@@ -571,7 +571,7 @@ SELECT * FROM CategoryTree;</code></pre></div>
   },
   {
     id: "db-49",
-    category: "Database (SQL)",
+    category: "Database",
     difficulty: "Advanced",
     tags: ["Resilience", "Two-Phase Commit", "2PC"],
     question: "Two-Phase Commit (2PC) Protocol দিয়ে Multi-Database Distributed Transaction কীভাবে সামলাবেন?",
@@ -581,7 +581,7 @@ SELECT * FROM CategoryTree;</code></pre></div>
   },
   {
     id: "db-50",
-    category: "Database (SQL)",
+    category: "Database",
     difficulty: "Intermediate",
     tags: ["PostgreSQL", "Constraints", "CHECK"],
     question: "PostgreSQL CHECK Constraints and EXCLUSION Constraints-এর সিকিউরিটি সুবিধা কী?",
