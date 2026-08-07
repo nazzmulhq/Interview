@@ -262,5 +262,331 @@ FROM employees;</code></pre>
     answer: `
 <p>WITH ক্লজ দিয়ে অস্থায়ী রেজাল্ট সেট তৈরি করাকে CTE বলে। Hierarchy ডেটা (Org Chart / Category Tree) সার্চে <code>WITH RECURSIVE</code> ব্যবহার করা হয়।</p>
     `
+  },
+  {
+    id: "db-19",
+    category: "Database (SQL)",
+    difficulty: "Advanced",
+    tags: ["Transactions", "Isolation Levels", "MVCC"],
+    question: "ACID Transactions: 4 Isolation Levels (Read Uncommitted, Read Committed, Repeatable Read, Serializable) এবং Dirty Read, Non-Repeatable Read, Phantom Read কী?",
+    answer: `
+<p><strong>Read Uncommitted:</strong> অন-কমিক ডেটা পড়ে (Dirty Read ঘটে)।</p><p><strong>Read Committed:</strong> কেবল কমিক হওয়া ডেটা পড়ে (Dirty Read মুক্ত)।</p><p><strong>Repeatable Read:</strong> ট্রানজেকশন চলাকালীন একই ডাটা পরিবর্তিত হয় না (Phantom Read ঘটতে পারে)।</p><p><strong>Serializable:</strong> সম্পূর্ণ আলাদা ও সিকুয়েনশিয়াল লক গ্যারান্টি (জিরো কনকারেন্সি এরর)।</p>
+    `
+  },
+  {
+    id: "db-20",
+    category: "Database (SQL)",
+    difficulty: "Advanced",
+    tags: ["Indexing", "B-Tree vs Hash", "Composite Index"],
+    question: "B-Tree Indexing Mechanism, Composite Indexing, Leftmost Prefix Rule এবং Index Scan vs Index Seek কী?",
+    answer: `
+<p><strong>B-Tree Index:</strong> O(log N) সময়ের মধ্যে ডেটা খোঁজে।</p><p><strong>Composite Index (A, B, C):</strong> কেবল তখনই কাজ করে যদি কোয়েরিতে বামের কলাম (Leftmost Prefix A) যুক্ত থাকে।</p><p><strong>Index Seek:</strong> নির্দিষ্ট পয়েন্টার ধরে সরাসরি বি-ট্রি পাতা রিড করা।</p>
+    `
+  },
+  {
+    id: "db-21",
+    category: "Database (SQL)",
+    difficulty: "Advanced",
+    tags: ["Performance", "EXPLAIN ANALYZE", "Query Plan"],
+    question: "EXPLAIN ANALYZE দিয়ে SQL Query Execution Plan এবং Performance Bottlenecks কীভাবে চিহ্নিত করবেন?",
+    answer: `
+<p>কোয়েরির আগে <code>EXPLAIN ANALYZE</code> চালালে ডাটাবেজের প্ল্যানিং টাইম, এক্সিকিউশন টাইম, Seq Scan (Full Table Scan), এবং Index Scan-এর প্রকৃত বিবরণ পাওয়া যায়।</p>
+    `
+  },
+  {
+    id: "db-22",
+    category: "Database (SQL)",
+    difficulty: "Advanced",
+    tags: ["Optimization", "Sharding", "Partitioning"],
+    question: "Database Partitioning (Range, List, Hash) vs Database Sharding-এর মধ্যে মৌলিক পার্থক্য কী?",
+    answer: `
+<p><strong>Partitioning:</strong> একই ডাটাবেজ সার্ভারের ভেতরে একটি বড় টেবিলকে কলাম বা রেঞ্জ ধরে ছোট ছোট সাব-টেবিলে ভাগ করা।</p><p><strong>Sharding:</strong> ডাটাবেজকে আলাদা আলাদা ফিজিক্যাল সার্ভার নোডে হরাইজন্টালি ডিস্ট্রিবিউট করা।</p>
+    `
+  },
+  {
+    id: "db-23",
+    category: "Database (SQL)",
+    difficulty: "Advanced",
+    tags: ["PostgreSQL", "JSONB", "GIN Index"],
+    question: "PostgreSQL JSON vs JSONB, GIN Indexing, এবং Expression Indexing কীভাবে সার্চ গতি বাড়ায়?",
+    answer: `
+<p><strong>JSON:</strong> প্লেন টেক্সট (ধীরগতি)। <strong>JSONB:</strong> বাইনারি ফরম্যাট (পার্সিং ছাড়াই দ্রুত রিড)। JSONB ফিল্ডে <code>CREATE INDEX ON table USING gin (data);</code> করলে ডকুমেন্টের ভেতরে ফুল-টেক্সট সার্চ ফাস্ট হয়।</p>
+    `
+  },
+  {
+    id: "db-24",
+    category: "Database (SQL)",
+    difficulty: "Intermediate",
+    tags: ["Window Functions", "OVER", "ROW_NUMBER"],
+    question: "SQL Window Functions (ROW_NUMBER(), RANK(), DENSE_RANK(), LAG(), LEAD()) কীভাবে কাজ করে?",
+    answer: `
+<p><code>OVER (PARTITION BY category ORDER BY price DESC)</code> দিয়ে সারি গ্রুপ করে প্রতি গ্রুপের ভেতরে র‍্যাঙ্ক গণনা করা (GROUP BY এর মতো রো সংকুচিত না করে প্রতিটি সারিতে রেজাল্ট দেয়)।</p>
+    `
+  },
+  {
+    id: "db-25",
+    category: "Database (SQL)",
+    difficulty: "Advanced",
+    tags: ["Concurrency", "Pessimistic Locking", "Optimistic Locking"],
+    question: "Pessimistic Locking (SELECT ... FOR UPDATE) vs Optimistic Locking (Version Column) কখন কোনটা ব্যবহার করবেন?",
+    answer: `
+<p><strong>Pessimistic Lock:</strong> রো সরাসরি লক করে অন্য ট্রানজেকশন আটকে দেয় (হাই কনফ্লিক্ট ব্যাংক ট্রানজেকশন)।</p><p><strong>Optimistic Lock:</strong> লক না করে <code>version</code> কলাম মিলিয়ে রাইট করে, কনফ্লিক্ট হলে রিট্রি করে।</p>
+    `
+  },
+  {
+    id: "db-26",
+    category: "Database (SQL)",
+    difficulty: "Intermediate",
+    tags: ["CTE", "WITH RECURSIVE", "Hierarchical"],
+    question: "Common Table Expressions (CTE) এবং WITH RECURSIVE দিয়ে অসীম নেস্টেড ক্যাটাগরি ট্রি (Tree Structure) কীভাবে কোয়েরি করবেন?",
+    answer: `
+<div class="code-box"><div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div><pre><code>WITH RECURSIVE CategoryTree AS (
+  SELECT id, name, parent_id FROM categories WHERE parent_id IS NULL
+  UNION ALL
+  SELECT c.id, c.name, c.parent_id FROM categories c
+  INNER JOIN CategoryTree ct ON c.parent_id = ct.id
+)
+SELECT * FROM CategoryTree;</code></pre></div>
+    `
+  },
+  {
+    id: "db-27",
+    category: "Database (SQL)",
+    difficulty: "Advanced",
+    tags: ["Connection Pooling", "PgBouncer", "Idle Sockets"],
+    question: "Database Connection Pooling (PgBouncer / HikariCP) এবং Max Connections Tuning কেন জরুরি?",
+    answer: `
+<p>প্রতিটি নতুন ডাটাবেজ কানেকশন কয়েক মেগাবাইট RAM এবং CPU প্রসেস খরচ করে। কানেকশন পুলিং পুরোনো সকেট রিইউজ করে হাজার হাজার রিড রিকুয়েস্ট হ্যান্ডেল করতে ডাটাবেজ ডাউন হওয়া আটকায়।</p>
+    `
+  },
+  {
+    id: "db-28",
+    category: "Database (SQL)",
+    difficulty: "Intermediate",
+    tags: ["ORM", "N+1 Problem", "Eager Loading"],
+    question: "ORM (Prisma / TypeORM / Sequelize)-এ N+1 Query Problem কী এবং Eager Loading / JOIN দিয়ে এটি কীভাবে সমাধান করবেন?",
+    answer: `
+<p>১টি প্রধান তালিকায় N-সংখ্যক চাইল্ড রিলেটেড ডাটা আনতেই আলাদা N-টি ডাটাবেজ কোয়েরি চ্যাটারিং ফায়ার হওয়া। <code>include</code> বা <code>JOIN</code> ব্যবহার করে ১টি কোয়েরিতেই সমাধান করা।</p>
+    `
+  },
+  {
+    id: "db-29",
+    category: "Database (SQL)",
+    difficulty: "Advanced",
+    tags: ["PostgreSQL", "WAL", "Checkpoints"],
+    question: "Write-Ahead Logging (WAL) এবং PostgreSQL Checkpoints কীভাবে ক্র্যাশ রিকভারি নিশ্চিত করে?",
+    answer: `
+<p>ডাটাবেজ আসল ডেটা ফাইলে লেখার আগে সকল পরিবর্তন <strong>WAL File</strong>-এ ডিস্কে স্থায়ীভাবে সংরক্ষণ করে। সার্ভার হঠাৎ পাওয়ার কাট হলে WAL রিড করে ইনস্ট্যান্ট মেমোরি স্টেট রিকভার করে।</p>
+    `
+  },
+  {
+    id: "db-30",
+    category: "Database (SQL)",
+    difficulty: "Intermediate",
+    tags: ["Schema", "Migrations", "Zero Downtime"],
+    question: "Database Migrations (Zero Downtime Schema Migration Pattern) কীভাবে পরিচালনা করবেন?",
+    answer: `
+<p>একসাথে কলাম রিনেম না করে ৩টি ফেজে সম্পন্ন করা: ১. নতুন কলাম যোগ করা, ২. ব্যাকগ্রাউন্ডে পুরাতন কলাম থেকে ডেটা ব্যাকফিল করা, ৩. ওল্ড কলাম রিমুভ করা।</p>
+    `
+  },
+  {
+    id: "db-31",
+    category: "Database (SQL)",
+    difficulty: "Advanced",
+    tags: ["Architecture", "CAP Theorem", "PACELC"],
+    question: "CAP Theorem (Consistency, Availability, Partition Tolerance) এবং PACELC Theorem-এর আধুনিক ব্যাখ্যা কী?",
+    answer: `
+<p>ডিস্ট্রিবিউটেড ডাটাবেজে নেটওয়ার্ক পার্টিশন (P) হলে আপনাকে Consistency (C) অথবা Availability (A) এর যেকোনো একটি নির্বাচন করতে হবে। PACELC বলে স্বাভাবিক সময়ে ল্যাটেন্সি (L) ও কনসিস্টেন্সি (C) এর মধ্যেও চুক্তি করতে হয়।</p>
+    `
+  },
+  {
+    id: "db-32",
+    category: "Database (SQL)",
+    difficulty: "Intermediate",
+    tags: ["Replication", "Master-Slave", "Logical"],
+    question: "Master-Slave Replication (Physical Streaming vs Logical Replication) এবং Replication Lag কী?",
+    answer: `
+<p><strong>Physical Streaming:</strong> বাইনারি WAL ফাইল সরাসরি কপি করা (হুবহু মিরর)।</p><p><strong>Logical Replication:</strong> নির্দিষ্ট টেবিল বা ইভেন্ট স্ট্রিম রেপ্লিকেট করা। <strong>Replication Lag:</strong> মাস্টার ও স্লেভের ডাটা প্রাপ্তির সময় পার্থক্য।</p>
+    `
+  },
+  {
+    id: "db-33",
+    category: "Database (SQL)",
+    difficulty: "Advanced",
+    tags: ["Foreign Keys", "CASCADE", "Triggers"],
+    question: "ON DELETE CASCADE, ON DELETE SET NULL, এবং Foreign Key Constraint Triggers-এর সঠিক ব্যবহার কী?",
+    answer: `
+<p><strong>CASCADE:</strong> পেরেন্ট সারির সাথে সাথে চাইল্ড সারি মুছে ফেলা। <strong>SET NULL:</strong> চাইল্ড সারির পয়েন্টার ফাঁকা করা। ভারী লজিকের জন্য ডাটাবেজ Triggers ব্যবহার করা।</p>
+    `
+  },
+  {
+    id: "db-34",
+    category: "Database (SQL)",
+    difficulty: "Intermediate",
+    tags: ["Normalization", "3NF", "Denormalization"],
+    question: "Database Normalization (1NF, 2NF, 3NF, BCNF) vs Denormalization — পারফরম্যান্স ও ডেটা ইন্টিগ্রিটি ব্যালেন্স কীভাবে করবেন?",
+    answer: `
+<p>নরম্যালাইজেশন ডুপ্লিকেট ডেটা মুছে ইন্টিগ্রিটি নিশ্চিত করে (রাইট ফাস্ট, রিড কস্টলি JOIN)। ডি-নরম্যালাইজেশন রিড পারফরম্যান্স বাড়াতে হিসাব করা বা ফ্রিকুয়েন্ট ফিল্ড ডুপ্লিকেট করে রাখে।</p>
+    `
+  },
+  {
+    id: "db-35",
+    category: "Database (SQL)",
+    difficulty: "Advanced",
+    tags: ["PostgreSQL", "VACUUM", "Bloat"],
+    question: "PostgreSQL MVCC Bloat এবং Autovacuum / VACUUM FULL কীভাবে মেমোরি ফিনিক্স করে?",
+    answer: `
+<p>Postgres UPDATE বা DELETE করলে পুরোনো ডাটা রো ফাইল সিস্টেমে 'Dead Tuples' হিসেবে থেকে যায়। <code>Autovacuum</code> ব্যাকগ্রাউন্ডে এগুলো পরিষ্কার করে মেমোরি রিসাইকেল করে।</p>
+    `
+  },
+  {
+    id: "db-36",
+    category: "Database (SQL)",
+    difficulty: "Intermediate",
+    tags: ["Triggers", "UDF", "Stored Procedures"],
+    question: "Stored Procedures vs User-Defined Functions (UDF) vs Database Triggers-এর কাজের পার্থক্য কী?",
+    answer: `
+<p><strong>Procedure:</strong> ট্রানজেকশন পরিচালনা করে (COMMIT/ROLLBACK)।</p><p><strong>UDF:</strong> ভ্যালু বা টেবিল রিটার্ন করে। <strong>Trigger:</strong> INSERT/UPDATE/DELETE ইভেন্টে স্বয়ংক্রিয়ভাবে স্পন হয়।</p>
+    `
+  },
+  {
+    id: "db-37",
+    category: "Database (SQL)",
+    difficulty: "Advanced",
+    tags: ["Indexing", "Partial Index", "Covering Index"],
+    question: "Partial Index and Covering Index (INCLUDE Clause) কীভাবে কোয়েরি অপটিমাইজ করে?",
+    answer: `
+<p><strong>Partial Index:</strong> <code>WHERE status = 'active'</code> দিয়ে কেবল ১০% প্রয়োজনীয় ডেটায় ছোট ইনডেক্স করা।</p><p><strong>Covering Index:</strong> ইনডেক্সের সাথে <code>INCLUDE (name, email)</code> যোগ করায় অরিজিনাল টেবিলে না গিয়ে সরাসরি ইনডেক্স থেকে রেসপন্স দেওয়া।</p>
+    `
+  },
+  {
+    id: "db-38",
+    category: "Database (SQL)",
+    difficulty: "Intermediate",
+    tags: ["PostgreSQL", "pflow", "Listen/Notify"],
+    question: "PostgreSQL LISTEN / NOTIFY দিয়ে রিয়েল-টাইম ডাটাবেজ চেঞ্জ নোটিফিকেশন কীভাবে ট্র্যাকিং করবেন?",
+    answer: `
+<p><code>NOTIFY channel_name, 'payload'</code> দিলে নোড ব্যাকএন্ড সকেট <code>LISTEN channel_name</code> দিয়ে কোনো এক্সটার্নাল মেসেজ ব্রোকার ছাড়াই রিয়েল-টাইম ডাটা ইভেন্ট সাবস্ক্রাইব করতে পারে।</p>
+    `
+  },
+  {
+    id: "db-39",
+    category: "Database (SQL)",
+    difficulty: "Advanced",
+    tags: ["Optimization", "Bulk Insert", "COPY"],
+    question: "PostgreSQL COPY Command vs Bulk INSERT — ১ লাখ রেকর্ড ১ সেকেন্ডে আপলোডের উপায় কী?",
+    answer: `
+<p>স্বাভাবিক INSERT কমান্ডের বদলে <code>COPY table_name FROM 'data.csv' WITH CSV HEADER;</code> ব্যবহার করলে এটি ডাটাবেজের বাইনারি স্ট্রিম দিয়ে সরাসরি ডিস্কে বাল্ক ইনসার্ট সম্পন্ন করে।</p>
+    `
+  },
+  {
+    id: "db-40",
+    category: "Database (SQL)",
+    difficulty: "Intermediate",
+    tags: ["Types", "UUID vs AutoIncrement", "Performance"],
+    question: "Primary Keys: Auto-increment INT vs UUID v4 vs UUID v7 (Time-ordered) — বি-ট্রি ইনডেক্স পারফরম্যান্স তুলনা কী?",
+    answer: `
+<p>UUID v4 সম্পূর্ণ র্যান্ডম হওয়ায় B-Tree Index Fragmentation ঘটায় (স্লো)। <strong>UUID v7</strong> টাইমস্ট্যাম্প অর্ডারড হওয়ায় Auto-increment-এর স্পিড ও UUID-এর ডিস্ট্রিবিউটেড গ্লোবাল ইউনিকত্ব একসাথে দেয়।</p>
+    `
+  },
+  {
+    id: "db-41",
+    category: "Database (SQL)",
+    difficulty: "Advanced",
+    tags: ["Joins", "Nested Loop", "Hash Join"],
+    question: "Database Join Algorithms: Nested Loop Join vs Hash Join vs Merge Join কীভাবে কাজ করে?",
+    answer: `
+<p><strong>Nested Loop:</strong> ১টি ছোট টেবিল অন্য টেবিলের প্রতি সারিতে লুকআপ করে (ছোট ডেটাসেট)।</p><p><strong>Hash Join:</strong> মেমোরিতে হ্যাশ টেবিল বানায় (বড় আন-সর্টেড ডেটাসেট)।</p><p><strong>Merge Join:</strong> ২ সর্টেড টেবিল সমান্তরাল মার্জ করে।</p>
+    `
+  },
+  {
+    id: "db-42",
+    category: "Database (SQL)",
+    difficulty: "Intermediate",
+    tags: ["PostgreSQL", "pg_stat_activity", "Slow Queries"],
+    question: "PostgreSQL pg_stat_activity এবং pg_stat_statements দিয়ে স্লো কোয়েরি ও ডেডলক কীভাবে চিহ্নিত করবেন?",
+    answer: `
+<p><code>SELECT * FROM pg_stat_activity WHERE state = 'active';</code> দিয়ে ঝুলন্ত ব্লকিং কোয়েরি দেখা এবং <code>pg_stat_statements</code> দিয়ে সবচেয়ে বেশি সময় নেওয়া টপ কোয়েরি তালিকা বিশ্লেষণ করা।</p>
+    `
+  },
+  {
+    id: "db-43",
+    category: "Database (SQL)",
+    difficulty: "Advanced",
+    tags: ["PostgreSQL", "Tablespace", "Storage"],
+    question: "PostgreSQL Tablespaces দিয়ে আলাদা ফিজিক্যাল ডিস্কে (NVMe SSD vs HDD) টেবিল স্টোর কীভাবে করবেন?",
+    answer: `
+<p>হট পারফরম্যান্স টেবিল দ্রুতগতির NVMe SSD-তে থাকা Tablespace-এ রাখা এবং ওল্ড হিস্ট্রি ডাটা ধীরগতির সস্তা HDD-তে তৈরি Tablespace-এ ডাইভার্ট করা।</p>
+    `
+  },
+  {
+    id: "db-44",
+    category: "Database (SQL)",
+    difficulty: "Intermediate",
+    tags: ["Queries", "GROUP BY", "HAVING"],
+    question: "GROUP BY vs HAVING vs WHERE Clause-এর এক্সিকিউশন অর্ডার ও কাজের পার্থক্য কী?",
+    answer: `
+<p><strong>WHERE:</strong> গ্রুপ করার আগেই ইনডিভিজুয়াল রো ফিল্টার করে।</p><p><strong>GROUP BY:</strong> সারিগুলোকে সমবেত করে।</p><p><strong>HAVING:</strong> এগ্রিগেটেড রেজাল্টের (SUM/AVG) ওপর ফিল্টার চালায়।</p>
+    `
+  },
+  {
+    id: "db-45",
+    category: "Database (SQL)",
+    difficulty: "Advanced",
+    tags: ["Security", "SQL Injection", "Parameterized Queries"],
+    question: "SQL Injection (SQLi) কীভাবে কাজ করে এবং Parameterized Prepared Statements এটি কেন শতভাগ প্রতিরোধ করে?",
+    answer: `
+<p>Prepared Statements SQL কোয়েরি কোড এবং ইউজার ইনপুট ডাটা দুটোকে সম্পূর্ণ আলাদা কার্নেল স্পেসে প্রসেস করায় ইনপুটের ভেতরের কোনো SQL ক্যারেক্টার (<code>' OR '1'='1</code>) এক্সিকিউটেবল কোড হতে পারে না।</p>
+    `
+  },
+  {
+    id: "db-46",
+    category: "Database (SQL)",
+    difficulty: "Intermediate",
+    tags: ["PostgreSQL", "Extensions", "pg_trgm"],
+    question: "PostgreSQL Extension: pg_trgm (Trigram Index) দিয়ে Fuzzy Text Search কীভাবে করবেন?",
+    answer: `
+<p><code>CREATE INDEX ON users USING gin (name gin_trgm_ops);</code> করলে বানানের ভুল থাকা সত্ত্বেও (e.g. 'Nazmul' vs 'Najmul') মিলি-সেকেন্ডে <code>%</code> সিমিলারিটি কোয়েরি করা যায়।</p>
+    `
+  },
+  {
+    id: "db-47",
+    category: "Database (SQL)",
+    difficulty: "Advanced",
+    tags: ["PostgreSQL", "FDW", "Foreign Data Wrapper"],
+    question: "PostgreSQL Foreign Data Wrappers (postgres_fdw) দিয়ে ডিস্ট্রিবিউটেড ডাটাবেজ কোয়েরি কীভাবে করবেন?",
+    answer: `
+<p>অন্য রিমোট PostgreSQL বা MySQL সার্ভারকে কাস্টম Foreign Table হিসেবে মাউন্ট করে বর্তমান ডাটাবেজ থেকেই সরাসরি <code>JOIN</code> চালানোর কৌশল।</p>
+    `
+  },
+  {
+    id: "db-48",
+    category: "Database (SQL)",
+    difficulty: "Intermediate",
+    tags: ["PostgreSQL", "COLLATE", "Case Insensitive"],
+    question: "PostgreSQL CITEXT Data Type vs Lowercase Indexing — Case-Insensitive Search কীভাবে করবেন?",
+    answer: `
+<p><code>citext</code> টাইপ কলাম নেটিভভাবে কেস-ইনসেনসিটিভ সার্চ দেয়। অথবা <code>CREATE INDEX ON users (LOWER(email));</code> দিয়ে এক্সপ্রেশন ইনডেক্স তৈরি করা।</p>
+    `
+  },
+  {
+    id: "db-49",
+    category: "Database (SQL)",
+    difficulty: "Advanced",
+    tags: ["Resilience", "Two-Phase Commit", "2PC"],
+    question: "Two-Phase Commit (2PC) Protocol দিয়ে Multi-Database Distributed Transaction কীভাবে সামলাবেন?",
+    answer: `
+<p>Prepare Phase (সব DB কি কমিক করতে প্রস্তুত?) এবং Commit Phase (সবাই কনফার্ম করলে এক সাথে চূড়ান্ত রাইট)।</p>
+    `
+  },
+  {
+    id: "db-50",
+    category: "Database (SQL)",
+    difficulty: "Intermediate",
+    tags: ["PostgreSQL", "Constraints", "CHECK"],
+    question: "PostgreSQL CHECK Constraints and EXCLUSION Constraints-এর সিকিউরিটি সুবিধা কী?",
+    answer: `
+<p><code>CHECK (price > 0)</code> দিয়ে ডাটাবেজ লেভেলেই ভুল মান ইনসার্ট ব্লক করা এবং <code>EXCLUSION</code> দিয়ে ওভারলেপিং ডেট-রেঞ্জ বা বুকিং কনফ্লিক্ট আটকানো।</p>
+    `
   }
 ];

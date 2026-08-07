@@ -317,5 +317,330 @@ getProfile(@CurrentUser() user: UserEntity) {
     answer: `
 <p><code>@nestjs/terminus</code> ব্যবহার করে <code>/health</code> রাউটে ডাটাবেজ, মেমোরি এবং এক্সটার্নাল সার্ভিসের হেলথ স্ট্যাটাস রিয়েলটাইম চেক করা হয়।</p>
     `
+  },
+  {
+    id: "nest-19",
+    category: "NestJS",
+    difficulty: "Advanced",
+    tags: ["Architecture", "Interceptors", "AOP"],
+    question: "NestJS Interceptors (NestInterceptor) কী? Aspect-Oriented Programming (AOP) এবং RxJS Observable রূপান্তর কীভাবে কাজ করে?",
+    answer: `
+<p>Interceptor হলো এমন একটি ক্লাস যা মেথড এক্সিকিউশনের আগে ও পরে কাস্টম লজিক রিড বা পরিবর্তন করতে সাহায্য করে (AOP Pattern)। এটি ExecutionContext এবং CallHandler (RxJS Observable) ব্যবহার করে রেসপন্স ট্রান্সফর্ম, ক্যাশিং বা টাইম লগার প্রসেস করে।</p>
+    `
+  },
+  {
+    id: "nest-20",
+    category: "NestJS",
+    difficulty: "Intermediate",
+    tags: ["Guards", "Auth", "Security"],
+    question: "NestJS Guards (CanActivate) এবং Custom Decorators (@Roles, @CurrentUser) দিয়ে RBAC Authorization কীভাবে করবেন?",
+    answer: `
+<p>Guard রিকুয়েস্ট হ্যান্ডলারের কাছে যাওয়ার আগেই Boolean (true/false) দিয়ে পারমিশন চেক করে। Reflector এবং Metadata ব্যবহার করে রুট লেভেলে ভূমিকা (Roles) যাচাই করা হয়।</p>
+    `
+  },
+  {
+    id: "nest-21",
+    category: "NestJS",
+    difficulty: "Intermediate",
+    tags: ["Pipes", "Validation", "class-validator"],
+    question: "NestJS ValidationPipe, class-validator এবং class-transformer দিয়ে DTO Input Validation কীভাবে কাজ করে?",
+    answer: `
+<p>ValidationPipe ইনকামিং JSON বডিকে DTO ক্লাসে রূপান্তর করে (class-transformer) এবং Decorators (@IsString(), @IsEmail(), @Min()) দিয়ে ইনপুট ডেটা ভ্যালিডেট করে অসামঞ্জস্য ডেটায় স্বয়ংক্রিয় 400 Bad Request দেয়।</p>
+    `
+  },
+  {
+    id: "nest-22",
+    category: "NestJS",
+    difficulty: "Advanced",
+    tags: ["Exception Filters", "Error Handling", "Global"],
+    question: "NestJS Exception Filters (BaseExceptionFilter, @Catch) দিয়ে সেন্ট্রালাইজড এরর ফরম্যাটিং কীভাবে সেটআপ করবেন?",
+    answer: `
+<p>অ্যাপ্লিকেশনের যেকোনো জায়গায় থ্রো করা Exception (e.g. HttpException) গ্লোবালি ইন্টারসেপ্ট করে একটি নির্দিষ্ট স্ট্যান্ডার্ড JSON ফরম্যাটে এরর রেসপন্স প্রদান করা।</p>
+    `
+  },
+  {
+    id: "nest-23",
+    category: "NestJS",
+    difficulty: "Advanced",
+    tags: ["Microservices", "Transports", "TCP/Redis/Kafka"],
+    question: "NestJS Microservices Architecture: Transport Strategy (TCP, Redis, NATS, Kafka) এবং @MessagePattern vs @EventPattern কী?",
+    answer: `
+<p><strong>@MessagePattern (Request-Response):</strong> ক্লায়েন্ট রেসপন্সের জন্য অপেক্ষা করে (ACK)।</p><p><strong>@EventPattern (Event-driven):</strong> ফায়ার-এন্ড-ফরগেট (Fire-and-forget), কোনো রেসপন্সের আশা করে না।</p>
+    `
+  },
+  {
+    id: "nest-24",
+    category: "NestJS",
+    difficulty: "Intermediate",
+    tags: ["Modules", "Dynamic Modules", "useFactory"],
+    question: "NestJS Dynamic Modules (forRoot, forRootAsync, register) কখন এবং কেন প্রয়োজন?",
+    answer: `
+<p>যখন একটি মডিউল কনফিগারেশন ইনপুট (যেমন ডাটাবেজ ইউআরএল বা সিক্রেট কী) অন-দ্য-ফ্লাই বা অ্যাসিনক্রোনাসলি ডাইনামিকালি প্যারামিটারাইজড করতে হয় (e.g. DatabaseModule.forRootAsync())।</p>
+    `
+  },
+  {
+    id: "nest-25",
+    category: "NestJS",
+    difficulty: "Advanced",
+    tags: ["CQRS", "CommandBus", "QueryBus"],
+    question: "NestJS-এ @nestjs/cqrs প্যাকেজ দিয়ে CQRS Pattern (Command, Query, Event Handlers) কীভাবে ইমপ্লিমেন্ট করবেন?",
+    answer: `
+<p>মেথডগুলোকে বিভক্ত করে আলাদা আলাদা Command (Write) এবং Query (Read) বাসে ভাগ করে ফেলা। EventBus ব্যবহার করে ডোমেইন ইভেন্ট সাবস্ক্রাইব করানো।</p>
+    `
+  },
+  {
+    id: "nest-26",
+    category: "NestJS",
+    difficulty: "Intermediate",
+    tags: ["Event Emitter", "Decoupling", "Events"],
+    question: "NestJS-এ @nestjs/event-emitter দিয়ে ইন-প্রসেস ইভেন্ট ড্রাইভেন আর্কিটেকচার কীভাবে তৈরি করবেন?",
+    answer: `
+<p><code>eventEmitter.emit('user.created', user)</code> পাঠালে <code>@OnEvent('user.created')</code> দিয়ে সার্ভিস লেভেলে কোনো কাইন্ড অফ ডাইরেক্ট ডিপেন্ডেন্সি ছাড়াই নোটিফিকেশন বা ইমেইল পাঠানো।</p>
+    `
+  },
+  {
+    id: "nest-27",
+    category: "NestJS",
+    difficulty: "Advanced",
+    tags: ["DI", "Scopes", "TRANSIENT"],
+    question: "NestJS Injection Scopes (DEFAULT, REQUEST, TRANSIENT) কী এবং Performance Impact কী?",
+    answer: `
+<p><strong>DEFAULT:</strong> সিঙ্গেলটন (Singleton), অ্যাপ চলাকালীন ১টি ইনস্ট্যান্স থাকে (ফাস্ট)।</p><p><strong>REQUEST:</strong> প্রতি ইনকামিং HTTP রিকুয়েস্টে নতুন ইনস্ট্যান্স তৈরি করে (পারফরম্যান্স স্লো করায় সতর্কতার সাথে ব্যবহার্য)।</p><p><strong>TRANSIENT:</strong> প্রতি ইনজেকশনে আলাদা ইনস্ট্যান্স দেয়।</p>
+    `
+  },
+  {
+    id: "nest-28",
+    category: "NestJS",
+    difficulty: "Intermediate",
+    tags: ["Middleware", "Express Middleware", "NestMiddleware"],
+    question: "NestJS Middleware vs Interceptor vs Guard vs Pipe — এক্সিকিউশন অর্ডার বা সিকুয়েন্স কী?",
+    answer: `
+<p>ইনকামিং রিকুয়েস্টের এক্সিকিউশন সিকুয়েন্স:</p><ol><li>Middleware</li><li>Guard</li><li>Interceptor (Before)</li><li>Pipe</li><li>Controller Handler</li><li>Interceptor (After)</li><li>Exception Filter (If error)</li></ol>
+    `
+  },
+  {
+    id: "nest-29",
+    category: "NestJS",
+    difficulty: "Advanced",
+    tags: ["Database", "TypeORM", "Prisma"],
+    question: "NestJS-এ TypeORM / Prisma Integration: Repository Pattern, Transactions এবং Migrations কীভাবে পরিচালিত হয়?",
+    answer: `
+<p>TypeORM <code>@InjectRepository()</code> বা PrismaService দিয়ে ডাটাবেজ লেয়ার ডিকুপল করা। Unit of Work ট্রানজেকশনে QueryRunner বা prisma.$transaction ব্যবহার করা।</p>
+    `
+  },
+  {
+    id: "nest-30",
+    category: "NestJS",
+    difficulty: "Intermediate",
+    tags: ["Config", "ConfigModule", "Joi"],
+    question: "NestJS @nestjs/config এবং Joi/Zod Schema Validation দিয়ে Env Variables সাশ্রয়ীভাবে পরিচালনা কীভাবে করবেন?",
+    answer: `
+<p><code>ConfigModule.forRoot({ validationSchema: Joi.object({...}) })</code> দিলে অ্যাপ স্টার্ট হওয়ার মুহূর্তেই প্রয়োজনীয় Env Missing থাকলে ক্র্যাশ করিয়ে নিরাপদ এনভায়রনমেন্ট গ্যারান্টি দেয়।</p>
+    `
+  },
+  {
+    id: "nest-31",
+    category: "NestJS",
+    difficulty: "Advanced",
+    tags: ["Caching", "CacheModule", "Redis"],
+    question: "NestJS CacheModule, CacheInterceptor এবং Redis Store দিয়ে অটো-ক্যাশিং কীভাবে করবেন?",
+    answer: `
+<p>কন্ট্রোলারের ওপর <code>@UseInterceptors(CacheInterceptor)</code> এবং <code>@CacheTTL(60)</code> বসালে GET এন্ডপয়েন্টের রেসপন্স স্বয়ংক্রিয়ভাবে Redis-এ ক্যাশ হয়।</p>
+    `
+  },
+  {
+    id: "nest-32",
+    category: "NestJS",
+    difficulty: "Intermediate",
+    tags: ["Testing", "Jest", "TestBed"],
+    question: "NestJS-এ Test.createTestingModule() দিয়ে Controller এবং Service Unit Testing & E2E Testing কীভাবে করবেন?",
+    answer: `
+<p>NestJS টেস্টিং ইউটিলিটি ব্যবহার করে সত্যিকারের মডিউলের বদলে <code>useValue</code> দিয়ে Mock Service বানিয়ে বিচ্ছিন্নভাবে ইউনিট টেস্ট চালানো।</p>
+    `
+  },
+  {
+    id: "nest-33",
+    category: "NestJS",
+    difficulty: "Advanced",
+    tags: ["Security", "Passport", "JWT"],
+    question: "NestJS @nestjs/passport এবং Passport-JWT Strategy দিয়ে Access & Refresh Token Authentication কীভাবে সেটআপ করবেন?",
+    answer: `
+<p><code>PassportStrategy(Strategy)</code> ক্লাস এক্সটেন্ড করে <code>validate()</code> মেথডে পেলোড ভ্যালিডেট করা এবং <code>AuthGuard('jwt')</code> দিয়ে রুট প্রটেক্ট করা।</p>
+    `
+  },
+  {
+    id: "nest-34",
+    category: "NestJS",
+    difficulty: "Intermediate",
+    tags: ["WebSockets", "Socket.io", "Adapters"],
+    question: "NestJS WebSocket Adapters (Socket.io vs ws) এবং Redis IoAdapter দিয়ে ক্লাস্টার স্কেলিং কীভাবে করবেন?",
+    answer: `
+<p>একাধিক NestJS নোডে WebSocket চালালে নোডগুলোর মধ্যে সকেট ইভেন্ট ব্রডকাস্টের জন্য <code>RedisIoAdapter</code> ব্যবহার করে PubSub চ্যানেল সিঙ্ক করা।</p>
+    `
+  },
+  {
+    id: "nest-35",
+    category: "NestJS",
+    difficulty: "Advanced",
+    tags: ["GraphQL", "Resolvers", "DataLoader"],
+    question: "NestJS GraphQL Resolvers-এ N+1 Query Problem কীভাবে DataLoader দিয়ে প্রতিরোধ করবেন?",
+    answer: `
+<p><code>@ResolveField()</code> মেথডে ব্যাচিং এবং মেমোাইজেশন করতে <code>DataLoader</code> ইন্টিগ্রেট করে N-সংখ্যক কোয়েরিকে ১টি ব্যাচ ইকুয়ালিটি ডিরেক্ট কোয়েরিতে রূপান্তর করা।</p>
+    `
+  },
+  {
+    id: "nest-36",
+    category: "NestJS",
+    difficulty: "Intermediate",
+    tags: ["OpenAPI", "Swagger", "Cli Plugin"],
+    question: "NestJS Swagger CLI Plugin (@nestjs/swagger/plugin) কীভাবে অটো-DTO ইনস্পেকশন করে?",
+    answer: `
+<p><code>nest-cli.json</code>-এ প্লাগইন অন করলে DTO ক্লাসে বারবার <code>@ApiProperty()</code> ডেকোরেটর না লিখেই স্বয়ংক্রিয়ভাবে টাইপস্ক্রিপ্ট ইন্টারফেস রিড করে Swagger স্কিমা বানায়।</p>
+    `
+  },
+  {
+    id: "nest-37",
+    category: "NestJS",
+    difficulty: "Advanced",
+    tags: ["Architecture", "Domain Driven Design", "DDD"],
+    question: "NestJS-এ Domain-Driven Design (DDD) Architecture — Aggregates, Value Objects, Domain Events কীভাবে সংগঠিত করবেন?",
+    answer: `
+<p>ডোমেন লজিককে NestJS ডেকোরেটর থেকে মুক্ত খাঁটি টাইপস্ক্রিপ্ট ফোল্ডারে (Entities, Value Objects) রাখা এবং ইনফ্রাস্ট্রাকচার মডিউলের মাধ্যমে রিফ্লেক্ট করা।</p>
+    `
+  },
+  {
+    id: "nest-38",
+    category: "NestJS",
+    difficulty: "Intermediate",
+    tags: ["Health", "Terminus", "Kubernetes"],
+    question: "NestJS Terminus Health Indicators (TypeOrmHealthIndicator, MemoryHealthIndicator) দিয়ে Readiness/Liveness Probes তৈরি কীভাবে করবেন?",
+    answer: `
+<p><code>/health/readiness</code> এ ডাটাবেজ সকেট চেক এবং <code>/health/liveness</code> এ মেমোরি থ্রেশহোল্ড চেক করে Kubernetes cluster POD রিফ্রেস নিয়ন্ত্রণ করা।</p>
+    `
+  },
+  {
+    id: "nest-39",
+    category: "NestJS",
+    difficulty: "Advanced",
+    tags: ["Custom Decorators", "ParamDecorator", "Reflector"],
+    question: "createParamDecorator দিয়ে কাস্টম প্যারামিটার ডেকোরেটর (e.g. @ExtractToken(), @IpAddress()) কীভাবে বানাবেন?",
+    answer: `
+<div class="code-box"><div class="code-header"><span>typescript</span><button class="copy-btn">Copy</button></div><pre><code>export const User = createParamDecorator(
+  (data: string, ctx: ExecutionContext) => {
+    const request = ctx.switchToHttp().getRequest();
+    return data ? request.user?.[data] : request.user;
+  },
+);</code></pre></div>
+    `
+  },
+  {
+    id: "nest-40",
+    category: "NestJS",
+    difficulty: "Intermediate",
+    tags: ["Queues", "BullMQ", "Events"],
+    question: "BullMQ Queue Events (@OnQueueCompleted, @OnQueueFailed) দিয়ে ব্যাকগ্রাউন্ড জব ফেলওভার হ্যান্ডেল কীভাবে করবেন?",
+    answer: `
+<p>জব ক্যানসেল বা ফেইল হলে <code>@OnQueueFailed()</code> লিসেনারে রিনোটিফিকেশন পাঠানো এবং জব অটো-রিট্রাই সেটিংস (backoff exponential) কনফিগার করা।</p>
+    `
+  },
+  {
+    id: "nest-41",
+    category: "NestJS",
+    difficulty: "Advanced",
+    tags: ["Rate Limiting", "Throttler", "ThrottlerGuard"],
+    question: "NestJS @nestjs/throttler দিয়ে ডাইনামিক এবং প্রক্সি-সচেতন Rate Limiting কীভাবে করবেন?",
+    answer: `
+<p><code>ThrottlerModule.forRoot([{ ttl: 60000, limit: 10 }])</code> দিয়ে কন্ট্রোলার লেভেলে <code>@SkipThrottle()</code> বা কাস্টম প্রক্সি IP ওভাররাইড ThrottlerGuard সেট করা।</p>
+    `
+  },
+  {
+    id: "nest-42",
+    category: "NestJS",
+    difficulty: "Intermediate",
+    tags: ["CLI", "Schematics", "Generators"],
+    question: "NestJS CLI Schematics (nest g resource) কীভাবে স্ট্যান্ডার্ড মডিউল স্কেফোল্ড করে?",
+    answer: `
+<p><code>nest g res users</code> চালালে এটি এক ক্লিকে Controller, Service, Module, DTO, Entity এবং Spec ফাইল জেনারেট করে মডিউলে রেজিস্টার করে।</p>
+    `
+  },
+  {
+    id: "nest-43",
+    category: "NestJS",
+    difficulty: "Advanced",
+    tags: ["Logging", "Winston", "LoggerService"],
+    question: "NestJS-এ কাস্টম LoggerService (e.g. Winston/Pino integration) দিয়ে স্ট্রাকচার্ড JSON লগিং কীভাবে করবেন?",
+    answer: `
+<p>NestJS-এর ডিফল্ট <code>Logger</code> ক্লাস কাস্টম Pino/Winston সার্ভিস দিয়ে রিপ্লেস করে সকল এরর স্ট্যাক JSON লাইনে আউটপুট দেওয়া।</p>
+    `
+  },
+  {
+    id: "nest-44",
+    category: "NestJS",
+    difficulty: "Intermediate",
+    tags: ["Microservices", "GRPC", "Proto"],
+    question: "NestJS-এ gRPC Microservice Transport এবং ClientsModule.register() কীভাবে সেটআপ করবেন?",
+    answer: `
+<p>Protobuf ফাইল লোড করে gRPC ট্রান্সপোর্ট কনফিগার করা এবং অন্য সার্ভিস থেকে <code>@Inject('HERO_PACKAGE') ClientGrpc</code> দিয়ে কল করা।</p>
+    `
+  },
+  {
+    id: "nest-45",
+    category: "NestJS",
+    difficulty: "Advanced",
+    tags: ["Performance", "Fastify", "Express Adapter"],
+    question: "NestJS Express Adapter বনাম Fastify Adapter-এর পারফরম্যান্স সুবিধা ও পরিবর্তন কী?",
+    answer: `
+<p><code>FastifyAdapter</code> ব্যবহার করলে HTTP throughput ২ গুণ পর্যন্ত বাড়ে, তবে এক্সপ্রেস-নির্দিষ্ট মিডলওয়্যার রিপ্লেস করতে হয়।</p>
+    `
+  },
+  {
+    id: "nest-46",
+    category: "NestJS",
+    difficulty: "Intermediate",
+    tags: ["File Upload", "FileInterceptor", "Multer"],
+    question: "NestJS-এ FileInterceptor, FilesInterceptor এবং ParseFilePipe দিয়ে ফাইল সাইজ ও টাইপ ভ্যালিডেশন কীভাবে করবেন?",
+    answer: `
+<p><code>@UseInterceptors(FileInterceptor('file'))</code> এবং <code>ParseFilePipe({ validators: [new MaxFileSizeValidator(...)] })</code> দিয়ে নিরাপদ ফাইল আপলোড।</p>
+    `
+  },
+  {
+    id: "nest-47",
+    category: "NestJS",
+    difficulty: "Advanced",
+    tags: ["Security", "Helmet", "CORS"],
+    question: "NestJS Bootstrap Server Security (Helmet, CORS, CSRF, Rate-limit) বেস্ট প্র্যাকটিস কী?",
+    answer: `
+<p><code>app.use(helmet())</code>, <code>app.enableCors({...})</code>, <code>app.useGlobalPipes(new ValidationPipe({ whitelist: true }))</code> সেটআপ করা।</p>
+    `
+  },
+  {
+    id: "nest-48",
+    category: "NestJS",
+    difficulty: "Intermediate",
+    tags: ["Context", "ExecutionContext", "ArgumentsHost"],
+    question: "NestJS ExecutionContext এবং ArgumentsHost-এর কাজের পার্থক্য কী?",
+    answer: `
+<p><strong>ArgumentsHost:</strong> ইনকামিং রিকুয়েস্টের প্রোটোকল কনটেক্সট (HTTP, RPC, WebSockets) অ্যাক্সেস করতে দেয়।</p><p><strong>ExecutionContext:</strong> ArgumentsHost-কে এক্সটেন্ড করে বর্তমান রুট হ্যান্ডলার ক্লাস ও মেথডের মেটাডাটা জানায়।</p>
+    `
+  },
+  {
+    id: "nest-49",
+    category: "NestJS",
+    difficulty: "Advanced",
+    tags: ["Multi-tenancy", "SaaS", "Databases"],
+    question: "NestJS-এ Multi-tenancy (Tenant-per-database vs Schema-per-tenant) কীভাবে বাস্তবায়ন করবেন?",
+    answer: `
+<p>ইনকামিং Subdomain বা Header থেকে Tenant ID বের করে Dynamic Provider দিয়ে নির্দিষ্ট Tenant ডাটাবেজ কানেকশন বা স্কোপ রিপ্লেস করা।</p>
+    `
+  },
+  {
+    id: "nest-50",
+    category: "NestJS",
+    difficulty: "Intermediate",
+    tags: ["Serialization", "ClassSerializerInterceptor", "Exclude"],
+    question: "ClassSerializerInterceptor এবং @Exclude(), @Expose() দিয়ে Sensitive Data (Password) লুকানো কীভাবে করবেন?",
+    answer: `
+<p>Entity বা DTO-তে <code>@Exclude()</code> বসিয়ে কন্ট্রোলারে <code>@UseInterceptors(ClassSerializerInterceptor)</code> বসালে স্বয়ংক্রিয়ভাবে পাসওয়ার্ড ফিল্ড বাদ দিয়ে JSON রেসপন্স পাঠায়।</p>
+    `
   }
 ];

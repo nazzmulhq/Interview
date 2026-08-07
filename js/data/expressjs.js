@@ -304,5 +304,349 @@ app.post('/register', validate(registerSchema), registerController);</code></pre
     answer: `
 <p>ক্ষতিকর ওয়েবসাইট ব্রাউজারের কুকি ব্যবহার করে অনাকাঙ্ক্ষিত রিকুয়েস্ট পাঠানোর অ্যাটাক। CSRF token এবং <code>SameSite=Strict</code> কুকি দিয়ে এটি প্রতিরোধ করা হয়।</p>
     `
+  },
+  {
+    id: "express-19",
+    category: "Express.js",
+    difficulty: "Intermediate",
+    tags: ["Middleware", "Architecture", "Flow"],
+    question: "Express.js Middleware Architecture এবং next() / next(err) কন্ট্রোল ফ্লো কীভাবে কাজ করে?",
+    answer: `
+<p>Express মিডলওয়্যার চেইন আকারে কাজ করে। <code>next()</code> ডাকলে পরবর্তী মিডলওয়্যারে যায়। কিন্তু <code>next(err)</code> ডাকলে এক্সপ্রেস মাঝের সব মিডলওয়্যার স্কিপ করে সরাসরি Global Error Handling Middleware-এ চলে যায়।</p>
+    `
+  },
+  {
+    id: "express-20",
+    category: "Express.js",
+    difficulty: "Intermediate",
+    tags: ["Error Handling", "Global Handler", "Async"],
+    question: "Express 4 vs Express 5-এ Async Error Handling-এর পার্থক্য কী? express-async-errors কেন লাগত?",
+    answer: `
+<p>Express 4-এ async/await মেথডে এরর হলে তা স্বয়ংক্রিয়ভাবে ধরা পড়ত না (Unhandled Rejection), try...catch দিয়ে <code>next(err)</code> ডাকতে হতো। Express 5-এ নেটিভভাবে প্রমিস রিজেকশন গ্লোবাল এরর হ্যান্ডলারে চলে যায়।</p>
+    `
+  },
+  {
+    id: "express-21",
+    category: "Express.js",
+    difficulty: "Intermediate",
+    tags: ["Routing", "express.Router", "Modular"],
+    question: "express.Router() দিয়ে মডুলার ও মেইনটেইনেবল রুট আর্কিটেকচার কীভাবে সাজাবেন?",
+    answer: `
+<p>প্রতিটি রিসোর্সের (e.g. user.routes.js, product.routes.js) জন্য আলাদা Router ইন্সট্যান্স তৈরি করে <code>app.use('/api/v1/users', userRouter)</code> দিয়ে মডুলারলি যুক্ত করা।</p>
+    `
+  },
+  {
+    id: "express-22",
+    category: "Express.js",
+    difficulty: "Advanced",
+    tags: ["Performance", "Route Matcher", "radix-tree"],
+    question: "Express Route Matching Performance এবং অতিরিক্ত মিডলওয়্যার ওভারহেড কীভাবে কমাবেন?",
+    answer: `
+<p>গ্লোবালি সব রুটে ভারী মিডলওয়্যার ব্যবহার না করে কেবল নির্দিষ্ট প্রয়োজনীয় রুটে স্কেপ করা এবং রাউটিং অর্ডারে সর্বাধিক ব্যবহৃত রুটগুলো উপরে রাখা।</p>
+    `
+  },
+  {
+    id: "express-23",
+    category: "Express.js",
+    difficulty: "Intermediate",
+    tags: ["Request", "Response", "Methods"],
+    question: "req.params vs req.query vs req.body-এর পার্থক্য ও ব্যবহার কী?",
+    answer: `
+<p><strong>req.params:</strong> URL Path-এর ডাইনামিক সেগমেন্ট (/users/:id -> req.params.id)।</p><p><strong>req.query:</strong> URL Search Query (/search?keyword=js -> req.query.keyword)।</p><p><strong>req.body:</strong> HTTP Request-এর JSON/Form Body।</p>
+    `
+  },
+  {
+    id: "express-24",
+    category: "Express.js",
+    difficulty: "Intermediate",
+    tags: ["Body Parsing", "express.json", "raw-body"],
+    question: "express.json() এবং express.urlencoded() মিডলওয়্যারের কাজ কী? limit সেটিংস কেন জরুরি?",
+    answer: `
+<p>ইনকামিং Raw HTTP Payload পার্স করে <code>req.body</code>-তে অবজেক্ট বানায়। <code>{ limit: '10kb' }</code> সেট না করলে অ্যাটাকার বিশাল মেগাবাইটের JSON পাঠিয়ে সার্ভার মেমোরি ক্র্যাশ করাতে পারে।</p>
+    `
+  },
+  {
+    id: "express-25",
+    category: "Express.js",
+    difficulty: "Advanced",
+    tags: ["Security", "CORS", "Preflight"],
+    question: "CORS Preflight Options Request (HTTP OPTIONS) কী এবং Express-এ cors() মিডলওয়্যার কীভাবে কাজ করে?",
+    answer: `
+<p>Non-simple HTTP Requests (যেমন: Custom Header বা PUT/DELETE) পাঠানোর আগে ব্রাউজার স্বয়ংক্রিয়ভাবে <code>OPTIONS</code> রিকুয়েস্ট পাঠিয়ে পারমিশন নিশ্চিত হয়। <code>cors()</code> এই প্র্রিফ্লাইট রিকুয়েস্ট হ্যান্ডেল করে।</p>
+    `
+  },
+  {
+    id: "express-26",
+    category: "Express.js",
+    difficulty: "Intermediate",
+    tags: ["Cookies", "cookie-parser", "httpOnly"],
+    question: "cookie-parser মিডলওয়্যার এবং httpOnly, Secure, SameSite Cookie Attributes-এর সিকিউরিটি ভূমিকা কী?",
+    answer: `
+<p><strong>httpOnly:</strong> ক্লায়েন্ট সাইড জাভাস্ক্রিপ্ট (XSS) দিয়ে কুকি পড়া ব্লক করে।</p><p><strong>Secure:</strong> কেবল HTTPS লাইনে কুকি পাঠায়।</p><p><strong>SameSite=Strict:</strong> Cross-site CSRF অ্যাটাক প্রতিরোধ করে।</p>
+    `
+  },
+  {
+    id: "express-27",
+    category: "Express.js",
+    difficulty: "Advanced",
+    tags: ["Security", "Rate Limiting", "Redis"],
+    question: "rate-limit-redis ব্যবহার করে ডিস্ট্রিবিউটেড Express Cluster-এ Rate Limiting কীভাবে করবেন?",
+    answer: `
+<p>একাধিক প্রসেস বা সার্ভারে এক্সপ্রেস চললে ইন-মেমোরি কাউন্টার কাজ করে না। <code>rate-limit-redis</code> স্টোর ব্যবহার করে সেন্ট্রাল Redis-এ IP রিকুয়েস্ট হিসেব রাখা হয়।</p>
+    `
+  },
+  {
+    id: "express-28",
+    category: "Express.js",
+    difficulty: "Intermediate",
+    tags: ["Streaming", "res.pipe", "Download"],
+    question: "Express-এ res.sendFile vs res.download vs Streams দিয়ে বড় ফাইল ডাউনলোড কীভাবে করাবেন?",
+    answer: `
+<p><code>res.download()</code> ব্রাউজারে Attachment হিসেবে ফাইল সেভ করতে বাধ্য করে। বড় ফাইলে মেমোরি বাঁচাতে <code>fs.createReadStream().pipe(res)</code> ব্যবহার করা সবচেয়ে উপযোগী।</p>
+    `
+  },
+  {
+    id: "express-29",
+    category: "Express.js",
+    difficulty: "Advanced",
+    tags: ["Security", "SQLi", "Sanitization"],
+    question: "Express-এ Input Validation (express-validator) এবং Sanitization কীভাবে করবেন?",
+    answer: `
+<div class="code-box"><div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div><pre><code>const { body, validationResult } = require('express-validator');
+app.post('/user', [
+  body('email').isEmail().normalizeEmail(),
+  body('password').isLength({ min: 6 })
+], (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+});</code></pre></div>
+    `
+  },
+  {
+    id: "express-30",
+    category: "Express.js",
+    difficulty: "Intermediate",
+    tags: ["Sessions", "express-session", "Connect-Redis"],
+    question: "express-session এবং connect-redis দিয়ে Scalable Session Storage কীভাবে তৈরি করবেন?",
+    answer: `
+<p>ডিফল্ট MemoryStore প্রোডাকশনে মেমোরি লিক ঘটায়। <code>connect-redis</code> ব্যবহার করে ইউজারের সেশন আইডি সিঙ্ক্রোনাসলি Redis ডাটাবেজে স্টোর রাখা হয়।</p>
+    `
+  },
+  {
+    id: "express-31",
+    category: "Express.js",
+    difficulty: "Advanced",
+    tags: ["Performance", "Compression", "Brotli"],
+    question: "Express-এ compression middleware এবং Brotli/Gzip এনকোডিং কনফিগারেশন কীভাবে করবেন?",
+    answer: `
+<p><code>app.use(compression())</code> দিলে Express ব্রাউজারের <code>Accept-Encoding</code> অনুযায়ী রেসপন্স টেক্সট কমপ্রেস করে ডেটা ট্রান্সফার স্পিড বাড়ায়।</p>
+    `
+  },
+  {
+    id: "express-32",
+    category: "Express.js",
+    difficulty: "Intermediate",
+    tags: ["Static Files", "express.static", "Caching"],
+    question: "express.static() দিয়ে স্ট্যাটিক ফাইল সার্ভিং এবং Cache-Control Max-Age সেট কীভাবে করবেন?",
+    answer: `
+<p><code>app.use(express.static('public', { maxAge: '1d', etag: true }))</code> দিলে ব্রাউজার ১ দিন পর্যন্ত ইমেজ ও সিএসএস ফাইল ই-ট্যাগ সিঙ্ক করে ক্যাশে ধরে রাখে।</p>
+    `
+  },
+  {
+    id: "express-33",
+    category: "Express.js",
+    difficulty: "Advanced",
+    tags: ["Security", "Helmet", "Content-Security-Policy"],
+    question: "Helmet.js দিয়ে Express-এ Content Security Policy (CSP) কীভাবে সেটআপ করবেন?",
+    answer: `
+<p>CSP হেডার ডিক্লেয়ার করে দিয়ে ব্রাউজারকে নির্দেশ দেওয়া যে কোন কোন ডোমেন থেকে কেবল ইমেজ বা জাভাস্ক্রিপ্ট লোড করার অনুমতি দেওয়া হবে (XSS & Injection Protection)।</p>
+    `
+  },
+  {
+    id: "express-34",
+    category: "Express.js",
+    difficulty: "Intermediate",
+    tags: ["Routing", "Param Middleware", "router.param"],
+    question: "Express-এ router.param() মিডলওয়্যার দিয়ে ড্রাই (DRY) কোড কীভাবে লিখবেন?",
+    answer: `
+<div class="code-box"><div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div><pre><code>router.param('userId', async (req, res, next, id) => {
+  req.user = await User.findById(id);
+  if (!req.user) return res.status(404).send('User not found');
+  next();
+});</code></pre></div>
+    `
+  },
+  {
+    id: "express-35",
+    category: "Express.js",
+    difficulty: "Advanced",
+    tags: ["Architecture", "MVC", "Layered"],
+    question: "Express.js-এ MVC / Controller-Service-Repository Pattern আর্কিটেকচার কেন প্রয়োজনীয়?",
+    answer: `
+<p>রুট ফাইল থেকে ডাটাবেজ কোয়েরি ও বিজনেস লজিক আলাদা করা। Router -> Controller (Request/Response) -> Service (Business Logic) -> Repository (Database Query)।</p>
+    `
+  },
+  {
+    id: "express-36",
+    category: "Express.js",
+    difficulty: "Intermediate",
+    tags: ["HTTP Status", "Status Codes", "REST"],
+    question: "RESTful API-তে এক্সপ্রেস দিয়ে সঠিক HTTP Status Codes (200, 201, 204, 400, 401, 403, 404, 409, 500) ব্যবহারের নিয়ম কী?",
+    answer: `
+<p><strong>201:</strong> নতুন রিসোর্স তৈরি। <strong>204:</strong> নো কন্টেন্ট (Delete)। <strong>401:</strong> আন-অথেনটিকেটেড (নো লগইন)। <strong>403:</strong> ফোর্বিডেন (নো পারমিশন)। <strong>409:</strong> কনফ্লিক্ট (ডুপ্লিকেট ইমেইল)।</p>
+    `
+  },
+  {
+    id: "express-37",
+    category: "Express.js",
+    difficulty: "Advanced",
+    tags: ["WebSockets", "ws", "http"],
+    question: "একই Express HTTP Server-এ ws / Socket.io সকেট কীভাবে একসাথে রান করবেন?",
+    answer: `
+<div class="code-box"><div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div><pre><code>const http = require('http');
+const server = http.createServer(app);
+const { Server } = require('socket.io');
+const io = new Server(server);
+server.listen(3000);</code></pre></div>
+    `
+  },
+  {
+    id: "express-38",
+    category: "Express.js",
+    difficulty: "Intermediate",
+    tags: ["Request Context", "res.locals", "req.state"],
+    question: "res.locals vs req.user — রিকুয়েস্ট লাইফসাইকেলে ডাটা শেয়ার করার মাধ্যম কোনটি?",
+    answer: `
+<p><code>res.locals</code> বর্তমান রিকুয়েস্টের ভিউ বা পরবর্তী মিডলওয়্যারে স্কোপড ভ্যারিয়েবল পাস করতে এক্সপ্রেসের অফিশিয়াল কনটেক্সট অবজেক্ট।</p>
+    `
+  },
+  {
+    id: "express-39",
+    category: "Express.js",
+    difficulty: "Advanced",
+    tags: ["Microservices", "Proxy", "express-http-proxy"],
+    question: "express-http-proxy দিয়ে এক্সপ্রেসকে এপিআই গেটওয়ে প্রক্সি হিসেবে কীভাবে ব্যবহার করবেন?",
+    answer: `
+<p><code>app.use('/services/user', proxy('http://user-service:4000'))</code> দিয়ে ইনকামিং রিকুয়েস্ট অন্য ইন্টারনাল মাইক্রোসার্ভিসে ফরওয়ার্ড করা।</p>
+    `
+  },
+  {
+    id: "express-40",
+    category: "Express.js",
+    difficulty: "Intermediate",
+    tags: ["Events", "Response", "finish event"],
+    question: "Express-এ res.on('finish') এবং res.on('close') ইভেন্ট দিয়ে Response Metrics ট্র্যাকিং কীভাবে করবেন?",
+    answer: `
+<p><code>res.on('finish')</code> ইভেন্ট রান করে যখন সম্পূর্ণ রেসপন্স ক্লায়েন্টের কাছে সাকসেসফুলি সেন্ড হওয়া শেষ হয়, লগার এবং মেট্রিক্স ট্র্যাকিংয়ে এটি অত্যন্ত দরকারি।</p>
+    `
+  },
+  {
+    id: "express-41",
+    category: "Express.js",
+    difficulty: "Advanced",
+    tags: ["Security", "Header Injection", "res.set"],
+    question: "Express-এ HTTP Response Splitting / Header Injection কীভাবে এড়াবেন?",
+    answer: `
+<p>রেসপন্স হেডারে নিউলাইন ক্যারেক্টার না পাঠানো। Express নেটিভভাবে হেডারে নিউলাইন থাকলে এরর থ্রো করে নিরাপদ রাখে।</p>
+    `
+  },
+  {
+    id: "express-42",
+    category: "Express.js",
+    difficulty: "Intermediate",
+    tags: ["Uploads", "Multer", "Memory Leak"],
+    question: "Multer ফাইল আপলোডের সময় Disk Storage vs Memory Buffer Memory Leak এড়ানোর কৌশল কী?",
+    answer: `
+<p>MemoryStorage ব্যবহার করলে বিশাল ফাইল পুরা RAM মেমোরিতে স্পেস নেয়। বড় ফাইলে <code>diskStorage</code> বা সরাসরি AWS S3 Multipart Upload Stream ব্যবহার করা নিরাপদ।</p>
+    `
+  },
+  {
+    id: "express-43",
+    category: "Express.js",
+    difficulty: "Advanced",
+    tags: ["Optimization", "ETag", "Fresh"],
+    question: "Express ETag Generation এবং HTTP 304 Not Modified Status কীভাবে কাজ করে?",
+    answer: `
+<p>Express নেটিভভাবে রেসপন্স বাফারের হ্যাশ (ETag) বানায়। ক্লায়েন্ট <code>If-None-Match</code> পাঠালে ই-ট্যাগ মিললে ৩০৪ স্ট্যাটাস পাঠায় (জিরো রেসপন্স বাডি ট্রান্সফার)।</p>
+    `
+  },
+  {
+    id: "express-44",
+    category: "Express.js",
+    difficulty: "Intermediate",
+    tags: ["Testing", "Supertest", "Mocks"],
+    question: "Supertest এবং Jest দিয়ে Express REST API Route Testing কীভাবে করবেন?",
+    answer: `
+<div class="code-box"><div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div><pre><code>const request = require('supertest');
+const app = require('../app');
+test('GET /api/users', async () => {
+  const res = await request(app).get('/api/users');
+  expect(res.statusCode).toBe(200);
+});</code></pre></div>
+    `
+  },
+  {
+    id: "express-45",
+    category: "Express.js",
+    difficulty: "Advanced",
+    tags: ["Routing", "Case Sensitivity", "Strict Routing"],
+    question: "Express Application Settings: 'case sensitive routing' এবং 'strict routing' এর কাজ কী?",
+    answer: `
+<p><code>app.set('case sensitive routing', true)</code> দিলে <code>/Users</code> এবং <code>/users</code> আলাদা রুট হিসেবে বিবেচিত হয়। <code>strict routing</code> অন করলে <code>/users</code> এবং <code>/users/</code> আলাদা ধরে।</p>
+    `
+  },
+  {
+    id: "express-46",
+    category: "Express.js",
+    difficulty: "Intermediate",
+    tags: ["Security", "Disable X-Powered-By", "Hide Tech"],
+    question: "app.disable('x-powered-by') কেন প্রোডাকশন অ্যাপে কল করা বাধ্যতামূলক?",
+    answer: `
+<p>Express বাই ডিফল্ট <code>X-Powered-By: Express</code> হেডার পাঠায় যা হ্যাকারদের টেকনোলজি স্ট্যাক জানিয়ে দেয়। এটি ডিজেবল করে হাইড করা উচিত।</p>
+    `
+  },
+  {
+    id: "express-47",
+    category: "Express.js",
+    difficulty: "Advanced",
+    tags: ["Middleware", "Conditional Middleware", "express-unless"],
+    question: "নির্দিষ্ট রুটে মিডলওয়্যার স্কিপ করতে express-unless কীভাবে ব্যবহার করবেন?",
+    answer: `
+<p>যেমন অথেন্টিকেশন মিডলওয়্যার <code>/login</code> বা <code>/register</code> রুটে স্কিপ করতে <code>authMiddleware.unless({ path: ['/login'] })</code> কনফিগার করা।</p>
+    `
+  },
+  {
+    id: "express-48",
+    category: "Express.js",
+    difficulty: "Intermediate",
+    tags: ["Graceful Shutdown", "stoppable", "http-terminator"],
+    question: "http-terminator দিয়ে Express Active Keep-Alive HTTP Connections দ্রুত বন্ধ কীভাবে করবেন?",
+    answer: `
+<p>ডিফল্ট <code>server.close()</code> কন্টিনিউয়াস Keep-alive কানেকশন সকেট বন্ধ করতে দীর্ঘ সময় নেয়। <code>http-terminator</code> দ্রুত সব আইডি সকেট কিল করে শাটডাউন ফাস্ট করে।</p>
+    `
+  },
+  {
+    id: "express-49",
+    category: "Express.js",
+    difficulty: "Advanced",
+    tags: ["OpenAPI", "express-openapi-validator", "Swagger"],
+    question: "express-openapi-validator দিয়ে OpenAPI Specs (.yaml) থেকে অটোমেটিক রুট ভ্যালিডেশন কীভাবে করবেন?",
+    answer: `
+<p>Swagger YAML ডেফিনিশন লোড করে দিলে এটি ইনকামিং রিকুয়েস্টের Body, Query, Params অটোমেটিক ওপেনএপিআই স্পেক্স অনুযায়ী টেস্ট ও ভ্যালিডেট করে।</p>
+    `
+  },
+  {
+    id: "express-50",
+    category: "Express.js",
+    difficulty: "Intermediate",
+    tags: ["Response", "res.format", "Content Negotiation"],
+    question: "res.format() দিয়ে Express-এ Content Negotiation (JSON, HTML, Text) কীভাবে করবেন?",
+    answer: `
+<div class="code-box"><div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div><pre><code>res.format({
+  'text/plain': () => res.send('hey'),
+  'text/html': () => res.send('<p>hey</p>'),
+  'application/json': () => res.send({ message: 'hey' })
+});</code></pre></div>
+    `
   }
 ];

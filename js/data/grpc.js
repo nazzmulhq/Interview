@@ -269,5 +269,330 @@ server.bindAsync('0.0.0.0:50051', grpc.ServerCredentials.createInsecure(), () =>
     answer: `
 <p>আইডল কানেকশন যেন নেটওয়ার্ক লড ব্যালেন্সার বা ফায়ারওয়াল বন্ধ না করে দেয়, সে জন্য সময় পর পর Keepalive Ping প্যাকেট পাঠায়।</p>
     `
+  },
+  {
+    id: "grpc-19",
+    category: "gRPC",
+    difficulty: "Advanced",
+    tags: ["Protobuf", "Serialization", "Varints"],
+    question: "Protocol Buffers Binary Wire Format (Varints, Tag-Length-Value) কীভাবে JSON-এর তুলনায় চরম ব্যান্ডউইথ সাশ্রয় করে?",
+    answer: `
+<p>JSON প্লেন টেক্সট স্ট্রিং হিসেবে ডেটা স্টোর করে। Protobuf ফিল্ড নেম না পাঠিয়ে কাস্টম Varints এবং Tag-Length-Value (TLV) বাইনারি ফরম্যাটে ছোট সংখ্যা ১ বাইটে সংকুচিত করে পাঠায় (৮০% সাইজ কমার কারণ)।</p>
+    `
+  },
+  {
+    id: "grpc-20",
+    category: "gRPC",
+    difficulty: "Advanced",
+    tags: ["Streaming", "Bidirectional", "HTTP2"],
+    question: "gRPC 4 Types of RPCs: Unary, Server Streaming, Client Streaming, Bidirectional Streaming কীভাবে কাজ করে?",
+    answer: `
+<p><strong>Unary:</strong> ১টি রিকুয়েস্ট -> ১টি রেসপন্স।</p><p><strong>Server Streaming:</strong> ১টি রিকুয়েস্ট -> একাধিক রেসপন্স স্ট্রিম।</p><p><strong>Client Streaming:</strong> একাধিক রিকুয়েস্ট স্ট্রিম -> ১টি রেসপন্স।</p><p><strong>Bidirectional:</strong> উভয় দিকেই স্বাধীন সকেটে সমান্তরাল ডেটা স্ট্রিম।</p>
+    `
+  },
+  {
+    id: "grpc-21",
+    category: "gRPC",
+    difficulty: "Intermediate",
+    tags: ["Interceptors", "Middleware", "Auth"],
+    question: "gRPC Interceptors (UnaryInterceptor vs StreamInterceptor) দিয়ে Authentication & Logging কীভাবে করবেন?",
+    answer: `
+<p>gRPC-এর মিডলওয়্যার সার্ভিস। ইনকামিং RPC কলে Metadata (Headers) থেকে Authorization Bearer token রিড করে ভ্যালিডেট করা এবং রেসপন্স টাইম স্টপওয়াচ হিসাব করা।</p>
+    `
+  },
+  {
+    id: "grpc-22",
+    category: "gRPC",
+    difficulty: "Advanced",
+    tags: ["Deadlines", "Timeouts", "Context"],
+    question: "gRPC Deadlines / Timeouts এবং Cascading Cancellation কীভাবে সার্ভিস ক্যাস্কেডিং ফেইলিয়র প্রতিরোধ করে?",
+    answer: `
+<p>ক্লায়েন্ট প্রতিটি কলের সাথে Deadline (e.g. 2 seconds) পাঠায়। কলটি চেইনের মধ্যে অন্য ১০টি অভ্যন্তরীণ সার্ভিসে গেলেও টাইমআউট পার হলে পুরো সার্ভিস চেইন স্বয়ংক্রিয়ভাবে এক্সিকিউশন ক্যানসেল (CANCELLED status) করে রিসোর্স ফ্রি করে।</p>
+    `
+  },
+  {
+    id: "grpc-23",
+    category: "gRPC",
+    difficulty: "Advanced",
+    tags: ["Load Balancing", "Client-Side LB", "Lookaside LB"],
+    question: "gRPC Load Balancing: Proxy Model vs Client-Side Load Balancing vs Lookaside LB (gRPC Name Resolver) কী?",
+    answer: `
+<p>HTTP/2 সকেট পারসিস্টেন্ট থাকায় স্ট্যান্ডার্ড L4 Load Balancer সমবন্টন করতে পারে না। Client-Side LB ক্লায়েন্ট নিজে সকেটে নাম পাওয়ার পর (Name Resolver) Round-Robin রুলস মেনে বিভিন্ন পোডে সাব-সকেট বন্টন করে।</p>
+    `
+  },
+  {
+    id: "grpc-24",
+    category: "gRPC",
+    difficulty: "Intermediate",
+    tags: ["Metadata", "Headers", "Context"],
+    question: "gRPC Metadata (metadata.MD) কী এবং কীভাবে Key-Value Pair হেডার প্রোপাগেট করা হয়?",
+    answer: `
+<p>HTTP/2 Headers-এর gRPC রূপান্তর। metadata.Pairs("authorization", "token") দিয়ে ক্লায়েন্ট থেকে সার্ভারে বা সার্ভার থেকে ক্লায়েন্টে কাস্টম হেডার পাঠানো।</p>
+    `
+  },
+  {
+    id: "grpc-25",
+    category: "gRPC",
+    difficulty: "Advanced",
+    tags: ["Protobuf", "Well-Known Types", "Timestamp"],
+    question: "Protobuf Well-Known Types (google.protobuf.Timestamp, Duration, Any, Empty, Struct) কী?",
+    answer: `
+<p>অফিশিয়াল স্ট্যান্ডারডাইজড টাইপস। Timestamp তারিখ নির্দেশ করে, Duration সময়সীমা, Any যেকোনো ডায়নামিক প্রোটো স্ট্রাকচার ডাইনামিকালি বহন করে।</p>
+    `
+  },
+  {
+    id: "grpc-26",
+    category: "gRPC",
+    difficulty: "Intermediate",
+    tags: ["Channel", "Subchannel", "Connection Pool"],
+    question: "gRPC Channel, Subchannel এবং Connectivity States (IDLE, CONNECTING, READY, TRANSIENT_FAILURE, SHUTDOWN) কী?",
+    answer: `
+<p><strong>Channel:</strong> গ্লোবাল সকেট কানেকশন ভার্চুয়াল পাইপ। এটি ভেতরে একাধিক ফিজিক্যাল সকেট (Subchannel) মেইনটেইন করে স্টেট পরিবর্তন ট্র্যাকিং করে।</p>
+    `
+  },
+  {
+    id: "grpc-27",
+    category: "gRPC",
+    difficulty: "Advanced",
+    tags: ["Security", "TLS", "mTLS"],
+    question: "gRPC Channel Security: Insecure vs TLS Credentials vs mTLS (Mutual TLS) কীভাবে কনফিগার করবেন?",
+    answer: `
+<p>grpc.credentials.createSsl() দিয়ে ক্লায়েন্ট ও সার্ভারের মধ্যে CA সার্টিফিকেট সিঙ্ক করে সকেটের ট্রান্সফার সম্পূর্ণ এনক্রিপ্ট করা।</p>
+    `
+  },
+  {
+    id: "grpc-28",
+    category: "gRPC",
+    difficulty: "Intermediate",
+    tags: ["Protobuf", "Packages", "Namespaces"],
+    question: "Protobuf package, option go_package, option java_package কীভাবে নেমস্পেস কলিশন এড়ায়?",
+    answer: `
+<p>package user.v1; ডিক্লেয়ার করলে তা ভিন্ন ভাষার সোর্স কোড জেনারেট করার সময় নিজস্ব ক্লাসের প্যাকেজ নাম ও নেমস্পেস বজায় রাখে।</p>
+    `
+  },
+  {
+    id: "grpc-29",
+    category: "gRPC",
+    difficulty: "Advanced",
+    tags: ["Protobuf", "oneof", "Unions"],
+    question: "Protobuf oneof Keyword কীভাবে C-style Unions বা Polymorphic Values অফার করে?",
+    answer: `
+<div class="code-box"><div class="code-header"><span>protobuf</span><button class="copy-btn">Copy</button></div><pre><code>message PaymentMethod {
+  oneof method {
+    CreditCard credit_card = 1;
+    PaypalAccount paypal = 2;
+  }
+}</code></pre></div><p>oneof ডিক্লেয়ার করলে একই সাথে মেমোরিতে কেবল ১টি ফিল্ড কার্যকর থাকবে।</p>
+    `
+  },
+  {
+    id: "grpc-30",
+    category: "gRPC",
+    difficulty: "Intermediate",
+    tags: ["Code Generation", "protoc", "Plugins"],
+    question: "protoc Compiler and gRPC Plugins (protoc-gen-go, protoc-gen-ts) কীভাবে কাজ করে?",
+    answer: `
+<p>.proto সোর্স ফাইল পার্স করে AST তৈরি করে এবং নির্দিষ্ট ল্যাঙ্গুয়েজ প্লাগইনের মাধ্যমে টাইপ-সেফ স্টাব (Stubs) কোড অটো-জেনারেট করে।</p>
+    `
+  },
+  {
+    id: "grpc-31",
+    category: "gRPC",
+    difficulty: "Advanced",
+    tags: ["Performance", "Compression", "gzip"],
+    question: "gRPC Message Compression (gzip, deflate, snappy) কীভাবে সক্রিয় করবেন?",
+    answer: `
+<p>grpc-internal-encoding: gzip হেডার দিয়ে প্রতিটি RPC বার্তার প্যাকট অন-দ্য-ফ্লাই সংকুচিত করে ব্যান্ডউইথ আরও সাশ্রয় করা।</p>
+    `
+  },
+  {
+    id: "grpc-32",
+    category: "gRPC",
+    difficulty: "Intermediate",
+    tags: ["Errors", "Status", "Details"],
+    question: "gRPC Error Details (google.rpc.ErrorInfo, BadRequest, RetryInfo) কীভাবে সমৃদ্ধ এরর পাঠায়?",
+    answer: `
+<p>কেবল এরর স্ট্যাটাস কোড না পাঠিয়ে Status.withDetails() দিয়ে সাথে Validation Errors বা Retry Delay সেশন সহ সমৃদ্ধ অবজেক্ট পাঠানো।</p>
+    `
+  },
+  {
+    id: "grpc-33",
+    category: "gRPC",
+    difficulty: "Advanced",
+    tags: ["Web", "gRPC-Web", "Envoy Proxy"],
+    question: "Browser JavaScript থেকে gRPC ডাকতে gRPC-Web এবং Envoy Proxy কেন প্রয়োজন?",
+    answer: `
+<p>ব্রাউজার নেটিভ HTTP/2 Framing সরাসরি অ্যাক্সেস করতে পারে না। gRPC-Web ব্রাউজার থেকে HTTP/1.1 বা কাস্টম প্রোটোকলে রেসপন্স পাঠায় এবং Envoy Proxy তা gRPC-তে রূপান্তর করে।</p>
+    `
+  },
+  {
+    id: "grpc-34",
+    category: "gRPC",
+    difficulty: "Intermediate",
+    tags: ["Protobuf", "repeated", "Arrays"],
+    question: "Protobuf repeated fields (packed=true) কীভাবে অ্যারে স্টোর করে?",
+    answer: `
+<p>repeated string tags = 1; দিয়ে অ্যারে লিস্ট বজায় রাখা। packed=true নিউমেরিক অ্যাররে ট্যাগ ওভারহেড ছাড়া ১টি স্লাইসে প্যাক করে।</p>
+    `
+  },
+  {
+    id: "grpc-35",
+    category: "gRPC",
+    difficulty: "Advanced",
+    tags: ["Testing", "grpcurl", "Mocking"],
+    question: "grpcurl Tool দিয়ে cURL-এর মতো gRPC এন্ডপয়েন্ট টার্মিনাল থেকে কীভাবে টেস্ট করবেন?",
+    answer: `
+<p>grpcurl -plaintext -d '{"name": "Nazmul"}' localhost:50051 user.v1.UserService/SayHello আদেশ দিয়ে সরাসরি কমান্ড লাইন টেস্ট।</p>
+    `
+  },
+  {
+    id: "grpc-36",
+    category: "gRPC",
+    difficulty: "Intermediate",
+    tags: ["Protobuf", "enum", "Zero Value"],
+    question: "Protobuf Enum Design Best Practice: 0-Index UNSPECIFIED Value কেন রাখা আবশ্যক?",
+    answer: `
+<p>Protobuf-এ ফিল্ড না পাঠালে ডিফল্ট ভ্যালু 0 সেট হয়। তাই প্রথম Enum ভ্যালু UNKNOWN = 0 রাখা উচিত যাতে ভুল মান পড়া প্রতিরোধ হয়।</p>
+    `
+  },
+  {
+    id: "grpc-37",
+    category: "gRPC",
+    difficulty: "Advanced",
+    tags: ["Resilience", "Retry Policy", "Hedging"],
+    question: "gRPC Native Service Config: Auto Retry Policy এবং Hedged Requests কীভাবে কাজ করে?",
+    answer: `
+<p><strong>Retry Policy:</strong> নির্দিষ্ট স্ট্যাটাস কোডে (e.g. UNAVAILABLE) স্বয়ংক্রিয় রিট্রি করা।</p><p><strong>Hedging:</strong> প্রথম সকেট স্লো হলে ব্যাকগ্রাউন্ডে ২য় নোডে সমান্তরাল বিকল্প রিকুয়েস্ট পাঠিয়ে ল্যাটেন্সি কমানো।</p>
+    `
+  },
+  {
+    id: "grpc-38",
+    category: "gRPC",
+    difficulty: "Intermediate",
+    tags: ["Protobuf", "map", "Dictionary"],
+    question: "Protobuf map<key_type, value_type> Syntax কীভাবে ডিকশনারি স্টোর করে?",
+    answer: `
+<p>map<string, int32> scores = 1; দিয়ে Dynamic Key-Value Pair স্টোর করা (Key অবশ্যই Primitive type হতে হবে)।</p>
+    `
+  },
+  {
+    id: "grpc-39",
+    category: "gRPC",
+    difficulty: "Advanced",
+    tags: ["Architecture", "REST vs gRPC", "Benchmark"],
+    question: "REST (JSON over HTTP/1.1) vs gRPC (Protobuf over HTTP/2)-এর পারফরম্যান্স বেঞ্চমার্ক তুলনা কী?",
+    answer: `
+<p>gRPC ৭ থেকে ১০ গুণ পর্যন্ত দ্রুততর আউটপুট দেয়, ব্যান্ডউইথ সাশ্রয় করে, স্ট্রিম সাপোর্ট করে এবং টাইপ-সেফ কোড জেনারেটর অফার করে।</p>
+    `
+  },
+  {
+    id: "grpc-40",
+    category: "gRPC",
+    difficulty: "Intermediate",
+    tags: ["Protobuf", "Import", "Proto Path"],
+    question: "Protobuf import \"other.proto\" এবং proto_path দিয়ে ফাইল অর্গানাইজেশন কীভাবে করবেন?",
+    answer: `
+<p>একটি .proto ফাইল থেকে অন্য প্রোটো ফাইল ইম্পোর্ট করা এবং protoc -I=proto/ দিয়ে পাথ সোর্স নির্দেশ করা।</p>
+    `
+  },
+  {
+    id: "grpc-41",
+    category: "gRPC",
+    difficulty: "Advanced",
+    tags: ["Gateway", "OpenAPI", "protoc-gen-openapiv2"],
+    question: "grpc-gateway দিয়ে automatic Swagger / OpenAPI Schema Generator কীভাবে সক্রিয় করবেন?",
+    answer: `
+<p>protoc-gen-openapiv2 প্লাগইন দিয়ে .proto ডিক্লারেশন থেকে স্বয়ংক্রিয় swagger.json ফাইল তৈরি করা।</p>
+    `
+  },
+  {
+    id: "grpc-42",
+    category: "gRPC",
+    difficulty: "Intermediate",
+    tags: ["Context", "Call Options", "Header Injection"],
+    question: "gRPC Call Options (Header, Trailer, MaxRecvMsgSize) কীভাবে সেট করবেন?",
+    answer: `
+<p>client.SayHello(ctx, req, grpc.MaxCallRecvMsgSize(1024 * 1024 * 10)) দিয়ে ডিফল্ট ৪MB রেসপন্স লিমিট বাড়িয়ে ১০MB করা।</p>
+    `
+  },
+  {
+    id: "grpc-43",
+    category: "gRPC",
+    difficulty: "Advanced",
+    tags: ["Keepalive", "Client Parameters", "PermitWithoutStream"],
+    question: "gRPC Keepalive Client Parameters: Time, Timeout, and PermitWithoutStream টিউন কীভাবে করবেন?",
+    answer: `
+<p>grpc.WithKeepaliveParams(keepalive.ClientParameters{ Time: 10 * time.Second, Timeout: 3 * time.Second, PermitWithoutStream: true }) কনফিগারেশন।</p>
+    `
+  },
+  {
+    id: "grpc-44",
+    category: "gRPC",
+    difficulty: "Intermediate",
+    tags: ["Debugging", "GRPC_GO_LOG_VERBOSITY", "Env"],
+    question: "gRPC Internal Debugging: GRPC_GO_LOG_VERBOSITY=debug এবং GRPC_TRACE=all দিয়ে নেটওয়ার্ক ফ্রেম কীভাবে রিড করবেন?",
+    answer: `
+<p>টার্মিনালে এনভায়রনমেন্ট ভ্যারিয়েবল অন করে gRPC ইঞ্জিনের ভেতর চলা সকেট কানেকশন ও HTTP/2 Framing র-লগ আকারে রিড করা।</p>
+    `
+  },
+  {
+    id: "grpc-45",
+    category: "gRPC",
+    difficulty: "Advanced",
+    tags: ["Protobuf", "Custom Options", "Extensions"],
+    question: "Protobuf Custom Options দিয়ে মেটাডাটা বা অডিটিং ডেকোরেটর কীভাবে বানাবেন?",
+    answer: `
+<p>extend google.protobuf.FieldOptions { string sensitive = 50001; } ডিক্লেয়ার করে ফিল্ডে প্রোটো লেভেল ডেকোরেটর যোগ করা।</p>
+    `
+  },
+  {
+    id: "grpc-46",
+    category: "gRPC",
+    difficulty: "Intermediate",
+    tags: ["Server", "Graceful Stop", "GracefulStop"],
+    question: "gRPC Server Graceful Shutdown: server.GracefulStop() vs server.Stop() কী?",
+    answer: `
+<p><strong>GracefulStop:</strong> নতুন রিকুয়েস্ট নেওয়া বন্ধ করে রানিং স্ট্রিমিং ও RPC প্রসেস শেষ হওয়া পর্যন্ত অপেক্ষা করে সার্ভার সকেট ক্লোজ করে।</p>
+    `
+  },
+  {
+    id: "grpc-47",
+    category: "gRPC",
+    difficulty: "Advanced",
+    tags: ["Tracing", "OpenTelemetry", "StatsHandler"],
+    question: "gRPC OpenTelemetry StatsHandler দিয়ে ক্লায়েন্ট ও সার্ভারের Metrics & Tracing কীভাবে ট্র্যাকিং করবেন?",
+    answer: `
+<p>stats.Handler ইন্টিগ্রেট করে প্রতিটি RPC কলের সাইজ, টাইম এবং স্ট্যাটাস কোড অটোমেটিক Prometheus বা Jaeger-এ পাঠানো।</p>
+    `
+  },
+  {
+    id: "grpc-48",
+    category: "gRPC",
+    difficulty: "Intermediate",
+    tags: ["Protobuf", "Deprecated", "deprecated option"],
+    question: "Protobuf option deprecated = true কীভাবে কোড জেনারেটরে ওয়ার্নিং ফায়ার করে?",
+    answer: `
+<p>string old_field = 1 [deprecated = true]; দিলে আইডিই ও কম্পাইলার ডেভেলপারদের ওয়ার্নিং দেয় যে ফিল্ডটি আগামীতে রিমুভ করা হবে।</p>
+    `
+  },
+  {
+    id: "grpc-49",
+    category: "gRPC",
+    difficulty: "Advanced",
+    tags: ["Connection", "Subchannel Reconnection", "Backoff"],
+    question: "gRPC Subchannel Connection Backoff Algorithm কীভাবে কাজ করে?",
+    answer: `
+<p>সার্ভার রেসপন্স না দিলে কানেকশন লুপ এড়াতে টাইমআউট ১ সে, ২ সে, ৪ সে করে বাড়িয়ে ট্রাই করে (Exponent backoff with random jitter)।</p>
+    `
+  },
+  {
+    id: "grpc-50",
+    category: "gRPC",
+    difficulty: "Intermediate",
+    tags: ["Testing", "Buf Breaking", "CI CD"],
+    question: "CI/CD Pipeline-এ buf breaking --against \".git#branch=main\" দিয়ে Breaking Change Detection কীভাবে করবেন?",
+    answer: `
+<p>পুল রিকুয়েস্টে (PR) কোনো ডেভেলপার ভুলবশত Protobuf ফিল্ড ট্যাগ চেঞ্জ বা ডিলিট করলে বিফোর-আফটার গিট ব্রাঞ্চ কম্পেয়ার করে বিল্ড ফেইল করানো।</p>
+    `
   }
 ];

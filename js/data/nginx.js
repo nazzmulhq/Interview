@@ -338,5 +338,337 @@ gzip_types
     answer: `
 <p><code>proxy_set_header Upgrade $http_upgrade;</code> এবং <code>proxy_set_header Connection "upgrade";</code> দেওয়া আবশ্যক।</p>
     `
+  },
+  {
+    id: "nginx-19",
+    category: "Nginx",
+    difficulty: "Advanced",
+    tags: ["Reverse Proxy", "HTTP2", "Performance"],
+    question: "Nginx-এ HTTP/2 এবং HTTP/3 (QUIC) প্রোটোকল কীভাবে সক্রিয় করবেন?",
+    answer: `
+<p><code>listen 443 ssl http2;</code> এবং Nginx 1.25+ এর জন্য <code>listen 443 quic reuseport;</code> যোগ করে SSL সাইফার কনফিগারেশনসহ HTTP/3 সাপোর্ট অন করা যায়।</p>
+    `
+  },
+  {
+    id: "nginx-20",
+    category: "Nginx",
+    difficulty: "Intermediate",
+    tags: ["SSL", "Certbot", "HTTPS"],
+    question: "Nginx-এ Let's Encrypt SSL (Certbot) এবং SSL Termination কীভাবে কনফিগার করা হয়?",
+    answer: `
+<p>Certbot স্বয়ংক্রিয়ভাবে TLS সার্টিফিকেট জেনারেট করে Nginx <code>listen 443 ssl;</code> ব্লকে <code>ssl_certificate</code> এবং <code>ssl_certificate_key</code> পাথ আপডেট করে HTTPS ডিরেক্টরি বজায় রাখে।</p>
+    `
+  },
+  {
+    id: "nginx-21",
+    category: "Nginx",
+    difficulty: "Advanced",
+    tags: ["Rate Limiting", "limit_req", "Security"],
+    question: "Nginx-এ limit_req_zone এবং limit_req (Leaky Bucket) দিয়ে Rate Limiting কীভাবে করবেন?",
+    answer: `
+<p><code>limit_req_zone $binary_remote_addr zone=one:10m rate=10r/s;</code> সেট করে <code>limit_req zone=one burst=20 nodelay;</code> ব্যবহার করে DDoS ও ব্রুটফোর্স রিকুয়েস্ট ক্যানসেল করা।</p>
+    `
+  },
+  {
+    id: "nginx-22",
+    category: "Nginx",
+    difficulty: "Intermediate",
+    tags: ["Upstream", "Load Balancing", "Keepalive"],
+    question: "Nginx Upstream Block-এ keepalive সেটিংস ব্যাকএন্ড সকেট রিইউজে কীভাবে সাহায্য করে?",
+    answer: `
+<p><code>upstream backend { server 127.0.0.1:4000; keepalive 32; }</code> দিলে Nginx ব্যাকএন্ড Node.js প্রসেসের সাথে TCP সকেট কানেকশন রিইউজ করে ল্যাটেন্সি কমায়।</p>
+    `
+  },
+  {
+    id: "nginx-23",
+    category: "Nginx",
+    difficulty: "Intermediate",
+    tags: ["Caching", "proxy_cache", "CDN"],
+    question: "Nginx Microcaching (proxy_cache, proxy_cache_valid) দিয়ে ডায়নামিক API রেসপন্স ক্যাশ কীভাবে করবেন?",
+    answer: `
+<p><code>proxy_cache_path /var/cache/nginx keys_zone=my_cache:10m;</code> ডিক্লেয়ার করে এন্ডপয়েন্টে ১ সেকেন্ডের জন্য হলেও (Microcaching) ক্যাশ করলে সার্ভার RPS ১০ গুণ বাড়ে।</p>
+    `
+  },
+  {
+    id: "nginx-24",
+    category: "Nginx",
+    difficulty: "Advanced",
+    tags: ["Security", "Headers", "Hardening"],
+    question: "Nginx Server Hardening: X-Frame-Options, CSP, HSTS হেডার যোগ করা এবং Nginx Version লুকানো কীভাবে করবেন?",
+    answer: `
+<p><code>server_tokens off;</code> দিয়ে ভার্সন লুকানো। <code>add_header X-Frame-Options "SAMEORIGIN";</code> এবং <code>add_header Strict-Transport-Security "max-age=31536000";</code> যোগ করা।</p>
+    `
+  },
+  {
+    id: "nginx-25",
+    category: "Nginx",
+    difficulty: "Intermediate",
+    tags: ["Redirects", "301 vs 302", "Rewrite"],
+    question: "Nginx 301 Permanent Redirect vs 302 Temporary Redirect এবং rewrite directive-এর নিয়ম কী?",
+    answer: `
+<p><strong>301:</strong> ব্রাউজার ও এসইও সার্চ ইঞ্জিনকে স্থায়ী স্থানান্তরের মেসেজ দেয় (ব্রাউজারে ক্যাশ হয়)।</p><p><strong>302:</strong> সাময়িক স্থানান্তর। <code>rewrite ^/old/(.*)$ /new/$1 permanent;</code> ডিরেক্টিভ দিয়ে ইউআরএল পরিবর্তন করা।</p>
+    `
+  },
+  {
+    id: "nginx-26",
+    category: "Nginx",
+    difficulty: "Advanced",
+    tags: ["Gzip", "Brotli", "Static"],
+    question: "Nginx-এ Static File Gzip & Brotli Compression (gzip_static, brotli_static) কীভাবে কনফিগার করবেন?",
+    answer: `
+<p>বিল্ড টাইমেই <code>.gz</code> বা <code>.br</code> ফাইল বানিয়ে রাখলে <code>gzip_static on;</code> দিলে Nginx অন-দ্য-ফ্লাই CPU কমপ্রেশন ওভারহেড না রেখে সরাসরি প্রিসংকুচিত ফাইল রিড করে পাঠায়।</p>
+    `
+  },
+  {
+    id: "nginx-27",
+    category: "Nginx",
+    difficulty: "Intermediate",
+    tags: ["Worker", "worker_processes", "worker_connections"],
+    question: "Nginx worker_processes এবং worker_connections সেটিংস কীভাবে সর্বোচ্চ কনকারেন্সি গ্যারান্টি দেয়?",
+    answer: `
+<p><code>worker_processes auto;</code> (CPU কোরের সংখ্যার সমান) এবং <code>worker_connections 1024;</code> দিলে সর্বোচ্চ কনকারেন্ট সকেট হ্যান্ডলিং ক্যাপাসিটি হয় <code>worker_processes * worker_connections</code>।</p>
+    `
+  },
+  {
+    id: "nginx-28",
+    category: "Nginx",
+    difficulty: "Advanced",
+    tags: ["Security", "mTLS", "Client Certificate"],
+    question: "Nginx-এ Mutual TLS (mTLS) Client Certificate Authentication কীভাবে কনফিগার করবেন?",
+    answer: `
+<p><code>ssl_client_certificate /etc/nginx/certs/ca.crt;</code> এবং <code>ssl_verify_client on;</code> দিলে Nginx ক্লায়েন্টের নিজস্ব ভ্যালিড SSL সার্টিফিকেট ছাড়া কানেকশন ড্রপ করে।</p>
+    `
+  },
+  {
+    id: "nginx-29",
+    category: "Nginx",
+    difficulty: "Intermediate",
+    tags: ["Errors", "custom error_page", "Fallbacks"],
+    question: "Nginx-এ কাস্টম 404/50x Error Pages এবং @fallback Location Block কীভাবে সেটআপ করবেন?",
+    answer: `
+<p><code>error_page 500 502 503 504 /50x.html;</code> এবং <code>location = /50x.html { root /usr/share/nginx/html; }</code> দিয়ে ব্যাকএন্ড ডাউন থাকলে কাস্টম পেজ দেখানো।</p>
+    `
+  },
+  {
+    id: "nginx-30",
+    category: "Nginx",
+    difficulty: "Advanced",
+    tags: ["Proxy", "proxy_pass", "Trailing Slash"],
+    question: "Nginx proxy_pass-এ Trailing Slash (/)-এর ভূমিকা ও পার্থক্য কী?",
+    answer: `
+<p><code>proxy_pass http://backend;</code> দিলে পুরো অরিজিনাল ইউআরএল রিডাইরেক্ট করে। কিন্তু <code>proxy_pass http://backend/;</code> দিলে location প্রিফিক্স বাদ দিয়ে বাকি পাথ ব্যাকএন্ডে পাঠায়।</p>
+    `
+  },
+  {
+    id: "nginx-31",
+    category: "Nginx",
+    difficulty: "Intermediate",
+    tags: ["Security", "IP Blocking", "allow deny"],
+    question: "Nginx-এ allow এবং deny ডিরেক্টিভ দিয়ে IP Blacklisting / Whitelisting কীভাবে করবেন?",
+    answer: `
+<div class="code-box"><div class="code-header"><span>nginx</span><button class="copy-btn">Copy</button></div><pre><code>location /admin {
+  allow 192.168.1.10;
+  deny all;
+}</code></pre></div>
+    `
+  },
+  {
+    id: "nginx-32",
+    category: "Nginx",
+    difficulty: "Advanced",
+    tags: ["Stub Status", "Metrics", "Prometheus"],
+    question: "Nginx stub_status module দিয়ে অ্যাক্টিভ কানেকশন মেট্রিক্স ট্র্যাকিং কীভাবে করবেন?",
+    answer: `
+<p><code>location /nginx_status { stub_status; allow 127.0.0.1; deny all; }</code> দিলে Nginx active connections, accepts, handled, requests মেট্রিক্স প্রমোট করে।</p>
+    `
+  },
+  {
+    id: "nginx-33",
+    category: "Nginx",
+    difficulty: "Intermediate",
+    tags: ["Buffers", "proxy_buffer_size", "Tuning"],
+    question: "Nginx-এ proxy_buffer_size এবং proxy_buffers দিয়ে Response Buffering টিউন কীভাবে করবেন?",
+    answer: `
+<p>ব্যাকএন্ড থেকে বড় হেডার বা বাফার আসলে Nginx ডিস্কে বাফার ফাইল বানায়। <code>proxy_buffer_size 16k; proxy_buffers 4 32k;</code> বাড়িয়ে ইন-মেমোরি বাফারিং ফাস্ট করা যায়।</p>
+    `
+  },
+  {
+    id: "nginx-34",
+    category: "Nginx",
+    difficulty: "Advanced",
+    tags: ["Stream", "SNI Routing", "ssl_preread"],
+    question: "Nginx Stream Module-এ ssl_preread দিয়ে TLS SNI-এর ওপর ভিত্তি করে L4 ট্রাফিক রাউটিং কীভাবে করবেন?",
+    answer: `
+<p>SSL সার্টিফিকেট না খুলেই ইনকামিং প্যাকটের SNI (Server Name Indication) রিড করে Domain A এবং Domain B-কে আলাদা আলাদা পোর্ট/সার্ভারে L4 লেভেলে ফরওয়ার্ড করা।</p>
+    `
+  },
+  {
+    id: "nginx-35",
+    category: "Nginx",
+    difficulty: "Intermediate",
+    tags: ["Try Files", "SPA", "History API"],
+    question: "Single Page Application (React/Vue/Angular)-এর জন্য try_files $uri $uri/ /index.html; কেন বাধ্যতামূলক?",
+    answer: `
+<p>SPA-তে ক্লায়েন্ট সাইড রাউটিং থাকায় ব্রাউজারে রিলোড দিলে Nginx সেই ফিজিক্যাল ফাইল না পেয়ে 404 দেয়। <code>try_files</code> ফাইল না পেলে ডিফল্ট <code>index.html</code> রেন্ডার করতে সাহায্য করে।</p>
+    `
+  },
+  {
+    id: "nginx-36",
+    category: "Nginx",
+    difficulty: "Advanced",
+    tags: ["High Availability", "Keepalived", "VIP"],
+    question: "Keepalived এবং Virtual IP (VIP) ব্যবহার করে Nginx High Availability (Active-Passive) কীভাবে সেটআপ করবেন?",
+    answer: `
+<p>২টি Nginx সার্ভারের মাঝে VRRP প্রোটোকল দিয়ে ১টি Virtual IP শেয়ার করা। Primary Nginx ক্র্যাশ করলে ১ সেকেন্ডের কম সময়ে Secondary Nginx ওই Virtual IP দখল করে ট্রাফিক সামলায়।</p>
+    `
+  },
+  {
+    id: "nginx-37",
+    category: "Nginx",
+    difficulty: "Intermediate",
+    tags: ["Timeouts", "keepalive_timeout", "client_header_timeout"],
+    question: "Nginx-এ keepalive_timeout এবং client_body_timeout সেটিংস কীভাবে স্লো-রিসোর্স অ্যাটাক প্রতিরোধ করে?",
+    answer: `
+<p><code>keepalive_timeout 65;</code> এবং <code>client_body_timeout 12;</code> দিলে ধীরগতির ক্ষতিকর ক্লায়েন্ট যদি টাইমআউটের মধ্যে বোডি বা হেডার না পাঠায়, তবে Nginx সকেট অটোমেটিক ড্রপ করে।</p>
+    `
+  },
+  {
+    id: "nginx-38",
+    category: "Nginx",
+    difficulty: "Advanced",
+    tags: ["Module", "Dynamic Modules", "so"],
+    question: "Nginx Dynamic Modules (.so) কীভাবে লোড ও মেইনটেইন করা হয়?",
+    answer: `
+<p>Nginx Recompile ছাড়াই <code>load_module modules/ngx_http_geoip2_module.so;</code> মেইন কনফিগ ফাইলের একদম শুরুতে বসিয়ে নতুন নেটিভ মডিউল এক্সটেন্ড করা।</p>
+    `
+  },
+  {
+    id: "nginx-39",
+    category: "Nginx",
+    difficulty: "Intermediate",
+    tags: ["Headers", "add_header", "proxy_hide_header"],
+    question: "Nginx proxy_hide_header এবং add_header-এর সিকিউরিটি ব্যবহার কী?",
+    answer: `
+<p>ব্যাকএন্ড থেকে আসা <code>Server: Express</code> বা <code>X-Powered-By</code> হেডার <code>proxy_hide_header</code> দিয়ে রিমুভ করা এবং সিকিউর হেডারগুলো <code>add_header</code> দিয়ে ইম্পোজ করা।</p>
+    `
+  },
+  {
+    id: "nginx-40",
+    category: "Nginx",
+    difficulty: "Advanced",
+    tags: ["Caching", "proxy_cache_use_stale", "Resilience"],
+    question: "Nginx proxy_cache_use_stale error timeout-এর সুবিধা কী?",
+    answer: `
+<p>যদি ব্যাকএন্ড প্রসেস (Node.js/DB) হঠাৎ ডাউন (502/504) হয়ে যায়, তবে Nginx এরর না দেখিয়ে আগের ক্যাশ করা পুরোনো বা বাসি (Stale) কন্টেন্ট ক্লায়েন্টকে সার্ভ করে সাইট সচল রাখে।</p>
+    `
+  },
+  {
+    id: "nginx-41",
+    category: "Nginx",
+    difficulty: "Intermediate",
+    tags: ["Logs", "syslog", "Remote Logging"],
+    question: "Nginx Access Log সরাসরি Remote Syslog সার্ভারে কীভাবে ফরওয়ার্ড করবেন?",
+    answer: `
+<p><code>access_log syslog:server=10.0.0.1:514,facility=local7,tag=nginx,severity=info json_analytics;</code> কনফিগার করে লোকাল ডিস্কে ফাইল ডাম্প না করে সরাসরি রিমোট লগার সার্ভারে রিডিক্ট করা।</p>
+    `
+  },
+  {
+    id: "nginx-42",
+    category: "Nginx",
+    difficulty: "Advanced",
+    tags: ["Performance", "sendfile", "tcp_nopush"],
+    question: "Nginx Performance Tuning: sendfile, tcp_nopush, এবং tcp_nodelay সেটিংস কী কাজ করে?",
+    answer: `
+<p><strong>sendfile:</strong> ওএস কার্নেল স্পেস থেকে সরাসরি নেটওয়ার্ক সকেটে ফাইল পাঠায় (Zero-copy)।</p><p><strong>tcp_nopush:</strong> HTTP হেডার ও ফাইলের শুরু ১টি TCP প্যাকেটে পাঠায়।</p><p><strong>tcp_nodelay:</strong> ছোট প্যাকেটে Nagle's Algorithm ডিজেবল করে ল্যাটেন্সি কমায়।</p>
+    `
+  },
+  {
+    id: "nginx-43",
+    category: "Nginx",
+    difficulty: "Intermediate",
+    tags: ["Auth", "auth_basic", "htpasswd"],
+    question: "Nginx auth_basic এবং .htpasswd ফাইল দিয়ে কীভাবে সিম্পল পাসওয়ার্ড প্রটেকশন দেবেন?",
+    answer: `
+<div class="code-box"><div class="code-header"><span>nginx</span><button class="copy-btn">Copy</button></div><pre><code>location /admin {
+  auth_basic "Restricted Area";
+  auth_basic_user_file /etc/nginx/.htpasswd;
+}</code></pre></div>
+    `
+  },
+  {
+    id: "nginx-44",
+    category: "Nginx",
+    difficulty: "Advanced",
+    tags: ["Upstream", "max_fails", "fail_timeout"],
+    question: "Nginx Upstream-এ max_fails এবং fail_timeout দিয়ে স্বাস্থ্যহীন ব্যাকএন্ড নোড ড্রপ কীভাবে করবেন?",
+    answer: `
+<p><code>server 10.0.0.1:4000 max_fails=3 fail_timeout=30s;</code> দিলে টানা ৩টি কলে ব্যর্থ হলে Nginx পরবর্তী ৩০ সেকেন্ডের জন্য ওই নোডে ট্রাফিক পাঠাবে না।</p>
+    `
+  },
+  {
+    id: "nginx-45",
+    category: "Nginx",
+    difficulty: "Intermediate",
+    tags: ["CORS", "Multiple Origins", "map directive"],
+    question: "Nginx map directive ব্যবহার করে ডায়নামিক Multiple Origin CORS কীভাবে কনফিগার করবেন?",
+    answer: `
+<div class="code-box"><div class="code-header"><span>nginx</span><button class="copy-btn">Copy</button></div><pre><code>map $http_origin $cors_origin {
+  default "";
+  "~^https?://(localhost|example\\.com)$" $http_origin;
+}
+server {
+  add_header 'Access-Control-Allow-Origin' $cors_origin;
+}</code></pre></div>
+    `
+  },
+  {
+    id: "nginx-46",
+    category: "Nginx",
+    difficulty: "Advanced",
+    tags: ["Security", "DoS", "limit_conn"],
+    question: "Nginx limit_conn_zone এবং limit_conn দিয়ে পার-আইপি সকেট কানেকশন লিমিট কীভাবে করবেন?",
+    answer: `
+<p><code>limit_conn_zone $binary_remote_addr zone=addr:10m;</code> সেট করে <code>limit_conn addr 20;</code> বসালে ১টি IP থেকে সর্বোচ্চ ২০টি সকেট কানেকশন অনুমোদিত হয়।</p>
+    `
+  },
+  {
+    id: "nginx-47",
+    category: "Nginx",
+    difficulty: "Intermediate",
+    tags: ["Geo", "GeoIP2", "MaxMind"],
+    question: "Nginx-এ geo directive দিয়ে CIDR IP Block অনুযায়ী কাস্টম ভ্যারিয়েবল সেট কীভাবে করবেন?",
+    answer: `
+<p><code>geo $is_internal { default 0; 10.0.0.0/8 1; 192.168.0.0/16 1; }</code> দিয়ে নিজস্ব ইন্টারনাল আইপির ক্ষেত্রে কাস্টম রুলস বসানো।</p>
+    `
+  },
+  {
+    id: "nginx-48",
+    category: "Nginx",
+    difficulty: "Advanced",
+    tags: ["HTTP2", "Server Push", "http2_push"],
+    question: "Nginx HTTP/2 Server Push (http2_push) কনফিগারেশন কীভাবে কাজ করে?",
+    answer: `
+<p><code>location / { http2_push /css/main.css; http2_push /js/app.js; }</code> দিলে HTML পেজ ক্লায়েন্টে যাওয়ার সাথে সাথেই সিএসএস এবং জেএস ফাইলও একসাথে পুশ করা হয়।</p>
+    `
+  },
+  {
+    id: "nginx-49",
+    category: "Nginx",
+    difficulty: "Intermediate",
+    tags: ["Config", "include directive", "conf.d"],
+    question: "Nginx include directive দিয়ে কনফিগারেশন মডুলারিটি বজায় রাখা কেন জরুরি?",
+    answer: `
+<p><code>include /etc/nginx/conf.d/*.conf;</code> এবং <code>include /etc/nginx/sites-enabled/*;</code> দিয়ে শত শত ওয়েবসাইটের কনফিগ ফাইল আলাদা ও পরিষ্কার রাখা।</p>
+    `
+  },
+  {
+    id: "nginx-50",
+    category: "Nginx",
+    difficulty: "Advanced",
+    tags: ["Architecture", "Master-Worker", "Shared Memory"],
+    question: "Nginx Architecture: Master Process, Worker Processes এবং Shared Memory (Slab Allocator) কীভাবে কাজ করে?",
+    answer: `
+<p>Master Process পারমিশন নেওয়া, কনফিগ রিড করা ও রিইভেন্ট চালায়। non-blocking Worker Process সমূহ আসল নেটওয়ার্ক ট্রান্সফার পরিচালনা করে এবং Shared Memory (Slab) দিয়ে ওয়ার্কারগুলোর মধ্যে রেট-লিমিট ও ক্যাশ ডাটা শেয়ার করে।</p>
+    `
   }
 ];

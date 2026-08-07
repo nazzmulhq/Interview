@@ -718,5 +718,227 @@ customElements.define('my-button', MyButton);</code></pre>
     answer: `
 <p>Event Loop অগ্রাধিকারের ক্রম: Synchronous Code -> Microtask Queue (Promise, queueMicrotask) -> Render Queue (requestAnimationFrame) -> Macrotask Queue (setTimeout, setInterval)।</p>
     `
+  },
+  {
+    id: "js-30",
+    category: "JavaScript",
+    difficulty: "Advanced",
+    tags: ["Performance", "Memory", "Garbage Collection"],
+    question: "JavaScript Garbage Collection Algorithms (Mark-and-Sweep, Generational GC, Scavenge vs Mark-Sweep-Compact) কীভাবে কাজ করে?",
+    answer: `
+<p>V8 ইঞ্জিনে মেমোরি ২ ভাগে বিভক্ত: <strong>Young Generation</strong> (Nursery & Intermediate) এবং <strong>Old Generation</strong>।</p><ul><li><strong>Scavenge Algorithm:</strong> ছোট ও নতুন অবজেক্ট দ্রুত প্রসেস করে (Cheney's Copying Algorithm)।</li><li><strong>Mark-Sweep-Compact:</strong> পুরানো মেমোরি লিক পরিষ্কার করতে পুরো অবজেক্ট গ্রাফ ট্রাভার্স করে অব্যবহৃত পয়েন্টার ডিসকার্ড করে।</li></ul>
+    `
+  },
+  {
+    id: "js-31",
+    category: "JavaScript",
+    difficulty: "Advanced",
+    tags: ["Async", "Iterators", "Generators"],
+    question: "Async Iterators এবং Async Generators (Symbol.asyncIterator, for await...of) কীভাবে স্ট্রিম প্রসেস করে?",
+    answer: `
+<p><code>Symbol.asyncIterator</code> মেথড একটি অবজেক্ট রিটার্ন করে যা <code>next()</code> কল করলে প্রমিস (Promise) রিটার্ন করে। এটি নেটওয়ার্ক স্ট্রিম বা বড় ডাটা ফাইল চাংক হিসেবে প্রসেস করতে সাহায্য করে।</p><div class="code-box"><div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div><pre><code>async function* fetchPages() {
+  yield await fetch('/page1').then(r => r.json());
+  yield await fetch('/page2').then(r => r.json());
+}
+for await (const page of fetchPages()) { console.log(page); }</code></pre></div>
+    `
+  },
+  {
+    id: "js-32",
+    category: "JavaScript",
+    difficulty: "Advanced",
+    tags: ["Metaprogramming", "Proxy", "Reflect"],
+    question: "JavaScript Proxy and Reflect API দিয়ে Validation, Data Binding এবং Negative Array Indexing কীভাবে বাস্তবায়ন করবেন?",
+    answer: `
+<p><code>Proxy</code> অবজেক্টের মূল আচরণ (Get, Set, Delete) ইন্টারসেপ্ট করে। <code>Reflect</code> অবজেক্টের ডিফল্ট মেথড সেফলি বজায় রাখে।</p><div class="code-box"><div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div><pre><code>const arr = [10, 20, 30];
+const proxyArr = new Proxy(arr, {
+  get(target, prop) {
+    const index = Number(prop);
+    if (index < 0) return target[target.length + index];
+    return Reflect.get(...arguments);
+  }
+});
+console.log(proxyArr[-1]); // 30</code></pre></div>
+    `
+  },
+  {
+    id: "js-33",
+    category: "JavaScript",
+    difficulty: "Advanced",
+    tags: ["WebAssembly", "Wasm", "Performance"],
+    question: "WebAssembly (Wasm) কী এবং JavaScript-এর সাথে WebAssembly.instantiateStreaming কীভাবে কাজ করে?",
+    answer: `
+<p>WebAssembly হলো একটি বাইনারি প্রোটোকল যা C/C++/Rust কোড ব্রাউজারে প্রায় নেটিভ স্পিডে এক্সিকিউট করতে সাহায্য করে। <code>WebAssembly.instantiateStreaming(fetch('module.wasm'), importObject)</code> দিয়ে সরাসরি স্ট্রিম পার্স ও মডিউল রান করা যায়।</p>
+    `
+  },
+  {
+    id: "js-34",
+    category: "JavaScript",
+    difficulty: "Intermediate",
+    tags: ["Data Structures", "StructuredClone", "Deep Copy"],
+    question: "structuredClone() API vs JSON.parse(JSON.stringify()) vs Object.assign() — Deep Cloning-এর পার্থক্য কী?",
+    answer: `
+<p><strong>Object.assign:</strong> কেবল ১ম লেভেলের Shallow Copy করে।</p><p><strong>JSON.stringify:</strong> Deep Copy করতে পারলেও Date, RegExp, Map, Set, undefined এবং Circular Reference সাপোর্ট করে না।</p><p><strong>structuredClone():</strong> নেটিভ HTML5 স্পেক্স যা Circular Reference, Map, Set, ArrayBuffer-সহ নির্ভুল Deep Copy করে।</p>
+    `
+  },
+  {
+    id: "js-35",
+    category: "JavaScript",
+    difficulty: "Advanced",
+    tags: ["Web APIs", "Web Workers", "SharedArrayBuffer"],
+    question: "Web Workers এবং SharedArrayBuffer / Atomics দিয়ে Multi-threaded JavaScript প্রোগ্রামিং কীভাবে করবেন?",
+    answer: `
+<p>Web Worker প্রধান UI থ্রেডকে ব্লক না করে ব্যাকগ্রাউন্ড থ্রেডে কাজ চালায়। <code>SharedArrayBuffer</code> একাধিক থ্রেডের মধ্যে মেমোরি শেয়ার করে এবং <code>Atomics</code> থ্রেড সেফটি ও Race Condition প্রতিরোধ গ্যারান্টি দেয়।</p>
+    `
+  },
+  {
+    id: "js-36",
+    category: "JavaScript",
+    difficulty: "Intermediate",
+    tags: ["Web APIs", "Service Workers", "PWA"],
+    question: "Service Workers Life Cycle (Install, Activate, Fetch) এবং Offline Cache Strategies কী?",
+    answer: `
+<p>Service Worker ব্রাউজার ব্যাকগ্রাউন্ডে নেটওয়ার্ক রিকুয়েস্ট ইন্টারসেপ্ট করে proxy হিসেবে কাজ করে।</p><ul><li><strong>Cache First:</strong> আগে ক্যাশে খোঁজে, না পেলে নেটওয়ার্কে যায়।</li><li><strong>Network First:</strong> আগে লাইভ নেটওয়ার্কে ট্রাই করে, অফলাইন হলে ক্যাশ কন্টেন্ট পাঠায়।</li></ul>
+    `
+  },
+  {
+    id: "js-37",
+    category: "JavaScript",
+    difficulty: "Advanced",
+    tags: ["Performance", "Tail Call Optimization", "TCO"],
+    question: "Tail Call Optimization (TCO) কী এবং রিকার্সিভ ফাংশনে Stack Overflow কীভাবে প্রতিরোধ করে?",
+    answer: `
+<p>ফাংশনের শেষ কাজ যদি সরাসরি রিকার্সিভ কল হয় (e.g. <code>return fact(n - 1, acc * n)</code>), তবে ইঞ্জিন আগের Stack Frame মুছে নতুন কল রিইউজ করে মেমোরি বাঁচায়।</p>
+    `
+  },
+  {
+    id: "js-38",
+    category: "JavaScript",
+    difficulty: "Intermediate",
+    tags: ["Features", "Optional Chaining", "Nullish Coalescing"],
+    question: "Optional Chaining (?.) এবং Nullish Coalescing Operator (??) vs OR Operator (||) এর পার্থক্য কী?",
+    answer: `
+<p><code>?.</code> এরর না খেয়ে শর্টসার্কিট সুরক্ষা দেয়।</p><p><code>||</code> অনলি Falsy মান (0, '', false, null, undefined) চেক করে, কিন্তু <code>??</code> কেবল <strong>null</strong> এবং <strong>undefined</strong> চেক করে (ফলে 0 বা false মান সঠিকভাবে বিবেচিত হয়)।</p>
+    `
+  },
+  {
+    id: "js-39",
+    category: "JavaScript",
+    difficulty: "Intermediate",
+    tags: ["Features", "BigInt", "Precision"],
+    question: "BigInt Data Type কী এবং Number.MAX_SAFE_INTEGER (2^53 - 1) এর চেয়ে বড় সংখ্যা কীভাবে প্রসেস করবেন?",
+    answer: `
+<p>JavaScript-এর <code>Number</code> টাইপ 64-bit IEEE 754 অনুসরণ করায় (2^53 - 1) এর চেয়ে বড় সংখ্যায় প্রেসিকেশন হারায়। <code>BigInt(9007199254740991n)</code> সংখ্যা শেষে <code>n</code> যোগ করে অসীম দৈর্ঘ্যের পূর্ণসংখ্যা হিসাব রাখতে সাহায্য করে।</p>
+    `
+  },
+  {
+    id: "js-40",
+    category: "JavaScript",
+    difficulty: "Intermediate",
+    tags: ["Features", "Array Methods", "flat"],
+    question: "Array.prototype.flat() এবং Array.prototype.flatMap() এর বাস্তবমুখী ব্যবহার কী?",
+    answer: `
+<p><code>flat(depth)</code> নেস্টেড অ্যারেকে সমতল করে। <code>flatMap()</code> একই সাথে <code>map()</code> এবং <code>flat(1)</code> চালায় যা ডায়নামিক অ্যারে মেপিং ফাস্ট করে।</p>
+    `
+  },
+  {
+    id: "js-41",
+    category: "JavaScript",
+    difficulty: "Intermediate",
+    tags: ["Internationalization", "Intl API", "Formatting"],
+    question: "Intl API (NumberFormat, DateTimeFormat, Collator) দিয়ে লোকাল মুদ্রা ও তারিখ ফরম্যাটিং কীভাবে করবেন?",
+    answer: `
+<p><code>new Intl.NumberFormat('bn-BD', { style: 'currency', currency: 'BDT' }).format(1500)</code> দিলে স্বয়ংক্রিয়ভাবে '৳১,৫০০.০০' ফরম্যাট করে আউটপুট দেয়।</p>
+    `
+  },
+  {
+    id: "js-42",
+    category: "JavaScript",
+    difficulty: "Advanced",
+    tags: ["Web Components", "Custom Elements", "Shadow DOM"],
+    question: "Web Components Architecture: Custom Elements, Shadow DOM, এবং HTML Templates কী?",
+    answer: `
+<p>কোনো ফ্রেমওয়ার্ক ছাড়া নেটিভ রিইউজেবল এইচটিএমএল ট্যাগ বানানো। <strong>Shadow DOM</strong> স্টাইল ও স্কোপ সম্পূর্ণ আইসোলেটেড রাখে যাতে বাইরের সিএসএস ট্যাগ ক্ষতিগ্রস্ত না করে।</p>
+    `
+  },
+  {
+    id: "js-43",
+    category: "JavaScript",
+    difficulty: "Intermediate",
+    tags: ["Objects", "Object.freeze", "Object.seal"],
+    question: "Object.freeze() vs Object.seal() vs Object.preventExtensions()-এর পার্থক্য কী?",
+    answer: `
+<p><strong>preventExtensions:</strong> নতুন প্রোপার্টি অ্যাড করা বন্ধ করে।</p><p><strong>seal:</strong> অ্যাড ও ডিলিট বন্ধ করে, তবে বিদ্যমান মান পরিবর্তন করা যায়।</p><p><strong>freeze:</strong> অ্যাড, ডিলিট এবং ভ্যালু চেঞ্জ সবই বন্ধ করে সম্পূর্ণ ইমিউটেবল বানায়।</p>
+    `
+  },
+  {
+    id: "js-44",
+    category: "JavaScript",
+    difficulty: "Advanced",
+    tags: ["Security", "XSS", "DOM Purify"],
+    question: "Cross-Site Scripting (XSS) অ্যাটাক প্রতিরোধে innerHTML-এর বদলে innerText / textContent বা Sanitizer API কেন ব্যবহার করা উচিত?",
+    answer: `
+<p><code>innerHTML</code> ইউজার ইনপুটে থাকা ক্ষতিকারক <code>&lt;script&gt;</code> ট্যাগ সরাসরি রান করিয়ে দেয়। <code>textContent</code> প্লেন টেক্সট হিসেবে এনকোড করে এক্সিকিউশন প্রতিরোধ করে।</p>
+    `
+  },
+  {
+    id: "js-45",
+    category: "JavaScript",
+    difficulty: "Intermediate",
+    tags: ["Web APIs", "Intersection Observer", "Lazy Loading"],
+    question: "Intersection Observer API দিয়ে ইমেজ লেজি লোডিং এবং ইনফিনিট স্ক্রলিং কীভাবে বাস্তবায়িত হয়?",
+    answer: `
+<p>স্ক্রোল ইভেন্ট লিসেনারের বদলে Browser-এর নিজস্ব থ্রেড দিয়ে কোনো এলিমেন্ট ভিউপোর্টে (Viewport) দৃশ্যমান হচ্ছে কিনা তা ০% পারফরম্যান্স ল্যাগ ছাড়াই ট্র্যাকিং করা।</p>
+    `
+  },
+  {
+    id: "js-46",
+    category: "JavaScript",
+    difficulty: "Advanced",
+    tags: ["Web APIs", "Mutation Observer", "DOM"],
+    question: "MutationObserver API দিয়ে DOM সাব-ট্রি পরিবর্তন বা Attribute Modification কীভাবে ট্র্যাক করবেন?",
+    answer: `
+<p>ডি ও এম (DOM)-এ কোনো নতুন চাইল্ড নোড যুক্ত হলে বা অ্যাট্রিবিউট চেঞ্জ হলে স্বয়ংক্রিয় অ্যাসিনক্রোনাস কলব্যাক ফায়ার করা।</p>
+    `
+  },
+  {
+    id: "js-47",
+    category: "JavaScript",
+    difficulty: "Intermediate",
+    tags: ["Web APIs", "Resize Observer", "Responsive"],
+    question: "ResizeObserver API দিয়ে এলিমেন্টের নিজস্ব সাইজ পরিবর্তন কীভাবে ডিটেক্ট করবেন?",
+    answer: `
+<p>Window Resize Event না ডেকে নির্দিষ্ট কোনো ডাইনামিক Div বা কন্টেইনারের সাইজ পরিবর্তন রিয়েল-টাইমে ডিটেক্ট করা।</p>
+    `
+  },
+  {
+    id: "js-48",
+    category: "JavaScript",
+    difficulty: "Advanced",
+    tags: ["Concurrency", "Promise.allSettled", "Promise.any"],
+    question: "Promise Combinators: Promise.all vs Promise.allSettled vs Promise.race vs Promise.any-এর সূক্ষ্ম পার্থক্য কী?",
+    answer: `
+<p><strong>Promise.all:</strong> সব প্রমিস সফল হতে হবে, ১টি এরর হলেই রেসপন্স রিজেক্টড।</p><p><strong>Promise.allSettled:</strong> এরর বা সাকসেস যা-ই হোক সব প্রমিসের রেজাল্ট অবজেক্ট রিটার্ন করে।</p><p><strong>Promise.race:</strong> সবার আগে ফিনিশ হওয়া প্রমিস (সাকসেস বা ফেল) দেয়।</p><p><strong>Promise.any:</strong> সবার আগে প্রথম <strong>সাকসেসফুল</strong> হওয়া প্রমিসটি দেয়।</p>
+    `
+  },
+  {
+    id: "js-49",
+    category: "JavaScript",
+    difficulty: "Intermediate",
+    tags: ["Modules", "ESM vs CJS", "Dynamic Import"],
+    question: "ES Modules (import/export) vs CommonJS (require/module.exports) এবং Dynamic import() কেন প্রয়োজন?",
+    answer: `
+<p>CJS হলো সিঙ্ক্রোনাস ও রানটাইম লোডিং। ESM হলো অ্যাসিনক্রোনাস ও কম্পাইল-টাইম স্ট্যাটিক বিশ্লেষণধর্মী। <code>import('module.js')</code> অন-ডিমান্ড প্রমিস ভিত্তিক কোড-স্প্লিটিং অফার করে।</p>
+    `
+  },
+  {
+    id: "js-50",
+    category: "JavaScript",
+    difficulty: "Advanced",
+    tags: ["Security", "Prototype Pollution", "Object.create"],
+    question: "Prototype Pollution Attack কী এবং Object.create(null) দিয়ে এটি কীভাবে আটকাবেন?",
+    answer: `
+<p>অ্যাটাকার ডাইনামিক <code>__proto__</code> কি ইনজেক্ট করে গ্লোবাল <code>Object.prototype</code> পরিবর্তন করে দিতে পারে। <code>Object.create(null)</code> দিলে জিরো প্রোটোটাইপ অবজেক্ট তৈরি হয় যা নিরাপদ।</p>
+    `
   }
 ];

@@ -292,5 +292,325 @@ run();</code></pre>
     answer: `
 <p>RabbitMQ-তে <code>prefetch count</code> সেট করে এবং Kafka-তে <code>pause()/resume()</code> দিয়ে কনজিউমার ফ্লো কন্ট্রোল করা হয়।</p>
     `
+  },
+  {
+    id: "mq-19",
+    category: "RabbitMQ & Kafka",
+    difficulty: "Advanced",
+    tags: ["RabbitMQ", "Exchanges", "Direct/Topic/Fanout/Headers"],
+    question: "RabbitMQ Exchange Types: Direct, Fanout, Topic, Headers Exchange-এর কাজের পার্থক্য কী?",
+    answer: `
+<p><strong>Direct:</strong> Exact Routing Key ম্যাচের মাধ্যমে কিউতে পাঠায়।</p><p><strong>Fanout:</strong> সব বাউন্ড কিউতে মেসেজ ব্রডকাস্ট করে (Routing key গুরুত্বহীন)।</p><p><strong>Topic:</strong> ওয়াইল্ডকার্ড (*.user.#) প্যাটার্ন ম্যাচে কিউতে পাঠায়।</p><p><strong>Headers:</strong> Routing key-র বদলে HTTP/Message Header Attributes মেলেনো।</p>
+    `
+  },
+  {
+    id: "mq-20",
+    category: "RabbitMQ & Kafka",
+    difficulty: "Advanced",
+    tags: ["Kafka", "Partitions", "Consumer Groups"],
+    question: "Kafka Topic, Partition, Segment, Offset এবং Consumer Group Scale-Out Architecture কীভাবে কাজ করে?",
+    answer: `
+<p>Topic একাধিক Partition-এ বিভক্ত থাকে। Consumer Group-এর প্রতিটি কনজিউমার নির্দিষ্ট অ্যাম্প্লিটিউডে পার্টিশন রিড করে। কনজিউমার সংখ্যা পার্টিশনের চেয়ে বেশি হলে অতিরিক্ত কনজিউমারগুলো আইডল বসে থাকে।</p>
+    `
+  },
+  {
+    id: "mq-21",
+    category: "RabbitMQ & Kafka",
+    difficulty: "Advanced",
+    tags: ["RabbitMQ", "DLX", "Dead Letter Exchange"],
+    question: "RabbitMQ Dead Letter Exchange (DLX) এবং Dead Letter Queue (DLQ) কীভাবে ফেলড মেসেজ প্রসেস করে?",
+    answer: `
+<p>মেসেজ Reject (basic.nack/basic.reject with requeue=false) হলে বা TTL এক্সপায়ার করলে বা কিউ সাইজ পূর্ণ হলে RabbitMQ স্বয়ংক্রিয়ভাবে মেসেজটি DLX-এ ফরওয়ার্ড করে আলাদা DLQ-তে ডেবাগিং বা ম্যানুয়াল রিভিউয়ের জন্য জমা করে।</p>
+    `
+  },
+  {
+    id: "mq-22",
+    category: "RabbitMQ & Kafka",
+    difficulty: "Advanced",
+    tags: ["Kafka", "Producer", "acks"],
+    question: "Kafka Producer Acknowledgments (acks=0, acks=1, acks=all / -1) এবং min.insync.replicas-এর নিরাপত্তা ভূমিকা কী?",
+    answer: `
+<p><strong>acks=0:</strong> নো কনফার্মেশন (দ্রুত, কিন্তু মেসেজ লসের ঝুঁকি)।</p><p><strong>acks=1:</strong> কেবল Leader Partition রাইট সিঙ্ক করলে কনফার্মেশন দেয়।</p><p><strong>acks=all (-1):</strong> Leader এবং সকল min.insync.replicas পার্টিশন সিঙ্ক শেষ করার পর নিশ্চিত কনফার্মেশন দেয় (জিরো ডাটা লস)।</p>
+    `
+  },
+  {
+    id: "mq-23",
+    category: "RabbitMQ & Kafka",
+    difficulty: "Intermediate",
+    tags: ["Message Delivery", "Guarantees", "At-least-once"],
+    question: "Message Delivery Guarantees: At-Most-Once, At-Least-Once, এবং Exactly-Once Semantics কী?",
+    answer: `
+<p><strong>At-Most-Once:</strong> মেসেজ জিরো বা সর্বোচ্চ ১ বার যাবে (মেসেজ লস হতে পারে, ডুপ্লিকেট হবে না)।</p><p><strong>At-Least-Once:</strong> মেসেজ অন্তত ১ বার পৌঁছাবে (মেসেজ লস হবে না, তবে ডুপ্লিকেট হতে পারে)।</p><p><strong>Exactly-Once:</strong> মেসেজ হুবহু ১ বারই পৌছানো গ্যারান্টি দেওয়া (মেসেজ আইডি ডিডুপ্লিকেশনের মাধ্যমে)।</p>
+    `
+  },
+  {
+    id: "mq-24",
+    category: "RabbitMQ & Kafka",
+    difficulty: "Advanced",
+    tags: ["Kafka", "Offset Commit", "auto.commit"],
+    question: "Kafka Manual Offset Commit (commitSync vs commitAsync) vs Auto Commit (enable.auto.commit) কী?",
+    answer: `
+<p>Auto Commit অন থাকলে নির্ধারিত সময় পর পর offset স্বয়ংক্রিয়ভাবে সেভ হয় (প্রসেসিং ফেইল করলে ডেটা লস হতে পারে)। Manual Commit প্রসেসিং সফলভাবে শেষ হওয়ার পর commitSync() বা commitAsync() করার পূর্ণ স্বাধিকার দেয়।</p>
+    `
+  },
+  {
+    id: "mq-25",
+    category: "RabbitMQ & Kafka",
+    difficulty: "Intermediate",
+    tags: ["RabbitMQ", "Message Acknowledgments", "basic.ack"],
+    question: "RabbitMQ Message Acknowledgments (autoAck vs manualAck) এবং Channel Prefetch (QoS) কী?",
+    answer: `
+<p><code>autoAck=true</code> দিলে মেসেজ সকেটে যাওয়ার সাথে সাথেই কিউ থেকে ড্রপ করে দেয়। <code>manualAck</code> দিলে কনজিউমার <code>channel.ack(message)</code> না পাঠানো পর্যন্ত কিউতে ধরে রাখে। <code>prefetch(10)</code> দিলে কনজিউমার একসাথে সর্বোচ্চ ১০টি মেসেজের বেশি একসাথে লোড করে মেমোরি ক্র্যাশ করায় না।</p>
+    `
+  },
+  {
+    id: "mq-26",
+    category: "RabbitMQ & Kafka",
+    difficulty: "Advanced",
+    tags: ["Kafka", "Log Retention", "Retention Policy"],
+    question: "Kafka Log Retention Policies (retention.ms, retention.bytes) এবং Log Cleanup (delete vs compact) কী?",
+    answer: `
+<p><strong>retention.ms:</strong> নির্দিষ্ট সময় (e.g. 7 days) পার হলে পুরোনো ফাইল সেগমেন্ট ডিলিট করা।</p><p><strong>retention.bytes:</strong> নির্দিষ্ট সাইজ পার হলে সেগমেন্ট ডিলিট করা।</p><p><strong>compact:</strong> কেবল সর্বশেষ ক্যালিব্রেটেড ভ্যালু বা কি ধরে রাখা।</p>
+    `
+  },
+  {
+    id: "mq-27",
+    category: "RabbitMQ & Kafka",
+    difficulty: "Intermediate",
+    tags: ["Message Ordering", "Partitioning", "Keys"],
+    question: "Kafka-তে Message Strict Ordering কীভাবে বজায় রাখবেন?",
+    answer: `
+<p>Kafka কেবল একই Partition-এর ভেতরে মেসেজ সিকুয়েন্স অর্ডার গ্যারান্টি দেয়। তাই নির্দিষ্ট ইউজারের সব মেসেজ একই পার্টিশনে পাঠাতে মেসেজে ইউনিক Message Key (e.g. userId) ব্যবহার করতে হয়।</p>
+    `
+  },
+  {
+    id: "mq-28",
+    category: "RabbitMQ & Kafka",
+    difficulty: "Advanced",
+    tags: ["RabbitMQ", "Clustering", "Mirrored Queues"],
+    question: "RabbitMQ Clustering, Mirrored Queues এবং Quorum Queues (Raft) এর প্রধান পার্থক্য কী?",
+    answer: `
+<p>Mirrored Queues পুরোনো মাস্টার-স্লেভ স্টাইলে সব ক্লাস্টার নোডে মেসেজ কপি করত। নতুন Quorum Queues Raft Consensus Algorithm মেনে শক্তিশালী হাই-অ্যাভেইলেবিলিটি দেয়।</p>
+    `
+  },
+  {
+    id: "mq-29",
+    category: "RabbitMQ & Kafka",
+    difficulty: "Intermediate",
+    tags: ["Kafka", "Controller Node", "KRaft"],
+    question: "Kafka Metadata Management: ZooKeeper vs KRaft (Kafka Raft Metadata Mode) কী?",
+    answer: `
+<p>পুরোনো কাফকাতে ক্লাস্টার মেটাডাটা ও লিডার ইলেকশনের জন্য আলাদা ZooKeeper লাগত। আধুনিক Kafka (v3.3+) ZooKeeper রিমুভ করে নেটিভ KRaft প্রোটোকল দিয়ে স্বয়ংসম্পূর্ণভাবে ক্লাস্টার মেটাডাটা পরিচালনা করে।</p>
+    `
+  },
+  {
+    id: "mq-30",
+    category: "RabbitMQ & Kafka",
+    difficulty: "Advanced",
+    tags: ["RabbitMQ", "Message TTL", "Queue TTL"],
+    question: "RabbitMQ Message TTL vs Queue Expiration TTL কীভাবে সেট করবেন?",
+    answer: `
+<p><code>x-message-ttl</code> কিউতে পাঠানো প্রতিটি বার্তার জন্য জীবনকাল ডিফাইন করে। <code>x-expires</code> নির্দিষ্ট সময় সম্পূর্ণ অব্যবহৃত ও আইডল থাকলে পুরো কিউ ডিলিট করে দেয়।</p>
+    `
+  },
+  {
+    id: "mq-31",
+    category: "RabbitMQ & Kafka",
+    difficulty: "Intermediate",
+    tags: ["Kafka", "Producer", "Partitioner"],
+    question: "Kafka Producer Custom Partitioner কীভাবে নির্দিষ্ট পার্টিশনে ট্রাফিক পাঠায়?",
+    answer: `
+<p>Default Partitioner মেসেজ Key-এর murmur2(key) % numPartitions ধরে পার্টিশন ডিক্লেয়ার করে। Key না থাকলে Sticky Partitioner দিয়ে ব্যাচ আকারে পাঠায়।</p>
+    `
+  },
+  {
+    id: "mq-32",
+    category: "RabbitMQ & Kafka",
+    difficulty: "Advanced",
+    tags: ["Architecture", "Kafka vs RabbitMQ", "Tradeoffs"],
+    question: "RabbitMQ (Smart Broker / Dumb Consumer) vs Kafka (Dumb Broker / Smart Consumer) দর্শনগত পার্থক্য কী?",
+    answer: `
+<p><strong>RabbitMQ:</strong> ব্রোকার জটিল রাউটিং (Exchanges) ও কনজিউমার স্টেট মেইনটেইন করে প্রসেস করা মেসেজ ডিলিট করে।</p><p><strong>Kafka:</strong> ব্রোকার মেসেজের ইমিউটেবল লগ ধরে রাখে। কনজিউমার নিজে নিজের Offset ট্র্যাক রেখে পাস্ট ডেটা Replay করতে পারে।</p>
+    `
+  },
+  {
+    id: "mq-33",
+    category: "RabbitMQ & Kafka",
+    difficulty: "Intermediate",
+    tags: ["RabbitMQ", "Lazy Queues", "Memory"],
+    question: "RabbitMQ Lazy Queues (x-queue-mode: lazy) RAM মেমোরি রক্ষায় কীভাবে কাজ করে?",
+    answer: `
+<p>ডিফল্ট কিউ মেমোরিতে মেসেজ জমায়। Lazy Queues ইনকামিং মেসেজ পাওয়ার সাথে সাথে সরাসরি ডিস্কে ডাম্প করে রাখে এবং কনজিউমার চাইলে কেবল ডিস্ক থেকে টেনে তোলে (RAM স্পাইক প্রতিরোধ করে)।</p>
+    `
+  },
+  {
+    id: "mq-34",
+    category: "RabbitMQ & Kafka",
+    difficulty: "Advanced",
+    tags: ["Kafka", "Transaction", "Transactional Producer"],
+    question: "Kafka Exactly-Once Semantics (EOS) এবং Transactional Producer (initTransactions, sendOffsetsToTransaction) কীভাবে কাজ করে?",
+    answer: `
+<p>Read-Process-Write প্যাটার্নে কাফকা টপিক থেকে রিড করে অন্য টপিকে লেখার সময় KafkaProducer.beginTransaction() ব্যবহার করে অটমিকাল প্রসেস করা।</p>
+    `
+  },
+  {
+    id: "mq-35",
+    category: "RabbitMQ & Kafka",
+    difficulty: "Intermediate",
+    tags: ["RabbitMQ", "Flow Control", "Memory Alarm"],
+    question: "RabbitMQ Memory Alarm and Disk Free Alarm কীভাবে মেসেজ প্রকাশ স্থগিত করে?",
+    answer: `
+<p>RAM ব্যবহৃত হয়ে vm_memory_high_watermark (ডিফল্ট 40%) ছোঁয়ালে বা ডিস্ক স্পেস সীমিত হলে RabbitMQ কানেকশন ব্লক করে প্রোডিউসারকে রাইট করা থামিয়ে দেয়।</p>
+    `
+  },
+  {
+    id: "mq-36",
+    category: "RabbitMQ & Kafka",
+    difficulty: "Advanced",
+    tags: ["Kafka", "Zero Copy", "sendfile"],
+    question: "Kafka Performance: OS Page Cache এবং Zero-Copy (sendfile syscall) কীভাবে কাফকাকে অতি দ্রুত করে?",
+    answer: `
+<p>Kafka মেসেজগুলো কার্নেল স্পেসের OS Page Cache-এ রাখে। ক্লায়েন্টকে পাঠানোর সময় JVM অ্যাপ মেমোরিতে না এনে সরাসরি Network Socket-এ কার্নেল sendfile দিয়ে পাঠায় (Zero-Copy)।</p>
+    `
+  },
+  {
+    id: "mq-37",
+    category: "RabbitMQ & Kafka",
+    difficulty: "Intermediate",
+    tags: ["RabbitMQ", "Consumer Cancel", "Cancel Callback"],
+    question: "RabbitMQ Consumer Cancel Notification এবং Graceful Consumer Recovery কীভাবে করবেন?",
+    answer: `
+<p>মাস্টার নোড ডিলিট বা কিউ ড্রপ হলে ব্রোকার basic.cancel পাঠায়। কনজিউমার এই নোটিফিকেশন শুনে নতুন কিউতে রি-সাবস্ক্রাইব করে সিঙ্ক রিকভার করে।</p>
+    `
+  },
+  {
+    id: "mq-38",
+    category: "RabbitMQ & Kafka",
+    difficulty: "Advanced",
+    tags: ["Kafka", "Streams API", "State Stores"],
+    question: "Kafka Streams API এবং RocksDB State Store দিয়ে রিয়েল-টাইম স্ট্রিম প্রসেসিং কীভাবে করবেন?",
+    answer: `
+<p>Kafka-তে প্রবাহিত ইভেন্টের ওপর রিয়েল-টাইম Windowing, Joins এবং Aggregations চালিয়ে লোকাল RocksDB ইন-মেমোরি স্টেট স্টোরে রেজাল্ট সিঙ্ক রাখা।</p>
+    `
+  },
+  {
+    id: "mq-39",
+    category: "RabbitMQ & Kafka",
+    difficulty: "Intermediate",
+    tags: ["RabbitMQ", "Exclusive Queue", "Auto Delete"],
+    question: "RabbitMQ Exclusive Queue এবং Auto-Delete Queue-এর ব্যবহার কী?",
+    answer: `
+<p><strong>Exclusive:</strong> কেবল বর্তমান নির্দিষ্ট কানেকশনের জন্য দৃশ্যমান সকেট কিউ, কানেকশন ক্লোজ হলে স্বয়ংক্রিয়ভাবে মুছে যায়।</p><p><strong>Auto-Delete:</strong> শেষ কনজিউমার আনসাবস্ক্রাইব করলে কিউ রিমুভ হয়ে যায়।</p>
+    `
+  },
+  {
+    id: "mq-40",
+    category: "RabbitMQ & Kafka",
+    difficulty: "Advanced",
+    tags: ["Kafka", "Compaction", "Tombstone Marker"],
+    question: "Kafka Log Compaction-এ Tombstone Marker (Null Payload) কী?",
+    answer: `
+<p>কম্প্যাক্টেড টপিকে কোনো Key-র মান ডিলিট করতে চাইলে Producer ওই Key দিয়ে একটি null পেলোড (Tombstone) পাঠায়। লগ ক্লিনার নির্দিষ্ট সময় পর ওই Key স্থায়ীভাবে মুছে দেয়।</p>
+    `
+  },
+  {
+    id: "mq-41",
+    category: "RabbitMQ & Kafka",
+    difficulty: "Intermediate",
+    tags: ["Monitoring", "Prometheus", "Metrics"],
+    question: "RabbitMQ and Kafka Prometheus Metrics: Consumer Lag কী এবং এটি কেন মনিটর করা জরুরি?",
+    answer: `
+<p><strong>Consumer Lag:</strong> Producer দ্বারা টপিকে রাইট করা সর্বশেষ অফসেট এবং Consumer দ্বারা প্রসেস করা অফসেটের পার্থক্য। এটি বাড়লে কনজিউমার ব্যাকলগ তৈরি হয়।</p>
+    `
+  },
+  {
+    id: "mq-42",
+    category: "RabbitMQ & Kafka",
+    difficulty: "Advanced",
+    tags: ["RabbitMQ", "Publisher Confirms", "Confirm Select"],
+    question: "RabbitMQ Publisher Confirms (confirmSelect) দিয়ে নির্ভরযোগ্য রাইট কীভাবে সুনিশ্চিত করবেন?",
+    answer: `
+<p>চ্যানেলকে confirmSelect মোডে নিয়ে মেসেজ পাঠালে ব্রোকার ডিস্কে মেসেজ স্টোর করার পর ack পাঠায়। nack আসলে প্রোডিউসার পুনরায় মেসেজ সেন্ড করে।</p>
+    `
+  },
+  {
+    id: "mq-43",
+    category: "RabbitMQ & Kafka",
+    difficulty: "Intermediate",
+    tags: ["Kafka", "MirrorMaker", "Cross DC"],
+    question: "Kafka MirrorMaker 2.0 দিয়ে Multi-Cluster Geo-Replication (Cross Datacenter) কীভাবে করবেন?",
+    answer: `
+<p>Kafka Connect ভিত্তিক সার্ভিস যা ডেটাসেন্টার A এর টপিকের সব মেসেজ ও অফসেট ডেটাসেন্টার B এর ক্লাস্টারে রিয়েল-টাইমে রেপ্লিকেট করে।</p>
+    `
+  },
+  {
+    id: "mq-44",
+    category: "RabbitMQ & Kafka",
+    difficulty: "Advanced",
+    tags: ["Security", "SASL", "SCRAM"],
+    question: "Kafka Authentication Protocols: PLAINTEXT vs SASL_SSL (SCRAM-SHA-512) এবং mTLS কীভাবে কাজ করে?",
+    answer: `
+<p>প্রোডাকশনে PLAINTEXT ডিজেবল করে SASL_SSL দিয়ে পাসওয়ার্ড ব্রোকার হ্যশিং এবং TLS দিয়ে ট্রাফিক সিকিউর করা।</p>
+    `
+  },
+  {
+    id: "mq-45",
+    category: "RabbitMQ & Kafka",
+    difficulty: "Intermediate",
+    tags: ["RabbitMQ", "Consistent Hash Exchange", "Sharding"],
+    question: "RabbitMQ Consistent Hash Exchange Plugin দিয়ে কিউ স্কেলিং কীভাবে করবেন?",
+    answer: `
+<p>মেসেজের Routing Key-কে হ্যাশ করে কাস্টম প্রক্সি এক্সচেঞ্জ থেকে একাধিক কিউয়ের মাঝে সমানভাবে লোড ডিস্ট্রিবিউট করার প্লাগইন।</p>
+    `
+  },
+  {
+    id: "mq-46",
+    category: "RabbitMQ & Kafka",
+    difficulty: "Advanced",
+    tags: ["Kafka", "Partition Rebalance", "Static Membership"],
+    question: "Kafka Consumer Static Membership (group.instance.id) কীভাবে অপ্রয়োজনীয় Rebalance প্রতিরোধ করে?",
+    answer: `
+<p>কনজিউমারকে স্থায়ী group.instance.id দিলে কনজিউমার প্রসেস রিস্টার্ট বা রোলিং আপগ্রেডের সময় কাফকা রিব্যালেন্স না করে সেশন টাইমআউট পর্যন্ত ওয়েট করে।</p>
+    `
+  },
+  {
+    id: "mq-47",
+    category: "RabbitMQ & Kafka",
+    difficulty: "Intermediate",
+    tags: ["RabbitMQ", "Federation", "Shovel"],
+    question: "RabbitMQ Federation vs Shovel Plugin-এর কাজের পার্থক্য কী?",
+    answer: `
+<p><strong>Federation:</strong> দূরবর্তী ভৌগোলিক ক্লাস্টারের কিউ বা এক্সচেঞ্জকে লজিক্যালি এক সাথে যুক্ত করে।</p><p><strong>Shovel:</strong> এক ক্লাস্টারের কিউ থেকে ডেটা রিড করে অন্য ক্লাস্টারের কিউতে পুশ করার হাল্কা ফরওয়ার্ডার।</p>
+    `
+  },
+  {
+    id: "mq-48",
+    category: "RabbitMQ & Kafka",
+    difficulty: "Advanced",
+    tags: ["Kafka", "Idempotent Producer", "enable.idempotence"],
+    question: "Kafka Idempotent Producer (enable.idempotence=true) কীভাবে ডুপ্লিকেট মেসেজ রাইট প্রতিরোধ করে?",
+    answer: `
+<p>প্রোডিউসারকে ১টি PID (Producer ID) এবং প্রতিটি মেসেজের জন্য ক্রমিক Sequence Number দেওয়া হয়। নেটওয়ার্ক রিট্রাই হলেও কাফকা ব্রোকার ডুপ্লিকেট সিকুয়েন্স ডিসকার্ড করে।</p>
+    `
+  },
+  {
+    id: "mq-49",
+    category: "RabbitMQ & Kafka",
+    difficulty: "Intermediate",
+    tags: ["RabbitMQ", "RPC", "Correlation ID"],
+    question: "RabbitMQ-তে Request-Reply (RPC) Pattern এবং Correlation ID কীভাবে বাস্তবায়িত হয়?",
+    answer: `
+<p>মেসেজে reply_to (অস্থায়ী রেসপন্স কিউ) এবং প্রতিটি রিকুয়েস্টে ইউনিক correlation_id হেডার দিয়ে রেসপন্স কিউ থেকে নির্দিষ্ট উত্তর চিনে নেওয়া।</p>
+    `
+  },
+  {
+    id: "mq-50",
+    category: "RabbitMQ & Kafka",
+    difficulty: "Advanced",
+    tags: ["Kafka", "Batching", "linger.ms"],
+    question: "Kafka Producer Batching Performance: batch.size, linger.ms, এবং compression.type (snappy/zstd) কীভাবে টিউন করবেন?",
+    answer: `
+<p>linger.ms=20 দিলে প্রোডিউসার ২০ মিলি-সেকেন্ড ওয়েট করে মেসেজ ব্যাচ করে। compression.type=zstd দিয়ে সংকুচিত করে পাঠালে Throughput ৫ গুণ বাড়ে।</p>
+    `
   }
 ];

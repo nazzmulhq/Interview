@@ -284,5 +284,335 @@ db.otp_codes.createIndex({ "createdAt": 1 }, { expireAfterSeconds: 3600 });</cod
     answer: `
 <p>Sparse Index ফিল্ড উপস্থিত থাকা রেকর্ডগুলো ইনডেক্স করে। Partial Index <code>partialFilterExpression</code> শর্ত মেনে ফিল্টার রেকর্ড ইনডেক্স করে।</p>
     `
+  },
+  {
+    id: "mongo-19",
+    category: "MongoDB",
+    difficulty: "Advanced",
+    tags: ["Aggregation", "Pipeline", "Optimizations"],
+    question: "MongoDB Aggregation Pipeline: $match, $group, $project, $lookup, $unwind, $facet এবং Pipeline Optimization কী?",
+    answer: `
+<p>একাধিক স্টেজে ডেটা ফিল্টার ও ট্রান্সফর্ম করা। অপটিমাইজেশন নিয়ম: <code>$match</code> এবং <code>$sort</code> একদম পাইপলাইনের শুরুতে রাখা উচিত যাতে ইনডেক্স ব্যবহার করা যায়।</p>
+    `
+  },
+  {
+    id: "mongo-20",
+    category: "MongoDB",
+    difficulty: "Advanced",
+    tags: ["Indexing", "ESR Rule", "Compound Index"],
+    question: "MongoDB ESR Rule (Equality, Sort, Range) compound indexing বেস্ট প্র্যাকটিস কী?",
+    answer: `
+<p>কম্পাউন্ড ইনডেক্সে ফিল্ড সাজানোর নিয়ম:</p><ol><li><strong>Equality:</strong> এক্সেক্ট ম্যাচ ফিল্ড সবার আগে।</li><li><strong>Sort:</strong> সর্টিং ফিল্ড মাঝে।</li><li><strong>Range:</strong> রেঞ্জ ফিল্ড (<code>$gt</code>, <code>$lt</code>) সবার শেষে।</li></ol>
+    `
+  },
+  {
+    id: "mongo-21",
+    category: "MongoDB",
+    difficulty: "Advanced",
+    tags: ["Replication", "Replica Sets", "Oplog"],
+    question: "MongoDB Replica Set Architecture: Primary Node, Secondary Nodes, Arbiter, Oplog, এবং Heartbeat Mechanism কী?",
+    answer: `
+<p>Primary Node-এ সকল রাইট অপারেশন হয় যা <code>local.oplog.rs</code> ফাইলে রেকর্ড হয়। Secondary Nodes এই Oplog রিড করে সিঙ্ক রাখে। Primary ডাউন হলে ১০ সেকেন্ডে ইলেকশন হয়ে নতুন প্রাইমারি নির্বাচিত হয়।</p>
+    `
+  },
+  {
+    id: "mongo-22",
+    category: "MongoDB",
+    difficulty: "Advanced",
+    tags: ["Sharding", "Shard Key", "Jumbo Shards"],
+    question: "MongoDB Sharding Architecture: Mongos Router, Config Server, Shards, এবং Shard Key (Hashed vs Ranged) নির্বাচনের নিয়ম কী?",
+    answer: `
+<p><strong>Mongos:</strong> রিকুয়েস্ট রাউটার। <strong>Config Server:</strong> মেটাডাটা রাখে। <strong>Shard Key:</strong> হাই কার্ডিনালিটি ও সুষম বন্টনমুখী কলাম বেছে নেওয়া উচিত যাতে Jumbo Shards বা Hotspots না তৈরি হয়।</p>
+    `
+  },
+  {
+    id: "mongo-23",
+    category: "MongoDB",
+    difficulty: "Advanced",
+    tags: ["Transactions", "ACID", "WiredTiger"],
+    question: "MongoDB Multi-Document ACID Transactions কীভাবে কাজ করে এবং কখন এটি এড়িয়ে যাওয়া উচিত?",
+    answer: `
+<p>WiredTiger স্টোরেজ ইঞ্জিন ব্যবহার করে একাধিক কালেকশনে <code>session.startTransaction()</code> দিয়ে ACID রাইট গ্যারান্টি। এটি মেমোরি কস্টলি হওয়ায় ডেনরম্যালাইজড নেস্টেড ডকুমেন্টে ডিজাইন করাই উত্তম।</p>
+    `
+  },
+  {
+    id: "mongo-24",
+    category: "MongoDB",
+    difficulty: "Intermediate",
+    tags: ["Schema Design", "Embedding vs Referencing", "Design"],
+    question: "MongoDB Schema Design: Embedding (One-to-Few) vs Referencing (One-to-Many / One-to-Squillions) কখন কোনটি নির্বাচন করবেন?",
+    answer: `
+<p><strong>Embedding:</strong> ১টি ডকুমেন্টের ১৮MB সাইজ সীমানার মধ্যে যদি চাইল্ড ডেটা ছোট হয় (e.g. ইউজারের ৩টি এড্রেস)।</p><p><strong>Referencing:</strong> চাইল্ড ডেটা বিশাল বা আনলিমিটেড হলে (e.g. পোস্টের ১০ হাজার কমেন্ট)।</p>
+    `
+  },
+  {
+    id: "mongo-25",
+    category: "MongoDB",
+    difficulty: "Advanced",
+    tags: ["Write Concern", "Read Concern", "Consistency"],
+    question: "Write Concern (w: 1, w: majority, j: true) vs Read Concern (local, majority, linearizable) এর নিরাপত্তা ভূমিকা কী?",
+    answer: `
+<p><strong>w: majority:</strong> মেজোরিটি সেকেন্ডারি নোড ডিস্কে রাইট সিঙ্ক করলে কনফার্মেশন দেয় (জিরো রোলব্যাক)।</p><p><strong>readConcern: majority:</strong> কেবল মেজোরিটি নোডে নিশ্চিত হওয়া ডেটা রিড করে।</p>
+    `
+  },
+  {
+    id: "mongo-26",
+    category: "MongoDB",
+    difficulty: "Intermediate",
+    tags: ["Performance", "explain()", "executionStats"],
+    question: "MongoDB explain('executionStats') দিয়ে COLLSCAN vs IXSCAN সনাক্তকরণ কীভাবে করবেন?",
+    answer: `
+<p><code>db.users.find({...}).explain("executionStats")</code> চালালে <code>stage: "COLLSCAN"</code> দেখলে বোঝা যায় ইনডেক্স নেই (Full Collection Scan)। <code>IXSCAN</code> দেখলে বোঝায় ইনডেক্স ব্যবহৃত হচ্ছে।</p>
+    `
+  },
+  {
+    id: "mongo-27",
+    category: "MongoDB",
+    difficulty: "Advanced",
+    tags: ["Storage", "WiredTiger", "Cache"],
+    question: "WiredTiger Storage Engine: Cache Management, Snappy Compression, এবং Eviction Policy কী?",
+    answer: `
+<p>WiredTiger নেটিভভাবে RAM মেমোরির ৫০% ক্যাশ হিসেবে ব্যবহার করে এবং ডিস্কে Snappy কমপ্রেশন দিয়ে ডেটা রাইট করে মেমোরি বাঁচায়।</p>
+    `
+  },
+  {
+    id: "mongo-28",
+    category: "MongoDB",
+    difficulty: "Intermediate",
+    tags: ["Indexing", "TTL Index", "Partial Index"],
+    question: "MongoDB TTL Index (expireAfterSeconds) এবং Partial Index (partialFilterExpression) কীভাবে ব্যবহার করবেন?",
+    answer: `
+<p><strong>TTL Index:</strong> নির্দিষ্ট সময় (e.g. ৩০ দিন) পর স্বয়ংক্রিয়ভাবে ওল্ড লগ ডকুমেন্ট মুছে ফেলা।</p><p><strong>Partial Index:</strong> কেবল <code>{ status: "active" }</code> হলে ইনডেক্স বানানো।</p>
+    `
+  },
+  {
+    id: "mongo-29",
+    category: "MongoDB",
+    difficulty: "Advanced",
+    tags: ["Search", "Atlas Search", "Lucene"],
+    question: "MongoDB Atlas Search ($search) এবং Apache Lucene Integration কীভাবে কাজ করে?",
+    answer: `
+<p>MongoDB-এর নেটিভ ইঞ্জিনের বাইরে Apache Lucene ইন-মেমোরি ইনভার্সড ইনডেক্স ব্যবহার করে ফুল-টেক্সট সার্চ, অটোকম্প্লিট এবং ফাজি ম্যাচিং প্রদান করা।</p>
+    `
+  },
+  {
+    id: "mongo-30",
+    category: "MongoDB",
+    difficulty: "Intermediate",
+    tags: ["Change Streams", "Real-time", "Oplog"],
+    question: "MongoDB Change Streams (watch()) দিয়ে রিয়েল-টাইম ডাটাবেজ ইভেন্ট ট্র্যাকিং কীভাবে করবেন?",
+    answer: `
+<p>Replica Set-এর Oplog ব্যবহার করে ডাটাবেজে নতুন ইনসার্ট, আপডেট বা ডিলিট হওয়ার সাথে সাথেই অ্যাপ্লিকেশন লাইভ নোটিফিকেশন সাবস্ক্রাইব করতে পারে।</p>
+    `
+  },
+  {
+    id: "mongo-31",
+    category: "MongoDB",
+    difficulty: "Advanced",
+    tags: ["Security", "FLE", "Encryption"],
+    question: "MongoDB Client-Side Field Level Encryption (CSFLE) দিয়ে সংবেদনশীল ডেটা এনক্রিপশন কীভাবে করবেন?",
+    answer: `
+<p>ডাটাবেজ ড্রাইভার ক্লায়েন্ট সাইডেই ডেটা (e.g. ক্রেডিট কার্ড বা SSN) এনক্রিপ্ট করে পাঠায়, ফলে ডাটাবেজ এডমিন বা হ্যাকারও আসল ডেটা দেখতে পারে না।</p>
+    `
+  },
+  {
+    id: "mongo-32",
+    category: "MongoDB",
+    difficulty: "Intermediate",
+    tags: ["Schema Validation", "JSON Schema", "validator"],
+    question: "MongoDB Schema Validation ($jsonSchema) দিয়ে ডাইনামিক ডকুমেন্টে কড়া টাইপ ডিফাইন কীভাবে করবেন?",
+    answer: `
+<div class="code-box"><div class="code-header"><span>json</span><button class="copy-btn">Copy</button></div><pre><code>db.createCollection("users", {
+  validator: {
+    $jsonSchema: {
+      bsonType: "object",
+      required: ["name", "email"],
+      properties: {
+        email: { bsonType: "string", pattern: "^.+@.+$" }
+      }
+    }
+  }
+})</code></pre></div>
+    `
+  },
+  {
+    id: "mongo-33",
+    category: "MongoDB",
+    difficulty: "Advanced",
+    tags: ["Time Series", "Collections", "Bucketing"],
+    question: "MongoDB Time Series Collections এবং Internal Bucketing Pattern কীভাবে IoT / Metrics ডাটা অপটিমাইজ করে?",
+    answer: `
+<p>টাইম সিরিজ কালেকশন সময়ভিত্তিক ইনকামিং ডাটা সংকুচিত কাস্টম বাকেটে স্টোর করায় ডিস্ক স্পেস ৯০% পর্যন্ত হ্রাস পায় এবং রিড স্পিড বহু গুণ বাড়ে।</p>
+    `
+  },
+  {
+    id: "mongo-34",
+    category: "MongoDB",
+    difficulty: "Intermediate",
+    tags: ["Indexing", "Text Index", "Weights"],
+    question: "MongoDB Text Index ($text) এবং Text Search Weights (weights parameter) কীভাবে টিউন করবেন?",
+    answer: `
+<p><code>title</code> ফিল্ডের ওয়েট ১০ এবং <code>description</code> ফিল্ডের ওয়েট ২ দিলে সার্চের সময় টাইটেলে শব্দ মিললে উচ্চ রেলিভেন্স স্কোর পেয়ে সামনে আসবে।</p>
+    `
+  },
+  {
+    id: "mongo-35",
+    category: "MongoDB",
+    difficulty: "Advanced",
+    tags: ["Ops", "Balancing", "Chunk Migration"],
+    question: "MongoDB Sharding Chunk Migration, Auto-Balancer, এবং Jumbo Chunks ফিক্সিং কৌশল কী?",
+    answer: `
+<p>ডাটা সাইজ ৬৪MB ছোঁয়ালে চ্যাঙ্ক স্প্লিট হয়। অটো-ব্যালেন্সার ব্যাকগ্রাউন্ডে চ্যাঙ্ক নোডগুলোর মাঝে ছড়ায়। Shard key ভুল হলে স্প্লিট না হয়ে Jumbo Chunk তৈরি হয়।</p>
+    `
+  },
+  {
+    id: "mongo-36",
+    category: "MongoDB",
+    difficulty: "Intermediate",
+    tags: ["Queries", "Array Operations", "elemMatch"],
+    question: "MongoDB Array Query Operators: $elemMatch, $all, $slice, এবং position operator ($) কীভাবে কাজ করে?",
+    answer: `
+<p><code>$elemMatch:</code> অ্যারেলিস্টের একই নেস্টেড অবজেক্টের ভেতরে একাধিক শর্ত মেলাতে সাহায্য করে।</p><p><code>$slice:</code> অ্যারের কেবল নির্দিষ্ট টপ ৫টি আইটেম ফেচ করা।</p>
+    `
+  },
+  {
+    id: "mongo-37",
+    category: "MongoDB",
+    difficulty: "Advanced",
+    tags: ["Replication", "Read Preference", "secondaryPreferred"],
+    question: "MongoDB Read Preference (primary, primaryPreferred, secondary, secondaryPreferred, nearest) এর কাজের পার্থক্য কী?",
+    answer: `
+<p><strong>primary:</strong> কেবল প্রাইমারি নোড থেকে রিড করা (Strictly consistent)।</p><p><strong>secondaryPreferred:</strong> রিড লোড স্লেভ নোডে ট্রান্সফার করা (Eventual consistency)।</p>
+    `
+  },
+  {
+    id: "mongo-38",
+    category: "MongoDB",
+    difficulty: "Intermediate",
+    tags: ["Operators", "$set", "$inc"],
+    question: "Atomic Update Operators: $set, $inc, $push, $pull, $addToSet, এবং upsert: true কীভাবে ব্যবহার করবেন?",
+    answer: `
+<p>ডকুমেন্ট পুরো না পাল্টে কেবল ইন-প্লেস অ্যাটমিক ফেচ ও আপডেট করা। <code>$addToSet</code> অ্যারেলিস্টে ডুপ্লিকেট ভ্যালু ঢুকতে দেয় না। <code>upsert: true</code> না থাকলে নতুন ইনসার্ট করে।</p>
+    `
+  },
+  {
+    id: "mongo-39",
+    category: "MongoDB",
+    difficulty: "Advanced",
+    tags: ["Aggregation", "$lookup", "Uncorrelated Subqueries"],
+    question: "MongoDB $lookup (Left Outer Join) uncorrelated and correlated subqueries কীভাবে টিউন করবেন?",
+    answer: `
+<p><code>$lookup</code> পাইপলাইনে নেস্টেড <code>let</code> এবং <code>pipeline</code> ব্যবহার করে অন্য কালেকশন আনার আগেই <code>$match</code> এবং <code>$project</code> চালিয়ে জয়েন মেমোরি কমানো।</p>
+    `
+  },
+  {
+    id: "mongo-40",
+    category: "MongoDB",
+    difficulty: "Intermediate",
+    tags: ["Geospatial", "2dsphere", "near"],
+    question: "MongoDB Geospatial Index (2dsphere) এবং $near / $geoWithin Query কীভাবে কাজ করে?",
+    answer: `
+<p>GeoJSON পয়েন্ট স্টোর করে <code>2dsphere</code> ইনডেক্স ব্যবহার করে জিপিএস লোকেশনের সাপেক্ষে নির্দিষ্ট দূরত্বের (e.g. 5km) সব আইটেম রিড করা।</p>
+    `
+  },
+  {
+    id: "mongo-41",
+    category: "MongoDB",
+    difficulty: "Advanced",
+    tags: ["Internal", "BSON", "Data Limits"],
+    question: "BSON Binary Format vs JSON এবং 16MB Document Limit কেন রাখা হয়েছে?",
+    answer: `
+<p>BSON-এ টাইপ ও লেন্থ প্রি-প্যাকিং থাকে যা পার্সিং ফাস্ট করে। ১৬MB লিমিট মেমোরি এবং নেটওয়ার্ক ট্র্যাফিক স্পাইক ব্লক করে আর্কিটেকচার সেফ রাখে।</p>
+    `
+  },
+  {
+    id: "mongo-42",
+    category: "MongoDB",
+    difficulty: "Intermediate",
+    tags: ["Indexing", "Wildcard Index", "$**"],
+    question: "MongoDB Wildcard Index ($**) কখন ব্যবহার করা উচিত?",
+    answer: `
+<p>যখন ডকুমেন্টের ভেতরে অনাক্সিডেন্টাল অগণিত ডায়নামিক ফিল্ড থাকে (e.g. <code>customFields.$**</code>)। তবে অতিরিক্ত মেমোরির কারণে সতর্কতার সাথে ব্যবহার্য।</p>
+    `
+  },
+  {
+    id: "mongo-43",
+    category: "MongoDB",
+    difficulty: "Advanced",
+    tags: ["Aggregation", "$facet", "Parallel Pipelines"],
+    question: "MongoDB $facet Stage দিয়ে সমান্তরাল প্যারালাল মেট্রিকেল এগ্রিগেশন কীভাবে করবেন?",
+    answer: `
+<p>একই ইনপুট ডকুমেন্টের ওপর ১টি পাইপলাইনেই একসাথে প্রডাক্ট ক্যাটাগরি কাউন্ট, প্রাইস এভারেজ এবং পেজিনেটেড রেজাল্ট আলাদা আলাদা ব্র্যাকেটে বের করা।</p>
+    `
+  },
+  {
+    id: "mongo-44",
+    category: "MongoDB",
+    difficulty: "Intermediate",
+    tags: ["Capped Collections", "Logs", "Fixed Size"],
+    question: "MongoDB Capped Collections (Circular Queue) কী এবং এর সুবিধা কী?",
+    answer: `
+<p>ফিক্সড সাইজের কালেকশন। সাইজ পূর্ণ হলে স্বয়ংক্রিয়ভাবে সবচেয়ে পুরোনো রেকর্ড মুছে নতুন ইনসার্ট জায়গা করে নেয় (লগিংয়ের জন্য আদর্শ)।</p>
+    `
+  },
+  {
+    id: "mongo-45",
+    category: "MongoDB",
+    difficulty: "Advanced",
+    tags: ["Index", "Multikey Index", "Arrays"],
+    question: "MongoDB Multikey Indexing এবং অ্যারে ফিল্ড ইনডেক্সিং সীমানা কী?",
+    answer: `
+<p>অ্যারে ফিল্ডে ইনডেক্স বসালে ES প্রতি এলিমেন্টের জন্য আলাদা ইনডেক্স কি বানায়। নিয়ম: ১টি কম্পাউন্ড ইনডেক্সে ১টির বেশি অ্যারে ফিল্ড রাখা নিষিদ্ধ।</p>
+    `
+  },
+  {
+    id: "mongo-46",
+    category: "MongoDB",
+    difficulty: "Intermediate",
+    tags: ["Connection", "Connection Pool", "maxPoolSize"],
+    question: "MongoDB Connection String Options: maxPoolSize, minPoolSize, and maxIdleTimeMS কীভাবে কনফিগার করবেন?",
+    answer: `
+<p><code>mongodb://localhost:27017/db?maxPoolSize=50&minPoolSize=10</code> দিয়ে নোড ড্রাইভারে ডাটাবেজ সকেট পুল টিউন করা।</p>
+    `
+  },
+  {
+    id: "mongo-47",
+    category: "MongoDB",
+    difficulty: "Advanced",
+    tags: ["Backup", "mongodump", "mongorestore"],
+    question: "MongoDB Backup Strategies: mongodump / mongorestore vs Oplog Point-in-time Recovery কী?",
+    answer: `
+<p><strong>mongodump:</strong> BSON ব্যাকআপ ফাইল। <strong>Point-in-time Recovery:</strong> LVM Snapshot এবং Oplog রিড করে রিয়েল-টাইম সেকেন্ড লেভেলের ডাটা রিকভার করা।</p>
+    `
+  },
+  {
+    id: "mongo-48",
+    category: "MongoDB",
+    difficulty: "Intermediate",
+    tags: ["Queries", "Projection", "Fields"],
+    question: "MongoDB Projection ({ name: 1, _id: 0 }) দিয়ে নেটওয়ার্ক পে-লোড কীভাবে কমাবেন?",
+    answer: `
+<p>প্রয়োজনীয় ফিল্ডগুলো সিলেক্ট করে অপ্রয়োজনীয় ভারী কলাম ফিল্টার করে আউটপুট পে-লোড এবং ব্যান্ডউইথ সাশ্রয় করা।</p>
+    `
+  },
+  {
+    id: "mongo-49",
+    category: "MongoDB",
+    difficulty: "Advanced",
+    tags: ["GridFS", "Big Files", "Chunks"],
+    question: "MongoDB GridFS Architecture: fs.files vs fs.chunks দিয়ে ১৬MB-র বড় ফাইল স্টোর কীভাবে করা হয়?",
+    answer: `
+<p>বড় ফাইলকে (e.g. 500MB Video) 255KB এর ছোট ছোট বাইনারি Chunk-এ ভাগ করে <code>fs.chunks</code> কালেকশনে স্টোর রাখা এবং <code>fs.files</code>-এ মেটাডাটা রাখা।</p>
+    `
+  },
+  {
+    id: "mongo-50",
+    category: "MongoDB",
+    difficulty: "Intermediate",
+    tags: ["Optimization", "Hint", "force index"],
+    question: "db.collection.find().hint() দিয়ে নির্দিষ্ট ইনডেক্স জোরপূর্বক ব্যবহার কীভাবে করাবেন?",
+    answer: `
+<p>MongoDB Query Planner যদি ভুল করে ধীরগতির ইনডেক্স নির্বাচন করে, তবে <code>.hint({ email: 1 })</code> দিয়ে কাঙ্ক্ষিত সেরা ইনডেক্স প্রয়োগ করতে বাধ্য করা।</p>
+    `
   }
 ];

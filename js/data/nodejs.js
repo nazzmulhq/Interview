@@ -356,5 +356,309 @@ process.on('SIGTERM', () => {
     answer: `
 <p>প্রসেস বন্ধের নোটিফিকেশন শুনে ডাটাবেজ সকেট বন্ধ ও পেন্ডিং জব শেষ করার জন্য <code>process.on('SIGTERM')</code> হ্যান্ডলার ব্যবহার করা আবশ্যক।</p>
     `
+  },
+  {
+    id: "node-21",
+    category: "Node.js",
+    difficulty: "Advanced",
+    tags: ["Async", "AsyncLocalStorage", "Tracing"],
+    question: "AsyncLocalStorage (async_hooks) কী এবং ডিস্ট্রিবিউটেড লগার বা রিকুয়েস্ট কনটেক্সট ট্র্যাকিংয়ে এটি কীভাবে কাজ করে?",
+    answer: `
+<p>Thread-local storage এর Node.js বিকল্প। কোনো ফাংশন প্যারামিটারে কন্টিনিউয়াস Trace ID না পাঠিয়ে সম্পূর্ণ Async Request Chain জুড়ে ভ্যারিয়েবল (e.g. Current User / Request ID) শেয়ার করতে সাহায্য করে।</p>
+    `
+  },
+  {
+    id: "node-22",
+    category: "Node.js",
+    difficulty: "Advanced",
+    tags: ["Diagnostics", "Heap Dump", "v8"],
+    question: "v8.getHeapSnapshot() এবং Chrome DevTools দিয়ে Node.js Memory Leak কীভাবে ডেবাগ করবেন?",
+    answer: `
+<p>প্রসেস চলাকালীন <code>v8.getHeapSnapshot()</code> চালিয়ে <code>.heapsnapshot</code> ফাইল জেনারেট করে Chrome DevTools Memory Tab-এ লোড করে Retained Size ও Detached DOM Node চেক করে মেমোরি লিকের মূল পয়েন্ট সনাক্ত করা।</p>
+    `
+  },
+  {
+    id: "node-23",
+    category: "Node.js",
+    difficulty: "Intermediate",
+    tags: ["Security", "Graceful Shutdown", "SIGTERM"],
+    question: "Node.js Application Graceful Shutdown (process.on('SIGTERM'), process.on('SIGINT')) কীভাবে বাস্তবায়ন করবেন?",
+    answer: `
+<p>নতুন রিকুয়েস্ট বন্ধ করা (<code>server.close()</code>), ডাটাবেজ কানেকশন পুল সুন্দরভাবে ড্রেন করা এবং রানিং জবগুলো শেষ করে <code>process.exit(0)</code> দিয়ে সার্ভার শাটডাউন করা।</p>
+    `
+  },
+  {
+    id: "node-24",
+    category: "Node.js",
+    difficulty: "Advanced",
+    tags: ["Streams", "Transform Stream", "pipeline"],
+    question: "stream.pipeline() এবং stream.finished() ব্যবহার করে Stream Error & Memory Leak কীভাবে প্রতিরোধ করবেন?",
+    answer: `
+<p>সরাসরি <code>pipe()</code> করলে মাঝের স্ট্রিম ডাউন হলে এরর হ্যান্ডেল না হয়ে মেমোরি লিক হয়। <code>pipeline(rs, transform, ws, (err) => {})</code> সঠিক ক্লিনআপ নিশ্চিত করে।</p>
+    `
+  },
+  {
+    id: "node-25",
+    category: "Node.js",
+    difficulty: "Intermediate",
+    tags: ["Process", "PM2", "Cluster"],
+    question: "PM2 Process Manager (Cluster Mode, Reload vs Restart) কীভাবে নোড অ্যাপ স্কেল করে?",
+    answer: `
+<p><code>pm2 start app.js -i max</code> দিয়ে সকল CPU কোরে প্রসেস স্পন করা। <code>pm2 reload</code> জিরো-ডাউনটাইমে একে একে কন্টেইনার আপডেট রিফ্রেশ করে।</p>
+    `
+  },
+  {
+    id: "node-26",
+    category: "Node.js",
+    difficulty: "Advanced",
+    tags: ["Security", "Helmet", "Rate Limiting"],
+    question: "Node.js Production Hardening: Helmet, Rate Limiting, HPP (HTTP Parameter Pollution) প্রতিরোধ বেস্ট প্র্যাকটিস কী?",
+    answer: `
+<p><code>helmet()</code> দিয়ে সিকিউর HTTP হেডার দেওয়া, <code>express-rate-limit</code> দিয়ে পার-আইপি রিকুয়েস্ট লিমিট করা এবং ডুপ্লিকেট কুয়েরি এড়াতে <code>hpp</code> মিডলওয়্যার ব্যবহার করা।</p>
+    `
+  },
+  {
+    id: "node-27",
+    category: "Node.js",
+    difficulty: "Intermediate",
+    tags: ["Performance", "Compression", "gzip"],
+    question: "compression middleware (Gzip/Brotli) দিয়ে Node.js Response Payload সাশ্রয় কীভাবে করবেন?",
+    answer: `
+<p>টেক্সট রেসপন্স (JSON/HTML) অন-দ্য-ফ্লাই সংকুচিত করে ব্রাউজারে ট্রান্সফার স্পিড ৬০-৮০% পর্যন্ত উন্নত করা।</p>
+    `
+  },
+  {
+    id: "node-28",
+    category: "Node.js",
+    difficulty: "Advanced",
+    tags: ["Architecture", "Domain Driven", "Clean Architecture"],
+    question: "Clean Architecture in Node.js: Controllers, Use Cases, Repositories, Domain Entities কীভাবে সাজাবেন?",
+    answer: `
+<p>বিজনেস লজিককে এক্সপ্রেস বা ডাটাবেজ মডিউল থেকে সম্পূর্ণ স্বাধীন খাঁটি জাভাস্ক্রিপ্ট ক্লাসে রাখা। ইনফ্রাস্ট্রাকচার লেয়ারের মাধ্যমে সার্ভিস ডিআই (Dependency Injection) করা।</p>
+    `
+  },
+  {
+    id: "node-29",
+    category: "Node.js",
+    difficulty: "Intermediate",
+    tags: ["Package", "pnpm", "npm"],
+    question: "pnpm / yarn / npm Workspaces দিয়ে Monorepo Package Management কীভাবে পরিচালিত হয়?",
+    answer: `
+<p><code>pnpm</code> কনটেন্ট-অ্যাড্রেসেবল স্টোরেজ ব্যবহার করে হার্ডলিংক দিয়ে মেমোরি বাঁচায়। Workspaces দিয়ে একাধিক ইন্টারনাল প্যাকেজ একসাথে লিংক রাখা যায়।</p>
+    `
+  },
+  {
+    id: "node-30",
+    category: "Node.js",
+    difficulty: "Advanced",
+    tags: ["Performance", "uv_threadpool_size", "libuv"],
+    question: "UV_THREADPOOL_SIZE (Default 4) কীভাবে বাড়াবেন এবং এটি কোন কোন অপারেশনে প্রভাব ফেলে?",
+    answer: `
+<p>libuv থ্রেডপুল ফাইল সিস্টেম (fs), ক্রিপ্টো (crypto.pbkdf2), এবং DNS অনুসন্ধানে ব্যবহৃত হয়। <code>process.env.UV_THREADPOOL_SIZE = 128</code> দিলে ব্লকিং অপারেশনের সমান্তরাল ক্ষমতা বাড়ে।</p>
+    `
+  },
+  {
+    id: "node-31",
+    category: "Node.js",
+    difficulty: "Intermediate",
+    tags: ["Modules", "ESM", "package.json"],
+    question: "Node.js-এ type: 'module' এবং .mjs vs .cjs ফাইল এক্সটেনশন ব্যবহারের সঠিক নিয়ম কী?",
+    answer: `
+<p><code>package.json</code>-এ <code>"type": "module"</code> দিলে সব <code>.js</code> ফাইল ES Module হিসেবে বিবেচিত হয়। তখন CommonJS ফাইলের জন্য <code>.cjs</code> এক্সটেনশন বাধ্যতামূলক করতে হয়।</p>
+    `
+  },
+  {
+    id: "node-32",
+    category: "Node.js",
+    difficulty: "Advanced",
+    tags: ["Security", "REPL", "eval"],
+    question: "Node.js-এ eval() এবং new Function() ব্যবহারের ভয়াবহ নিরাপত্তা ঝুঁকি কী?",
+    answer: `
+<p>অ্যাটাকার যদি ইনপুটে কাস্টম কোড ইনজেক্ট করতে পারে (RCE Attack), তবে সে <code>eval()</code> ব্যবহার করে সার্ভারের পুরো ফাইল সিস্টেম এবং ওএস এক্সেস করে ডিলিট বা লিক করে দিতে পারে।</p>
+    `
+  },
+  {
+    id: "node-33",
+    category: "Node.js",
+    difficulty: "Intermediate",
+    tags: ["HTTP", "http.Agent", "KeepAlive"],
+    question: "http.Agent { keepAlive: true } ব্যাকএন্ড এপিআই কলের ল্যাটেন্সি কীভাবে কমায়?",
+    answer: `
+<p>প্রতিটি আউটগোয়িং HTTP রিকুয়েস্টে নতুন TCP 3-way handshake না করে পুরোনো সকেট কানেকশন রিইউজ করে ল্যাটেন্সি ৫০ms পর্যন্ত কমিয়ে দেয়।</p>
+    `
+  },
+  {
+    id: "node-34",
+    category: "Node.js",
+    difficulty: "Advanced",
+    tags: ["Testing", "node:test", "Mocking"],
+    question: "Node.js Native Test Runner (node:test) এবং Mocking API (node:test/reporters) কীভাবে কাজ করে?",
+    answer: `
+<p>Node 18+ এ কোনো থার্ডপার্টি Jest/Mocha ছাড়াই নেটিভ <code>import test from 'node:test'</code> এবং <code>test.mock.fn()</code> ব্যবহার করে সুপারফাস্ট ইউনিট টেস্ট চালানো যায়।</p>
+    `
+  },
+  {
+    id: "node-35",
+    category: "Node.js",
+    difficulty: "Intermediate",
+    tags: ["FileSystem", "fs/promises", "fs.watch"],
+    question: "fs.watch vs fs.watchFile এবং fs/promises ব্যবহারের আধুনিক সুবিধা কী?",
+    answer: `
+<p><code>fs/promises</code> অ্যাসিনক্রোনাস প্রমিস ড্রিভেন কোড নিশ্চিত করে। <code>fs.watch</code> ওএস নেটিভ ইভেন্ট লিসেনার ব্যবহার করায় <code>fs.watchFile</code> পোলিং মেথডের চেয়ে দ্রুত।</p>
+    `
+  },
+  {
+    id: "node-36",
+    category: "Node.js",
+    difficulty: "Advanced",
+    tags: ["Diagnostics", "perf_hooks", "PerformanceObserver"],
+    question: "node:perf_hooks এবং PerformanceObserver দিয়ে এন্ডপয়েন্টের ল্যাটেন্সি বেন্চমার্ক কীভাবে মেজার করবেন?",
+    answer: `
+<div class="code-box"><div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div><pre><code>const { performance, PerformanceObserver } = require('perf_hooks');
+performance.mark('A');
+// code execution
+performance.mark('B');
+performance.measure('A to B', 'A', 'B');</code></pre></div>
+    `
+  },
+  {
+    id: "node-37",
+    category: "Node.js",
+    difficulty: "Intermediate",
+    tags: ["Crypto", "crypto.randomBytes", "UUID"],
+    question: "crypto.randomBytes() vs Math.random() — কেন সিকিউরিটিতে Cryptographically Secure Pseudo-Random (CSPRNG) জরুরি?",
+    answer: `
+<p><code>Math.random()</code> প্রেডিক্টেবল অ্যালগরিদম অনুসরণ করে (Non-secure)। <code>crypto.randomBytes()</code> ওএস এনট্রপি রিড করে ক্রিপ্টোগ্রাফিকালি সিকিউর র্যান্ডম টোকেন ও পাসওয়ার্ড জেনারেট করে।</p>
+    `
+  },
+  {
+    id: "node-38",
+    category: "Node.js",
+    difficulty: "Advanced",
+    tags: ["Native", "N-API", "C++ Addons"],
+    question: "Node-API (N-API) এবং C++ Addons দিয়ে অতি উচ্চ পারফরম্যান্সের নেটিভ মডিউল কীভাবে তৈরি করা হয়?",
+    answer: `
+<p>অত্যন্ত ভারী গাণিতিক বা ইমেজ প্রসেসিংয়ের কাজ C/C++ এ লিখে <code>N-API</code> ইন্টারফেসের মাধ্যমে Node.js V8 বিহাইন্ড দ্য সিন ইন্টিগ্রেট করা যাতে Node.js ভার্সন আপগ্রেডে কোড ব্রেক না করে।</p>
+    `
+  },
+  {
+    id: "node-39",
+    category: "Node.js",
+    difficulty: "Intermediate",
+    tags: ["Globals", "process.nextTick", "setImmediate"],
+    question: "process.nextTick vs setImmediate vs setTimeout(fn, 0) এর এক্সিকিউশন সিকুয়েন্স প্র্যাকটিকাল প্রমাণ কী?",
+    answer: `
+<ol><li><code>process.nextTick</code> (Microtask Phase এর শুরুতেই)</li><li><code>Promise.then</code> (Microtask Phase)</li><li><code>setTimeout 0</code> (Timers Phase)</li><li><code>setImmediate</code> (Check Phase)</li></ol>
+    `
+  },
+  {
+    id: "node-40",
+    category: "Node.js",
+    difficulty: "Advanced",
+    tags: ["Security", "Policy", "Permission Model"],
+    question: "Node.js Experimental Permission Model (--experimental-permission) দিয়ে ফাইল সিস্টেম এক্সেস কীভাবে লক ডাউন করবেন?",
+    answer: `
+<p><code>node --permission --allow-fs-read=/tmp app.js</code> দিলে নোড অ্যাপ ওই সুনির্দিষ্ট ডিরেক্টরি ছাড়া ওএস-এর অন্য কোনো ফাইল রিড বা রাইট করতে পারবে না।</p>
+    `
+  },
+  {
+    id: "node-41",
+    category: "Node.js",
+    difficulty: "Intermediate",
+    tags: ["Process", "child_process.fork", "IPC"],
+    question: "child_process.fork() এবং Inter-Process Communication (process.send) কীভাবে ব্যাকগ্রাউন্ড ভারী কাজ প্রসেস করে?",
+    answer: `
+<p>মেইন ইভেন্ট লুপ ব্লক না করে আলাদা Node.js V8 প্রসেস স্পন করে <code>process.send()</code> এবং <code>process.on('message')</code> দিয়ে তথ্য আদান-প্রদান করা।</p>
+    `
+  },
+  {
+    id: "node-42",
+    category: "Node.js",
+    difficulty: "Advanced",
+    tags: ["Security", "HTTPS", "TLS"],
+    question: "tls.createServer() এবং ALPN (Application-Layer Protocol Negotiation) কনফিগারেশন কী?",
+    answer: `
+<p>SSL/TLS হ্যান্ডশেক করার সময় ক্লায়েন্ট ও সার্ভারের মধ্যে প্রোটোকল (e.g. HTTP/1.1 vs HTTP/2) নেগোশিয়েট করার প্রক্রিয়া।</p>
+    `
+  },
+  {
+    id: "node-43",
+    category: "Node.js",
+    difficulty: "Intermediate",
+    tags: ["Console", "console.time", "console.trace"],
+    question: "console.time(), console.timeEnd(), এবং console.trace()-এর কাজের সুবিধা কী?",
+    answer: `
+<p><code>console.time('DB')</code> ও <code>console.timeEnd('DB')</code> দিয়ে কোনো নির্দিষ্ট কোড ব্লকের এক্সিকিউশন টাইম মিলিসেকেন্ডে মাপা এবং <code>console.trace()</code> দিয়ে কল স্ট্যাক ট্র্যাকিং করা।</p>
+    `
+  },
+  {
+    id: "node-44",
+    category: "Node.js",
+    difficulty: "Advanced",
+    tags: ["Cluster", "Sticky Sessions", "Socket.io"],
+    question: "Node.js Cluster Mode-এ Sticky Sessions (socket.io-sticky) কেন বাধ্যতামূলক?",
+    answer: `
+<p>সকেট কানেকশন হ্যান্ডশেক করার সময় একাধিক প্রসেসের মধ্যে র্যান্ডমলি ঘুরে গেলে সকেট এরর দেয়। Sticky Sessions ইউজারের IP অনুযায়ী একই Worker Process-এ রিকুয়েস্ট ফিক্স রাখে।</p>
+    `
+  },
+  {
+    id: "node-45",
+    category: "Node.js",
+    difficulty: "Intermediate",
+    tags: ["Environment", "NODE_ENV", "Optimization"],
+    question: "NODE_ENV=production দিলে Node.js অ্যান্ড এক্সপ্রেস অভ্যন্তরীণভাবে কী কী অপটিমাইজেশন অন করে?",
+    answer: `
+<p>ভিউ ক্যাশিং অন করা, CSS/JS মেনিফেস্ট সংকুচিত করা, স্ট্যাক ট্রেস হাইড করা এবং রেসপন্স বাফারিং ফাস্ট করা।</p>
+    `
+  },
+  {
+    id: "node-46",
+    category: "Node.js",
+    difficulty: "Advanced",
+    tags: ["Diagnostics", "Diagnostic Channel", "diagnostics_channel"],
+    question: "node:diagnostics_channel দিয়ে ইন-মেমোরি পারফরম্যান্স মেট্রিক্স ট্র্যাকিং কীভাবে করবেন?",
+    answer: `
+<p>অ্যাপ্লিকেশনের বিভিন্ন লাইফসাইকেল বা থার্ডপার্টি মডিউলের অভ্যন্তরীণ ইভেন্ট সাবস্ক্রাইব করে পারফরম্যান্স টেলিমেট্রি ডাটা প্রমোট করা।</p>
+    `
+  },
+  {
+    id: "node-47",
+    category: "Node.js",
+    difficulty: "Intermediate",
+    tags: ["Stream", "Backpressure", "highWaterMark"],
+    question: "Stream highWaterMark Parameter (Default 64KB) টিউন করার কৌশল কী?",
+    answer: `
+<p>বড় ফাইল বা ভিডিও প্রসেস করার সময় <code>highWaterMark</code> কমিয়ে বা বাড়িয়ে RAM সাশ্রয় ও গিগাবিট নেটওয়ার্ক থ্রুপুট ব্যালেন্স করা।</p>
+    `
+  },
+  {
+    id: "node-48",
+    category: "Node.js",
+    difficulty: "Advanced",
+    tags: ["WebSockets", "ws", "Heartbeat"],
+    question: "ws library দিয়ে WebSockets Ping/Pong Heartbeat Mechanism এবং Dead Socket Cleanup কীভাবে করবেন?",
+    answer: `
+<p>নির্ধারিত সময় পর পর (e.g. 30s) সার্ভার <code>ping</code> পাঠাবে। সকেট <code>pong</code> না পাঠালে সেটিকে মরা সকেট (Dead socket) চিহ্নিত করে <code>terminate()</code> কল করা।</p>
+    `
+  },
+  {
+    id: "node-49",
+    category: "Node.js",
+    difficulty: "Intermediate",
+    tags: ["Utils", "util.promisify", "Custom Promisify"],
+    question: "util.promisify() এবং custom promisify symbol (util.promisify.custom) কীভাবে ব্যবহার করবেন?",
+    answer: `
+<p>পুরোনো Callback-style মেথডকে (<code>(err, data) => {}</code>) নিমেষেই modern Promise-based <code>async/await</code> মেথডে রূপান্তর করা।</p>
+    `
+  },
+  {
+    id: "node-50",
+    category: "Node.js",
+    difficulty: "Advanced",
+    tags: ["Architecture", "Event Driven", "Decoupling"],
+    question: "Node.js-এ Event-Driven Microservices Layer Architecture কীভাবে সংগঠিত করবেন?",
+    answer: `
+<p>সার্ভিসগুলোর সরাসরি এইচটিটিপি কল এড়িয়ে NATS/RabbitMQ মেসেজিং দিয়ে এসিনক্রোনাস ডিসকানেক্টেড সিস্টেম বজায় রাখা।</p>
+    `
   }
 ];
