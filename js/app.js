@@ -15,8 +15,10 @@ let userProgress = {
 };
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Load All 12 Data Files
+  // Load All 14 Data Files
   if (typeof javascriptQuestions !== 'undefined') allQuestions.push(...javascriptQuestions);
+  if (typeof reactjsQuestions !== 'undefined') allQuestions.push(...reactjsQuestions);
+  if (typeof nextjsQuestions !== 'undefined') allQuestions.push(...nextjsQuestions);
   if (typeof nodejsQuestions !== 'undefined') allQuestions.push(...nodejsQuestions);
   if (typeof expressjsQuestions !== 'undefined') allQuestions.push(...expressjsQuestions);
   if (typeof nestjsQuestions !== 'undefined') allQuestions.push(...nestjsQuestions);
