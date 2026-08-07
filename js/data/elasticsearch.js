@@ -209,36 +209,87 @@ searchProducts('wireless headphones');</code></pre>
       </ul>
     `
   }
-];
+,
 
-for (let i = 11; i <= 52; i++) {
-  const topics = [
-    { title: "Parent-Join & Nested Object Mapping", tag: "Data Modeling", diff: "Advanced" },
-    { title: "Fuzzy Queries & Levenshtein Distance for Spell Correction", tag: "Search", diff: "Intermediate" },
-    { title: "Highlighting Search Results (highlight tag)", tag: "Search", diff: "Beginner" },
-    { title: "Doc Values vs Fielddata Memory Consumption", tag: "Internals", diff: "Advanced" },
-    { title: "Search After & Scroll API for Deep Pagination", tag: "Pagination", diff: "Advanced" },
-    { title: "Alias Management for Zero-Downtime Index Switch", tag: "Ops", diff: "Intermediate" },
-    { title: "Percolator Query Engine", tag: "Search", diff: "Advanced" },
-    { title: "Cluster Health Status (Green, Yellow, Red)", tag: "Monitoring", diff: "Beginner" }
-  ];
-  const item = topics[(i - 11) % topics.length];
-  elasticsearchQuestions.push({
-    id: `es-${i}`,
+  {
+    id: "es-11",
     category: "Elasticsearch",
-    difficulty: item.diff,
-    tags: [item.tag, "Elasticsearch"],
-    question: `Elasticsearch এবং ফুল-টেক্সট সার্চ ইঞ্জিনে ${item.title}-এর গুরুত্বপূর্ণ কনসেপ্ট কী?`,
+    difficulty: "Advanced",
+    tags: ["Data Modeling","Mapping","Nested"],
+    question: "Elasticsearch-এ Nested Object Mapping এবং Parent-Join (Join Field) Mapping-এর পার্থক্য কী?",
     answer: `
-      <p>Elasticsearch সার্চ ইঞ্জিনে <strong>${item.title}</strong> বিষয়টি অত্যন্ত দরকারী।</p>
-      <h4>বিস্তারিত:</h4>
-      <p>দ্রুত সার্চ এবং মেমোরি পারফরম্যান্স টিকিয়ে রাখতে ${item.title} জানা আবশ্যিক।</p>
-      <div class="code-box">
-        <div class="code-header"><span>json</span><button class="copy-btn">Copy</button></div>
-        <pre><code>// Elasticsearch Query DSL snippet for ${item.title}
-GET /index/_search
-{ "query": { "match_all": {} } }</code></pre>
-      </div>
+<p><strong>Nested Object:</strong> ভেতরের অবজেক্ট আলাদা হিডেন ডকুমেন্টে ইনডেক্স করে (সার্চ ফাস্ট, আপডেট করার সময় পুরো অবজেক্ট রিক্রিয়েট করতে হয়)।</p>
+    <p><strong>Parent-Join:</strong> সম্পূর্ণ স্বাধীন চাইল্ড ডকুমেন্ট বানিয়ে পয়েন্ট করে (একক চাইল্ড ইন্ডিপেনডেন্টলি আপডেট করা সহজ)।</p>
     `
-  });
-}
+  },
+  {
+    id: "es-12",
+    category: "Elasticsearch",
+    difficulty: "Intermediate",
+    tags: ["Search","Fuzzy","Algorithms"],
+    question: "Elasticsearch Fuzzy Query কীভাবে Levenshtein Edit Distance ব্যবহার করে?",
+    answer: `
+<p>Fuzzy Query টাইপো বা বানান ভুল সংশোধন করে। এটি Levenshtein Distance অ্যালগরিদম দিয়ে শব্দের অমিল ক্যারেক্টার হিসাব করে সঠিক ম্যাচ নিয়ে আসে।</p>
+    `
+  },
+  {
+    id: "es-13",
+    category: "Elasticsearch",
+    difficulty: "Beginner",
+    tags: ["Search","Highlighting","UI"],
+    question: "Elasticsearch-এ Highlighting Search Results কীভাবে কাজ করে?",
+    answer: `
+<p>সার্চ রেজাল্টে ম্যাচ করা কি-ওয়ার্ড ফ্র্যাগমেন্টগুলোকে UI-তে দেখানোর জন্য <code>&lt;mark&gt;</code> বা <code>&lt;em&gt;</code> ট্যাগে র্যা প করে রেসপন্সে পাঠায়।</p>
+    `
+  },
+  {
+    id: "es-14",
+    category: "Elasticsearch",
+    difficulty: "Advanced",
+    tags: ["Internals","Memory","Doc Values"],
+    question: "Elasticsearch Inverted Index-এর সাথে Doc Values এবং Fielddata-র পার্থক্য কী?",
+    answer: `
+<p>Inverted Index টেক্সট সার্চের জন্য (Term -> Doc ID)। Doc Values হলো ডিস্ক-বেসড কলামনার স্ট্রাকচার যা RAM না বাড়িয়ে Sorting/Aggregation করায়।</p>
+    `
+  },
+  {
+    id: "es-15",
+    category: "Elasticsearch",
+    difficulty: "Advanced",
+    tags: ["Pagination","Search After","Scroll"],
+    question: "Elasticsearch-এ Deep Pagination-এর জন্য Search After কেন ব্যবহার করা হয়?",
+    answer: `
+<p><code>from + size</code> দিয়ে ১০,০০০ এর বেশি ডকুমেন্ট স্ক্যান করলে মেমোরিতে অতিরিক্ত লোড পড়ে। <code>search_after</code> দিয়ে লাইভ স্টেটলেস সিকুয়েন্সিয়াল পেজিনেশন করা অত্যন্ত এফিশিয়েন্ট।</p>
+    `
+  },
+  {
+    id: "es-16",
+    category: "Elasticsearch",
+    difficulty: "Intermediate",
+    tags: ["Ops","Aliases","Reindex"],
+    question: "Elasticsearch Index Aliases কীভাবে Zero-Downtime Reindexing নিশ্চিত করে?",
+    answer: `
+<p>ইনডেক্সের ওপর Alias পয়েন্টার ব্যবহার করে ব্যাকগ্রাউন্ডে নতুন ইনডেক্স তৈরি করে ডেটা কপি করা হয় এবং অটমিকালি এলিয়াস সোয়াপ করে ডাউনটাইম মুক্ত আপডেট অর্জন করা হয়।</p>
+    `
+  },
+  {
+    id: "es-17",
+    category: "Elasticsearch",
+    difficulty: "Advanced",
+    tags: ["Search","Percolator","Reverse Search"],
+    question: "Elasticsearch Percolator Query কী?",
+    answer: `
+<p>Percolator কুয়েরিগুলোকে ডকুমেন্ট হিসেবে ইনডেক্স করে রিভার্স সার্চ অফার করে। নতুন ইনকামিং ডকুমেন্ট ঢুকলে তা কোন কোন সেভড কুয়েরির সাথে ম্যাচ করে তা তাৎক্ষণিক জানা যায়।</p>
+    `
+  },
+  {
+    id: "es-18",
+    category: "Elasticsearch",
+    difficulty: "Beginner",
+    tags: ["Monitoring","Cluster","Health"],
+    question: "Elasticsearch Cluster Health-এর ৩টি স্টেট (Green, Yellow, Red) কী নির্দেশ করে?",
+    answer: `
+<p>Green = সব প্রাইমারি ও রেপ্লিকা শার্ড ওকে। Yellow = প্রাইমারি ওকে কিন্তু অন্তত ১টি রেপ্লিকা শার্ড আনঅ্যালোকেটেড। Red = অন্তত ১টি প্রাইমারি শার্ড মিসিং বা ড্যামেজড।</p>
+    `
+  }
+];

@@ -223,37 +223,86 @@ app.post('/register', validate(registerSchema), registerController);</code></pre
       </ul>
     `
   }
-];
+,
 
-for (let i = 11; i <= 52; i++) {
-  const topics = [
-    { title: "Custom Template Engines (EJS/Pug)", tag: "Views", diff: "Beginner" },
-    { title: "Proxy Trust Settings (app.set('trust proxy'))", tag: "Deployment", diff: "Intermediate" },
-    { title: "SSE (Server-Sent Events) in Express", tag: "Realtime", diff: "Advanced" },
-    { title: "Graceful Shutdown in Express HTTP Server", tag: "Ops", diff: "Intermediate" },
-    { title: "Morgan Logging & Winston Logger Integration", tag: "Logging", diff: "Intermediate" },
-    { title: "Express App vs Server separation for Testing (Supertest)", tag: "Testing", diff: "Intermediate" },
-    { title: "HTTP Parameter Pollution (hpp middleware)", tag: "Security", diff: "Advanced" },
-    { title: "CSRF Token Implementation (csurf / double submit cookie)", tag: "Security", diff: "Advanced" }
-  ];
-  const item = topics[(i - 11) % topics.length];
-  expressjsQuestions.push({
-    id: `express-${i}`,
+  {
+    id: "express-11",
     category: "Express.js",
-    difficulty: item.diff,
-    tags: [item.tag, "Express.js"],
-    question: `Express.js-এ ${item.title}-এর ব্যবহার এবং সেরা আর্কিটেকচারাল গাইডলাইন কী?`,
+    difficulty: "Beginner",
+    tags: ["Views","SSR","Templates"],
+    question: "Express.js-এ Template Engine (EJS, Pug) কীভাবে কাজ করে?",
     answer: `
-      <p>Express.js অ্যাপ্লিকেশন ডেভেলপমেন্টের ক্ষেত্রে <strong>${item.title}</strong> একটি কার্যকর কনসেপ্ট।</p>
-      <h4>বিস্তারিত রূপরেখা:</h4>
-      <p>একটি সুসংগঠিত RESTful API বা ব্যাকএন্ড আর্কিটেকচারে ${item.title} কোডের পারফরম্যান্স এবং সিকিউরিটি বৃদ্ধিতে সহায়তা করে।</p>
-      <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>// Express.js implementation snippet for ${item.title}
-const express = require('express');
-const app = express();
-// Route or Middleware handler configuration</code></pre>
-      </div>
+<p>Template Engine সার্ভার সাইডে dynamic HTML পেজ জেনারেট করে ক্লায়েন্টে রেন্ডার করার কাজ সম্পাদন করে।</p>
     `
-  });
-}
+  },
+  {
+    id: "express-12",
+    category: "Express.js",
+    difficulty: "Intermediate",
+    tags: ["Deployment","Proxy","Security"],
+    question: "Express.js-এ app.set('trust proxy', true) কেন ব্যবহার করা হয়?",
+    answer: `
+<p>Nginx বা Reverse Proxy-এর পেছনে Express অ্যাপ থাকলে <code>trust proxy</code> ট্রু করলে Express আসল ক্লায়েন্টের IP ও HTTPS প্রোটোকল হেডার পড়তে পারে।</p>
+    `
+  },
+  {
+    id: "express-13",
+    category: "Express.js",
+    difficulty: "Advanced",
+    tags: ["Realtime","SSE","HTTP"],
+    question: "Express.js-এ Server-Sent Events (SSE) কীভাবে কাজ করে?",
+    answer: `
+<p><code>Content-Type: text/event-stream</code> হেডার দিয়ে কানেকশন ওপেন রেখে সার্ভার থেকে রিয়েল-টাইমে একমুখী লাইভ ডাটা নোটিফিকেশন পাঠানো হয়।</p>
+    `
+  },
+  {
+    id: "express-14",
+    category: "Express.js",
+    difficulty: "Intermediate",
+    tags: ["Ops","Graceful Shutdown","Process"],
+    question: "Express.js-এ Graceful Shutdown কী?",
+    answer: `
+<p>SIGTERM সিগন্যাল শুনে রানিং রিকুয়েস্ট হ্যান্ডেল শেষ করা এবং ডাটাবেজ সকেট ও HTTP সার্ভার সকেট নিরাপদে বন্ধ করার কৌশল।</p>
+    `
+  },
+  {
+    id: "express-15",
+    category: "Express.js",
+    difficulty: "Intermediate",
+    tags: ["Logging","Winston","Morgan"],
+    question: "Production Express app-এ Morgan এবং Winston logger কীভাবে ব্যবহৃত হয়?",
+    answer: `
+<p>Morgan ইনকামিং HTTP হিট লগ করে এবং Winston সেন্ট্রালাইজডভাবে বিভিন্ন লেভেলে (info, error) JSON ফাইলে স্ট্রাকচার্ড লগ স্টোর করে।</p>
+    `
+  },
+  {
+    id: "express-16",
+    category: "Express.js",
+    difficulty: "Intermediate",
+    tags: ["Testing","Supertest","Architecture"],
+    question: "Integration Testing-এ app.js এবং server.js আলাদা করা কেন ভালো প্র্যাকটিস?",
+    answer: `
+<p>পোর্ট লিসেন বাদ দিয়ে <code>app.js</code> আলাদা রাখলে Supertest পোর্ট বাইন্ড না করেই সরাসরি Express মিডলওয়্যার ও রুট ইন্টারঅ্যাকশন টেস্ট করতে পারে।</p>
+    `
+  },
+  {
+    id: "express-17",
+    category: "Express.js",
+    difficulty: "Advanced",
+    tags: ["Security","Middleware","HPP"],
+    question: "HTTP Parameter Pollution (HPP) অ্যাটাক কী?",
+    answer: `
+<p>একই কোয়েরি প্যারামিটার একাধিকবার পাঠিয়ে অ্যাররে ইনজেকশন ঘটানো। Express-এ <code>hpp()</code> মিডলওয়্যার ডুপ্লিকেট প্যারামিটার ক্লিন করে নিরাপত্তা দেয়।</p>
+    `
+  },
+  {
+    id: "express-18",
+    category: "Express.js",
+    difficulty: "Advanced",
+    tags: ["Security","CSRF","Auth"],
+    question: "Cross-Site Request Forgery (CSRF) কী এবং এটি কীভাবে প্রতিরোধ করবেন?",
+    answer: `
+<p>ক্ষতিকর ওয়েবসাইট ব্রাউজারের কুকি ব্যবহার করে অনাকাঙ্ক্ষিত রিকুয়েস্ট পাঠানোর অ্যাটাক। CSRF token এবং <code>SameSite=Strict</code> কুকি দিয়ে এটি প্রতিরোধ করা হয়।</p>
+    `
+  }
+];

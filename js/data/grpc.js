@@ -188,36 +188,86 @@ server.bindAsync('0.0.0.0:50051', grpc.ServerCredentials.createInsecure(), () =>
       <p><strong>gRPC-Web:</strong> এটি একটি জাভাস্ক্রিপ্ট ক্লায়েন্ট লাইব্রেরি যা ব্রাউজারকে HTTP/1.1 বা সাধারণ HTTP/2 দিয়ে প্রক্সিতে (Envoy Proxy) কথা বলতে দেয়। Envoy প্রক্সি gRPC-Web ট্রাফিককে রূপান্তর করে নেটিভ gRPC ব্যাকএন্ডে পাঠায়।</p>
     `
   }
-];
+,
 
-for (let i = 11; i <= 52; i++) {
-  const topics = [
-    { title: "Protobuf Backward & Forward Compatibility Rules", tag: "Versioning", diff: "Advanced" },
-    { title: "gRPC Error Handling & Status Codes (OK, NOT_FOUND, CANCELLED)", tag: "Error Handling", diff: "Intermediate" },
-    { title: "Buf Tool for Proto Linting and Breaking Change Detection", tag: "Tools", diff: "Intermediate" },
-    { title: "gRPC Reflections & Evans CLI Debugging", tag: "Debugging", diff: "Intermediate" },
-    { title: "Health Checking Protocol in gRPC", tag: "DevOps", diff: "Advanced" },
-    { title: "Field Masks in gRPC for Partial Response", tag: "Optimization", diff: "Advanced" },
-    { title: "gRPC Transcoding (JSON to gRPC REST Gateway)", tag: "Gateway", diff: "Advanced" },
-    { title: "Keepalive Pings in Long-lived gRPC Streams", tag: "Networking", diff: "Intermediate" }
-  ];
-  const item = topics[(i - 11) % topics.length];
-  grpcQuestions.push({
-    id: `grpc-${i}`,
+  {
+    id: "grpc-11",
     category: "gRPC",
-    difficulty: item.diff,
-    tags: [item.tag, "gRPC"],
-    question: `gRPC এবং হাই-পারফরম্যান্স কমুনিকেশনে ${item.title}-এর সুবিধা ও প্রয়োগ নীতি কী?`,
+    difficulty: "Advanced",
+    tags: ["Protobuf","Versioning","Rules"],
+    question: "Protocol Buffers (Protobuf)-এ Backward এবং Forward Compatibility রুলস কী কী?",
     answer: `
-      <p>মাইক্রোসার্ভিস ব্যাকএন্ডে <strong>${item.title}</strong> একটি অত্যন্ত দ্রুত ও কার্যকর টেকনোলজি।</p>
-      <h4>ব্যাখ্যা:</h4>
-      <p>হাই থ্রুপুট সার্ভিস কমুনিকেশনে ${item.title} কোডের পারফরম্যান্স বহুলাংশে বৃদ্ধি করে।</p>
-      <div class="code-box">
-        <div class="code-header"><span>protobuf</span><button class="copy-btn">Copy</button></div>
-        <pre><code>// Protocol Buffers snippet for ${item.title}
-syntax = "proto3";
-message ExampleMessage { string status = 1; }</code></pre>
-      </div>
+<p>Tag Number কখনো চেঞ্জ বা ডিলিট করা যাবে না। নতুন ফিল্ড যোগ করলে পুরাতন ক্লায়েন্ট তা ইগনোর করবে এবং রিমুভড ফিল্ড <code>reserved</code> মার্ক করতে হবে।</p>
     `
-  });
-}
+  },
+  {
+    id: "grpc-12",
+    category: "gRPC",
+    difficulty: "Intermediate",
+    tags: ["Error Handling","Status Codes","API"],
+    question: "gRPC Status Codes (OK, NOT_FOUND, CANCELLED) কীভাবে কাজ করে?",
+    answer: `
+<p>gRPC নির্দিষ্ট ১৬টি ক্যানোনিকাল স্ট্যাটাস কোড (যেমন OK, INVALID_ARGUMENT, NOT_FOUND) প্রদান করে এবং Rich Error অবজেক্ট সাপোর্ট করে।</p>
+    `
+  },
+  {
+    id: "grpc-13",
+    category: "gRPC",
+    difficulty: "Intermediate",
+    tags: ["Tools","Buf","Linting"],
+    question: "gRPC-তে Buf Tool কী?",
+    answer: `
+<p>Protobuf ফাইলের Linting, Breaking Change Detection এবং অটোমেটিক কোড জেনারেটর প্রসেস সহজ করার আধুনিক CLI টুল।</p>
+    `
+  },
+  {
+    id: "grpc-14",
+    category: "gRPC",
+    difficulty: "Intermediate",
+    tags: ["Debugging","Evans CLI","Reflection"],
+    question: "gRPC Server Reflection এবং Evans CLI কী?",
+    answer: `
+<p>Server Reflection <code>.proto</code> ফাইল ছাড়াই মেটাডাটা জানায় এবং Evans CLI দিয়ে ইন্টারেক্টিভভাবে টার্মিনাল থেকে gRPC মেথড টেস্ট করা হয়।</p>
+    `
+  },
+  {
+    id: "grpc-15",
+    category: "gRPC",
+    difficulty: "Advanced",
+    tags: ["DevOps","Health Check","Kubernetes"],
+    question: "gRPC Health Checking Protocol কীভাবে কাজ করে?",
+    answer: `
+<p>Kubernetes বা Load Balancer-এর জন্য gRPC স্ট্যান্ডার্ড <code>grpc.health.v1.Health</code> সার্ভিস অফার করে (Check & Watch RPC)।</p>
+    `
+  },
+  {
+    id: "grpc-16",
+    category: "gRPC",
+    difficulty: "Advanced",
+    tags: ["Optimization","FieldMask","Performance"],
+    question: "gRPC FieldMask (Partial Response) কী?",
+    answer: `
+<p>ক্লায়েন্ট সব ফিল্ড না চেয়ে কেবল প্রয়োজনীয় ফিল্ড ফিল্টার করে ডেটা ট্রান্সফার ব্যান্ডউইথ অপটিমাইজ করার পদ্ধতি।</p>
+    `
+  },
+  {
+    id: "grpc-17",
+    category: "gRPC",
+    difficulty: "Advanced",
+    tags: ["Gateway","Transcoding","JSON"],
+    question: "gRPC JSON Transcoding (grpc-gateway) কী?",
+    answer: `
+<p>ইনকামিং RESTful JSON HTTP রিকুয়েস্টকে অটোমেটিক gRPC বাইনারিতে রূপান্তর করে সার্ভারে পাঠানোর প্রক্সি গেটওয়ে।</p>
+    `
+  },
+  {
+    id: "grpc-18",
+    category: "gRPC",
+    difficulty: "Intermediate",
+    tags: ["Networking","HTTP/2","Keepalive"],
+    question: "gRPC Stream-এ HTTP/2 Keepalive Pings-এর ভূমিকা কী?",
+    answer: `
+<p>আইডল কানেকশন যেন নেটওয়ার্ক লড ব্যালেন্সার বা ফায়ারওয়াল বন্ধ না করে দেয়, সে জন্য সময় পর পর Keepalive Ping প্যাকেট পাঠায়।</p>
+    `
+  }
+];

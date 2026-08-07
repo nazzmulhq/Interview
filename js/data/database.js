@@ -179,35 +179,88 @@ FROM employees;</code></pre>
       </ul>
     `
   }
-];
+,
 
-for (let i = 11; i <= 52; i++) {
-  const topics = [
-    { title: "WAL (Write-Ahead Logging) in RDBMS", tag: "Internals", diff: "Advanced" },
-    { title: "Stored Procedures vs Functions vs Triggers", tag: "Programmability", diff: "Intermediate" },
-    { title: "N+1 Query Problem & Eager vs Lazy Loading", tag: "ORM", diff: "Intermediate" },
-    { title: "Foreign Key Constraints & Cascade Delete Performance", tag: "Integrity", diff: "Beginner" },
-    { title: "DB Master-Slave Replication & Read Replicas", tag: "Architecture", diff: "Advanced" },
-    { title: "CAP Theorem (Consistency, Availability, Partition Tolerance)", tag: "Distributed DB", diff: "Advanced" },
-    { title: "Database Migration Management (Knex/Prisma/Flyway)", tag: "DevOps", diff: "Intermediate" },
-    { title: "CTE (Common Table Expressions) and Recursive Queries", tag: "SQL", diff: "Intermediate" }
-  ];
-  const item = topics[(i - 11) % topics.length];
-  databaseQuestions.push({
-    id: `db-${i}`,
+  {
+    id: "db-11",
     category: "Database",
-    difficulty: item.diff,
-    tags: [item.tag, "Database"],
-    question: `Database-এ ${item.title}-এর কাজ ও ইন্টারভিউ ফোকাস বিষয়গুলো কী কী?`,
+    difficulty: "Advanced",
+    tags: ["Internals","RDBMS","ACID"],
+    question: "RDBMS-এ WAL (Write-Ahead Logging) কী এবং এটি কীভাবে ACID Durability নিশ্চিত করে?",
     answer: `
-      <p>ডাটা আর্কিটেকচার এবং SQL ডেটাবেজে <strong>${item.title}</strong> বিষয়সমূহ অত্যন্ত প্রাসঙ্গিক।</p>
-      <h4>আলোচনা:</h4>
-      <p>ডাটা সামঞ্জস্যতা (Consistency) এবং হাই থ্রুপুট বজায় রাখতে ${item.title}-এর সঠিক ব্যবহার জানা দরকার।</p>
-      <div class="code-box">
-        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
-        <pre><code>-- SQL Query implementation for ${item.title}
-EXPLAIN SELECT * FROM orders WHERE status = 'ACTIVE';</code></pre>
-      </div>
+<p><strong>Write-Ahead Logging (WAL)</strong> হলো ডাটাবেজ ইঞ্জিনের একটি বৈশিষ্ট্য যা নিশ্চিত করে যে ডাটাবেজ ফাইলে পরিবর্তনের আগে সেই পরিবর্তনের লগ ডিস্কে সিঙ্ক্রোনাসলি রাইট করা হবে। সার্ভার ক্র্যাশ করলে রিস্টার্টের সময় WAL রিড করে রিকভারি চালানো হয়।</p>
     `
-  });
-}
+  },
+  {
+    id: "db-12",
+    category: "Database",
+    difficulty: "Intermediate",
+    tags: ["SQL","Programmability","RDBMS"],
+    question: "Stored Procedures, User-Defined Functions (UDF) এবং Triggers-এর মধ্যে মূল পার্থক্য কী?",
+    answer: `
+<p><strong>Stored Procedure:</strong> বিজনেস লজিক চালায়, একাধিক রেজাল্ট দিতে পারে, CALL দিয়ে ইনভোক করা হয়।</p>
+    <p><strong>UDF Function:</strong> একক ভ্যালু রিটান করে, SELECT-এ ব্যবহৃত হয়।</p>
+    <p><strong>Trigger:</strong> INSERT/UPDATE/DELETE ইভেন্টে স্বয়ংক্রিয়ভাবে এক্সিকিউট হয়।</p>
+    `
+  },
+  {
+    id: "db-13",
+    category: "Database",
+    difficulty: "Intermediate",
+    tags: ["ORM","Performance","SQL"],
+    question: "ORM-এ N+1 Query Problem কী এবং Eager Loading (JOIN / Include) দিয়ে এটি কীভাবে সমাধান করা হয়?",
+    answer: `
+<p>১টি মেইন অবজেক্ট লিস্ট আনার জন্য ১টি কুয়েরি চালানো এবং পরে প্রতিটি আইটেমের রিলেটেড ডেটার জন্য N-সংখ্যক কুয়েরি চালানোই হলো N+1 প্রবলেম। Eager Loading (JOIN) ব্যবহার করে সিঙ্গেল কুয়েরিতে পুরো ডেটা তুলে আনলে এটি সমাধান হয়।</p>
+    `
+  },
+  {
+    id: "db-14",
+    category: "Database",
+    difficulty: "Beginner",
+    tags: ["Integrity","Foreign Key","SQL"],
+    question: "Foreign Key Constraints এবং ON DELETE CASCADE কী?",
+    answer: `
+<p>Foreign Key টেবিলগুলোর সম্পর্ক টিকিয়ে রাখে। <code>ON DELETE CASCADE</code> দিলে প্যারেন্ট রেকর্ড ডিলিট হলে স্বয়ংক্রিয়ভাবে সকল সম্পর্কিত চাইল্ড রেকর্ড মুছে যায়।</p>
+    `
+  },
+  {
+    id: "db-15",
+    category: "Database",
+    difficulty: "Advanced",
+    tags: ["Architecture","Replication","Scaling"],
+    question: "Database Master-Slave Replication এবং Read Replicas কীভাবে কাজ করে?",
+    answer: `
+<p>Master Node সকল Write অপারেশন গ্রহণ করে এবং Replication Log তৈরি করে। Read Replicas সেই লগ সিঙ্ক করে রিড-অনলি (SELECT) সেবা দিয়ে ট্রাফিক স্কেল করে।</p>
+    `
+  },
+  {
+    id: "db-16",
+    category: "Database",
+    difficulty: "Advanced",
+    tags: ["Distributed Systems","CAP Theorem","Architecture"],
+    question: "Distributed Database Design-এ CAP Theorem কী?",
+    answer: `
+<p>CAP Theorem অনুযায়ী ডিস্ট্রিবিউটেড ডাটাবেজে Consistency (C), Availability (A), এবং Partition Tolerance (P)-এর মধ্যে একসাথে যেকোনো ২টি কেবল নিশ্চিত করা যায় (CP বা AP)।</p>
+    `
+  },
+  {
+    id: "db-17",
+    category: "Database",
+    difficulty: "Intermediate",
+    tags: ["DevOps","Migrations","Schema"],
+    question: "Database Migration Management (Knex/Prisma/Flyway) কী?",
+    answer: `
+<p>ডাটাবেজ স্কিমা ফাইল ভার্সন কন্ট্রোল করার পদ্ধতি। Up/Down মাইগ্রেশন ফাইলের মাধ্যমে টিমের সবার ডাটাবেজ স্কিমা একই স্টেটাস বজায় রাখে।</p>
+    `
+  },
+  {
+    id: "db-18",
+    category: "Database",
+    difficulty: "Intermediate",
+    tags: ["SQL","CTE","Queries"],
+    question: "SQL-এ Common Table Expressions (CTE) এবং Recursive Queries কী?",
+    answer: `
+<p>WITH ক্লজ দিয়ে অস্থায়ী রেজাল্ট সেট তৈরি করাকে CTE বলে। Hierarchy ডেটা (Org Chart / Category Tree) সার্চে <code>WITH RECURSIVE</code> ব্যবহার করা হয়।</p>
+    `
+  }
+];

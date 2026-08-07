@@ -255,39 +255,106 @@ process.on('SIGTERM', () => {
       </ul>
     `
   }
-];
+,
 
-// Generate up to 52 items
-for (let i = 11; i <= 52; i++) {
-  const topics = [
-    { title: "N-API & C++ Addons", tag: "Native", diff: "Advanced" },
-    { title: "Path Module & Path Traversal Vulnerability", tag: "Security", diff: "Intermediate" },
-    { title: "Environment Variables & dotenv / process.env", tag: "Config", diff: "Beginner" },
-    { title: "HTTP Keep-Alive and Connection Pooling", tag: "Networking", diff: "Intermediate" },
-    { title: "Crypto Module & Password Hashing (bcrypt, argon2)", tag: "Security", diff: "Intermediate" },
-    { title: "DNS resolution & c-ares library", tag: "Libuv", diff: "Advanced" },
-    { title: "Module Caching (require cache)", tag: "Modules", diff: "Intermediate" },
-    { title: "Performance Hooks API (perf_hooks)", tag: "Profiling", diff: "Advanced" },
-    { title: "Heapdump and Diagnostic Reports", tag: "Debugging", diff: "Advanced" },
-    { title: "SIGINT vs SIGTERM signals in Node.js", tag: "OS", diff: "Intermediate" }
-  ];
-  const item = topics[(i - 11) % topics.length];
-  nodejsQuestions.push({
-    id: `node-${i}`,
+  {
+    id: "node-11",
     category: "Node.js",
-    difficulty: item.diff,
-    tags: [item.tag, "Node.js"],
-    question: `Node.js-এ ${item.title}-এর গুরুত্বপূর্ণ কনসেপ্ট ও ইন্টারভিউ টেকনিক কী?`,
+    difficulty: "Advanced",
+    tags: ["Native","C++ Addons","N-API"],
+    question: "Node.js-এ Node-API (N-API) এবং C++ Addons কী?",
     answer: `
-      <p>Node.js ব্যাকেণ্ড আর্কিটেকচারে <strong>${item.title}</strong> একটি অত্যন্ত স্পর্শকাতর ও গুরুত্বপূর্ণ বিষয়।</p>
-      <h4>বিশ্লেষণ:</h4>
-      <p>প্রোডাকশন গ্রেড সার্ভারে স্কেলেবিলিটি এবং হাই পারফরম্যান্স নিশ্চিত করতে ${item.title} সঠিকভাবে জানা জরুরি।</p>
-      <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>// Practical implementation pattern for ${item.title}
-const nodeModule = require('node:module');
-// Optimizing Node.js server performance</code></pre>
-      </div>
+<p>C/C++ দিয়ে তৈরি নেটিভ বাইনারি মডিউলকে Node.js-এ চালানোর ABI-stable API। ভারী গাণিতিক হিসাব বা নেটিভ সিটেম মেমোরি অ্যাক্সেসে এটি ব্যবহৃত হয়।</p>
     `
-  });
-}
+  },
+  {
+    id: "node-12",
+    category: "Node.js",
+    difficulty: "Intermediate",
+    tags: ["Security","Path Traversal","FS"],
+    question: "Node.js path মডিউল ব্যবহারে Path Traversal সিকিউরিটি ঝুঁকি কী?",
+    answer: `
+<p>ইউজার ইনপুট ফিল্টার না করে সরাসরি ফাইল রিড করলে ডিরেক্টরি ট্রাভার্সাল হ্যাক হয়। সমাধান: <code>path.resolve</code> করে বেস ডিরেক্টরির সাথে মেলানো।</p>
+    `
+  },
+  {
+    id: "node-13",
+    category: "Node.js",
+    difficulty: "Beginner",
+    tags: ["Config","Env","Node20"],
+    question: "Node.js 20.6+ এর নেটিভ --env-file ফ্ল্যাগ কীভাবে কাজ করে?",
+    answer: `
+<p>dotenv প্যাকেজ ছাড়াই <code>node --env-file=.env app.js</code> চালালে Node.js স্বয়ংক্রিয়ভাবে <code>process.env</code> ভ্যারিয়েবল লোড করে।</p>
+    `
+  },
+  {
+    id: "node-14",
+    category: "Node.js",
+    difficulty: "Intermediate",
+    tags: ["Networking","Keep-Alive","Sockets"],
+    question: "Node.js HTTP Keep-Alive এবং socket reuse সুবিধা কী?",
+    answer: `
+<p><code>http.Agent({ keepAlive: true })</code> সেটিংস TCP handshakes বারবার না করে বিদ্যমান সকেট রিইউজ করে ল্যাটেন্সি অর্ধেকের বেশি কমায়।</p>
+    `
+  },
+  {
+    id: "node-15",
+    category: "Node.js",
+    difficulty: "Intermediate",
+    tags: ["Security","Crypto","Hashing"],
+    question: "Node.js crypto module দিয়ে পাসওয়ার্ড হ্যশিং এবং এনক্রিপশন কীভাবে করবেন?",
+    answer: `
+<p><code>crypto.scrypt</code> দিয়ে নিরাপদ হ্যাশ এবং <code>crypto.createCipheriv('aes-256-gcm')</code> দিয়ে ফাইল এনক্রিপ্ট করা যায়।</p>
+    `
+  },
+  {
+    id: "node-16",
+    category: "Node.js",
+    difficulty: "Advanced",
+    tags: ["DNS","Libuv","Threads"],
+    question: "dns.lookup() এবং dns.resolve()-এর মধ্যে মূল পার্থক্য কী?",
+    answer: `
+<p><code>dns.lookup()</code> ওএসের getaddrinfo ব্যবহার করে Worker Thread ব্লক করে। <code>dns.resolve()</code> c-ares লাইব্রেরি দিয়ে নন-ব্লকিং অ্যাসিনক্রোনাস ডিএনএস কুয়েরি পাঠায়।</p>
+    `
+  },
+  {
+    id: "node-17",
+    category: "Node.js",
+    difficulty: "Intermediate",
+    tags: ["Modules","Cache","Require"],
+    question: "Node.js require.cache কীভাবে কাজ করে?",
+    answer: `
+<p>require করা ফাইল <code>require.cache</code> অবজেক্টে ক্যাশ হয়। ফাইল রিলোড করতে <code>delete require.cache[require.resolve('./module')]</code> করতে হয়।</p>
+    `
+  },
+  {
+    id: "node-18",
+    category: "Node.js",
+    difficulty: "Advanced",
+    tags: ["Performance","Perf Hooks","Metrics"],
+    question: "Node.js perf_hooks API দিয়ে কোডের ল্যাটেন্সি কীভাবে মাপবেন?",
+    answer: `
+<p><code>performance.mark('start')</code> এবং <code>performance.mark('end')</code> দিয়ে <code>performance.measure()</code> করে ল্যাটেন্সি মাপা হয়।</p>
+    `
+  },
+  {
+    id: "node-19",
+    category: "Node.js",
+    difficulty: "Advanced",
+    tags: ["Debugging","Heapdump","Diagnostics"],
+    question: "Node.js Diagnostic Reports (process.report) কী?",
+    answer: `
+<p>প্রসেস ক্র্যাশ বা হাই মেমোরিতে <code>process.report.getReport()</code> দিয়ে ওএস মেমোরি, থ্রেড স্ট্যাক এবং ইভেন্ট লুপের স্টেট স্ন্যাপশট জেনারেট করা হয়।</p>
+    `
+  },
+  {
+    id: "node-20",
+    category: "Node.js",
+    difficulty: "Intermediate",
+    tags: ["OS","Signals","Process"],
+    question: "Node.js-এ SIGINT এবং SIGTERM সিগন্যাল কেন হ্যান্ডেল করা উচিত?",
+    answer: `
+<p>প্রসেস বন্ধের নোটিফিকেশন শুনে ডাটাবেজ সকেট বন্ধ ও পেন্ডিং জব শেষ করার জন্য <code>process.on('SIGTERM')</code> হ্যান্ডলার ব্যবহার করা আবশ্যক।</p>
+    `
+  }
+];

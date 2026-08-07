@@ -257,37 +257,86 @@ gzip_types
       </div>
     `
   }
-];
+,
 
-for (let i = 11; i <= 52; i++) {
-  const topics = [
-    { title: "Nginx Location Block Matching Priority (=, ^~, ~, ~*)", tag: "Routing", diff: "Intermediate" },
-    { title: "Client Max Body Size & File Upload Timeout Tuning", tag: "Config", diff: "Beginner" },
-    { title: "Nginx Stream Module for Layer 4 TCP/UDP Load Balancing", tag: "L4 Balancing", diff: "Advanced" },
-    { title: "Zero-Downtime Reloading (nginx -s reload)", tag: "Ops", diff: "Beginner" },
-    { title: "Custom Log Formats with JSON output for ELK stack", tag: "Logging", diff: "Intermediate" },
-    { title: "GeoIP module for Country-based Traffic Routing", tag: "Routing", diff: "Advanced" },
-    { title: "Nginx OpenResty & Lua Scripting", tag: "Lua", diff: "Advanced" },
-    { title: "WebSockets Proxying (Upgrade & Connection headers)", tag: "WebSockets", diff: "Intermediate" }
-  ];
-  const item = topics[(i - 11) % topics.length];
-  nginxQuestions.push({
-    id: `nginx-${i}`,
+  {
+    id: "nginx-11",
     category: "Nginx",
-    difficulty: item.diff,
-    tags: [item.tag, "Nginx"],
-    question: `Nginx-এ ${item.title}-এর কনফিগারেশন এবং সেরা ব্যবহার কৌশল কী?`,
+    difficulty: "Intermediate",
+    tags: ["Routing","Location","Priority"],
+    question: "Nginx Location Block Matching Priority-এর নিয়মসমূহ কী কী?",
     answer: `
-      <p>Nginx ওয়েবাসার্ভার এবং লোড ব্যালেন্সার অপারেশনে <strong>${item.title}</strong> কনসেপ্টটি খুবই গুরুত্ত্বপূর্ণ।</p>
-      <h4>বিশ্লেষণ:</h4>
-      <p>সার্ভার অপ্টিমাইজেশন এবং হাই-ট্রাফিক ব্যাকএন্ড সচল রাখতে Nginx-এ ${item.title} ব্যবহারের খুঁটিনাটি নিম্নে দেওয়া হলো।</p>
-      <div class="code-box">
-        <div class="code-header"><span>nginx</span><button class="copy-btn">Copy</button></div>
-        <pre><code># Configuration block snippet for ${item.title}
-location /example {
-  proxy_pass http://backend_upstream;
-}</code></pre>
-      </div>
+<p>অগ্রাধিকারের ক্রম: 1. <code>=</code> Exact 2. <code>^~</code> Preferential Prefix 3. <code>~</code> / <code>~*</code> Regex 4. Standard Prefix Match।</p>
     `
-  });
-}
+  },
+  {
+    id: "nginx-12",
+    category: "Nginx",
+    difficulty: "Beginner",
+    tags: ["Config","Uploads","Timeouts"],
+    question: "Nginx-এ 413 Request Entity Too Large এরর ফিক্স করতে কোন কনফিগারেশন চেঞ্জ করবেন?",
+    answer: `
+<p><code>http</code> বা <code>server</code> ব্লকে <code>client_max_body_size 100M;</code> যোগ করতে হয়।</p>
+    `
+  },
+  {
+    id: "nginx-13",
+    category: "Nginx",
+    difficulty: "Advanced",
+    tags: ["L4 Balancing","Stream","TCP"],
+    question: "Nginx Stream Module দিয়ে Layer 4 (TCP/UDP) Load Balancing কীভাবে করা হয়?",
+    answer: `
+<p>HTTP ট্রান্সফর্ম না করে সরাসরি সকেট লেভেলে প্রোটোকল (MySQL, gRPC, Redis) লোড ব্যালেন্স করতে <code>stream { ... }</code> ব্যবহৃত হয়।</p>
+    `
+  },
+  {
+    id: "nginx-14",
+    category: "Nginx",
+    difficulty: "Beginner",
+    tags: ["Ops","Reload","Process"],
+    question: "nginx -s reload কমান্ড দিলে কীভাবে জিরো-ডাউনটাইম আপডেট হয়?",
+    answer: `
+<p>Master Process কনফিগারেশন রিড করে নতুন Worker Process চালু করে। পুরাতন ওয়ার্কারগুলো পেন্ডিং কাজ শেষ করে স্বয়ংক্রিয়ভাবে ক্লোজ হয়।</p>
+    `
+  },
+  {
+    id: "nginx-15",
+    category: "Nginx",
+    difficulty: "Intermediate",
+    tags: ["Logging","JSON","ELK"],
+    question: "Nginx-এ কাস্টম JSON Access Log ফরম্যাট কীভাবে তৈরি করবেন?",
+    answer: `
+<p><code>log_format json_analytics '{"time": "$time_iso8601", "ip": "$remote_addr", "status": "$status"}';</code> ডিক্লেয়ার করে দেওয়া হয়।</p>
+    `
+  },
+  {
+    id: "nginx-16",
+    category: "Nginx",
+    difficulty: "Advanced",
+    tags: ["GeoIP","Routing","Security"],
+    question: "Nginx GeoIP Module দিয়ে দেশভিত্তিক ট্রাফিক ব্লক বা রাউট কীভাবে করা হয়?",
+    answer: `
+<p>MaxMind GeoIP2 ডাটাবেজ দিয়ে ইনকামিং IP-র দেশ বের করে নির্দিষ্ট দেশের ট্রাফিক অন্য ইউআরএলে রিডাইরেক্ট বা ব্লক করা যায়।</p>
+    `
+  },
+  {
+    id: "nginx-17",
+    category: "Nginx",
+    difficulty: "Advanced",
+    tags: ["Lua","OpenResty","Dynamic"],
+    question: "Nginx-এ OpenResty এবং Lua Scripting-এর কাজ কী?",
+    answer: `
+<p>Lua স্ক্রিপ্টিং দিয়ে Nginx-এর ভেতরেই ডায়নামিক অথেন্টিকেশন, কাস্টম ক্যাশিং ও এপিআই গেটওয়ে লজিক সি-লেভেল পারফরম্যান্সে চালানো যায়।</p>
+    `
+  },
+  {
+    id: "nginx-18",
+    category: "Nginx",
+    difficulty: "Intermediate",
+    tags: ["WebSockets","Proxy","Headers"],
+    question: "Nginx-এ WebSockets Proxying করতে কোন কোন হেডার সেট করতে হয়?",
+    answer: `
+<p><code>proxy_set_header Upgrade $http_upgrade;</code> এবং <code>proxy_set_header Connection "upgrade";</code> দেওয়া আবশ্যক।</p>
+    `
+  }
+];

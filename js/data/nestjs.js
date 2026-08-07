@@ -236,37 +236,86 @@ getProfile(@CurrentUser() user: UserEntity) {
       </div>
     `
   }
-];
+,
 
-for (let i = 11; i <= 52; i++) {
-  const topics = [
-    { title: "BullMQ & Queue Management in NestJS", tag: "Queues", diff: "Advanced" },
-    { title: "Task Scheduling & Cron Jobs (@Cron)", tag: "Tasks", diff: "Intermediate" },
-    { title: "WebSockets with @WebSocketGateway in NestJS", tag: "Realtime", diff: "Intermediate" },
-    { title: "GraphQL Integration (Code-first vs Schema-first)", tag: "GraphQL", diff: "Advanced" },
-    { title: "Custom Providers (useValue, useClass, useFactory)", tag: "DI", diff: "Advanced" },
-    { title: "Lifecycle Hooks (onModuleInit, onApplicationShutdown)", tag: "Architecture", diff: "Intermediate" },
-    { title: "Swagger OpenAPI Integration (@ApiTags, @ApiOperation)", tag: "Docs", diff: "Beginner" },
-    { title: "Health Checks with @nestjs/terminus", tag: "DevOps", diff: "Intermediate" }
-  ];
-  const item = topics[(i - 11) % topics.length];
-  nestjsQuestions.push({
-    id: `nest-${i}`,
+  {
+    id: "nest-11",
     category: "NestJS",
-    difficulty: item.diff,
-    tags: [item.tag, "NestJS"],
-    question: `NestJS-এ ${item.title}-এর কাজ এবং উৎপাদনমুখী (Production) ব্যবহারের সেরা নিয়ম কী?`,
+    difficulty: "Advanced",
+    tags: ["Queues","BullMQ","Redis"],
+    question: "NestJS-এ BullMQ (@nestjs/bull) দিয়ে Queue Management কীভাবে কাজ করে?",
     answer: `
-      <p>NestJS অ্যান্টারপ্রাইজ লেভেল আর্কিটেকচারে <strong>${item.title}</strong> একটি বহুল ব্যবহৃত মডিউল।</p>
-      <h4>বিস্তারিত বিবরণ:</h4>
-      <p>কোডের নির্ভরতা হ্রাস (Decoupling) এবং মডুলারিটি বজায় রাখতে NestJS-এর প্রমিত উপায়ে ${item.title} ইমপ্লিমেন্ট করা আবশ্যক।</p>
-      <div class="code-box">
-        <div class="code-header"><span>typescript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>// NestJS implementation snippet for ${item.title}
-import { Injectable } from '@nestjs/common';
-@Injectable()
-export class FeatureService {}</code></pre>
-      </div>
+<p>BullMQ হলো Redis-ভিত্তিক কিউ ম্যানেজার। সার্ভিস থেকে হেভি জব কিউতে পুশ করে Processor ক্লাস দিয়ে ব্যাকগ্রাউন্ডে তা সম্পাদন করা হয়।</p>
     `
-  });
-}
+  },
+  {
+    id: "nest-12",
+    category: "NestJS",
+    difficulty: "Intermediate",
+    tags: ["Tasks","Cron","Schedule"],
+    question: "NestJS-এ Task Scheduling ও Cron Jobs (@Cron) কীভাবে পরিচালনা করা হয়?",
+    answer: `
+<p><code>@nestjs/schedule</code> ব্যবহার করে মেথডের ওপর <code>@Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)</code> দিয়ে স্বয়ংক্রিয় ব্যাকগ্রাউন্ড কাজ শিডিউল করা হয়।</p>
+    `
+  },
+  {
+    id: "nest-13",
+    category: "NestJS",
+    difficulty: "Intermediate",
+    tags: ["Realtime","WebSockets","Gateways"],
+    question: "NestJS @WebSocketGateway() ব্যবহার করে সকেট কীভাবে সেটআপ করবেন?",
+    answer: `
+<p>WebSocket Gateway তৈরি করে <code>@SubscribeMessage()</code> এবং <code>@MessageBody()</code> দিয়ে মেসেজ রিসিভ ও বাইডিরেকশনাল রিয়েল-টাইম ডাটা পাঠানো হয়।</p>
+    `
+  },
+  {
+    id: "nest-14",
+    category: "NestJS",
+    difficulty: "Advanced",
+    tags: ["GraphQL","Code-first","Schema-first"],
+    question: "NestJS GraphQL Integration-এ Code-first vs Schema-first-এর পার্থক্য কী?",
+    answer: `
+<p>Code-first এ TypeScript ক্লাস ও Decorator দিয়ে টাইপ ডিফাইন করা হয়। Schema-first এ হাতে <code>.graphql</code> ফাইল লেখা হয়।</p>
+    `
+  },
+  {
+    id: "nest-15",
+    category: "NestJS",
+    difficulty: "Advanced",
+    tags: ["DI","Custom Providers","Patterns"],
+    question: "NestJS Custom Providers (useValue, useClass, useFactory) কখন ব্যবহৃত হয়?",
+    answer: `
+<p>Mock service injection এ <code>useValue</code>, ডাইনামিক ক্লাসে <code>useClass</code> এবং অ্যাসিনক্রোনাস ডাটাবেজ কানফিগ প্রোভাইডারে <code>useFactory</code> ব্যবহৃত হয়।</p>
+    `
+  },
+  {
+    id: "nest-16",
+    category: "NestJS",
+    difficulty: "Intermediate",
+    tags: ["Lifecycle","Hooks","Architecture"],
+    question: "NestJS Lifecycle Hooks-এর প্রধান ধাপগুলো কী কী?",
+    answer: `
+<p>স্টার্টআপ ও শাটডাউনে <code>OnModuleInit</code> -> <code>OnApplicationBootstrap</code> এবং <code>OnModuleDestroy</code> -> <code>OnApplicationShutdown</code> কাজ করে।</p>
+    `
+  },
+  {
+    id: "nest-17",
+    category: "NestJS",
+    difficulty: "Beginner",
+    tags: ["Docs","Swagger","OpenAPI"],
+    question: "NestJS-এ Swagger OpenAPI Integration কীভাবে ডক্স জেনারেট করে?",
+    answer: `
+<p><code>@nestjs/swagger</code> যোগ করে <code>@ApiTags()</code>, <code>@ApiOperation()</code> দিয়ে অটোমেটিক ইন্টারঅ্যাক্টিভ REST API ডক্স তৈরি করা হয়।</p>
+    `
+  },
+  {
+    id: "nest-18",
+    category: "NestJS",
+    difficulty: "Intermediate",
+    tags: ["Health Check","Terminus","DevOps"],
+    question: "NestJS-এ Terminus দিয়ে Health Checks Endpoint কীভাবে সেটআপ করবেন?",
+    answer: `
+<p><code>@nestjs/terminus</code> ব্যবহার করে <code>/health</code> রাউটে ডাটাবেজ, মেমোরি এবং এক্সটার্নাল সার্ভিসের হেলথ স্ট্যাটাস রিয়েলটাইম চেক করা হয়।</p>
+    `
+  }
+];

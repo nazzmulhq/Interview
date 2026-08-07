@@ -203,35 +203,86 @@ db.otp_codes.createIndex({ "createdAt": 1 }, { expireAfterSeconds: 3600 });</cod
       </div>
     `
   }
-];
+,
 
-for (let i = 11; i <= 52; i++) {
-  const topics = [
-    { title: "Text Search & Wildcard Indexing", tag: "Indexing", diff: "Intermediate" },
-    { title: "Geospatial Queries ($near, $geoWithin, 2dsphere index)", tag: "Queries", diff: "Advanced" },
-    { title: "WiredTiger Storage Engine & MVCC", tag: "Internals", diff: "Advanced" },
-    { title: "Capped Collections for High Performance Logging", tag: "Collections", diff: "Intermediate" },
-    { title: "Change Streams for Real-time Event Driven Apps", tag: "Realtime", diff: "Advanced" },
-    { title: "GridFS for Storing Large Files (>16MB)", tag: "Storage", diff: "Intermediate" },
-    { title: "Mongoose Virtuals and Populate vs Aggregation Lookup", tag: "Mongoose", diff: "Intermediate" },
-    { title: "Partial and Sparse Indexes in MongoDB", tag: "Indexing", diff: "Advanced" }
-  ];
-  const item = topics[(i - 11) % topics.length];
-  mongodbQuestions.push({
-    id: `mongo-${i}`,
+  {
+    id: "mongo-11",
     category: "MongoDB",
-    difficulty: item.diff,
-    tags: [item.tag, "MongoDB"],
-    question: `MongoDB-তে ${item.title}-এর গুরুত্বপূর্ণ প্রয়োগ ও কনসেপ্টগুলো কী কী?`,
+    difficulty: "Intermediate",
+    tags: ["Indexing","Text Search","Queries"],
+    question: "MongoDB Text Search এবং Wildcard Indexing ($**) কীভাবে কাজ করে?",
     answer: `
-      <p>NoSQL নো-এসকিউএল ডাটাবেজ অপ্টিমাইজেশনে <strong>${item.title}</strong> একটি দরকারি মেকানিজম।</p>
-      <h4>প্র্যাকটিক্যাল ব্যাখ্যা:</h4>
-      <p>MongoDB স্কিমা ডিজাইন এবং হাই থ্রুপুট রিড/রাইটের জন্য ${item.title}-এর ব্যবহার ইন্টারভিউতে বহুল জিজ্ঞাসিত হয়।</p>
-      <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>// MongoDB operation snippet for ${item.title}
-db.collection.find({ status: "ACTIVE" }).explain("executionStats");</code></pre>
-      </div>
+<p>Text Index স্ট্রিংয়ে ফুল-টেক্সট সার্চ ও র‍্যাঙ্কিং দেয়। Wildcard Index ডাইনামিক ফিল্ডগুলোকে স্বয়ংক্রিয় ইনডেক্সিং করে।</p>
     `
-  });
-}
+  },
+  {
+    id: "mongo-12",
+    category: "MongoDB",
+    difficulty: "Advanced",
+    tags: ["Geospatial","Queries","Index"],
+    question: "MongoDB 2dsphere index এবং Geospatial Queries ($near, $geoWithin) কীভাবে ব্যবহৃত হয়?",
+    answer: `
+<p>GPS Latitude/Longitude GeoJSON সংরক্ষণে 2dsphere ইনডেক্স ব্যবহৃত হয়। <code>$near</code> ও <code>$geoWithin</code> দিয়ে দূরত্ব অনুযায়ী ফিল্টারিং করা যায়।</p>
+    `
+  },
+  {
+    id: "mongo-13",
+    category: "MongoDB",
+    difficulty: "Advanced",
+    tags: ["Internals","WiredTiger","Engine"],
+    question: "MongoDB WiredTiger Storage Engine কীভাবে Concurrency পরিচালনা করে?",
+    answer: `
+<p>WiredTiger Document-level Locking এবং MVCC সাপোর্ট করার একই কালেকশনের বিভিন্ন ডকুমেন্টে সমান্তরাল Read/Write অপারেশন হাই স্পিডে সম্পন্ন করতে পারে।</p>
+    `
+  },
+  {
+    id: "mongo-14",
+    category: "MongoDB",
+    difficulty: "Intermediate",
+    tags: ["Collections","Capped","Performance"],
+    question: "MongoDB Capped Collections কী?",
+    answer: `
+<p>নির্দিষ্ট ফিক্সড সাইজের সার্কুলার কালেকশন। মেমোরি পূর্ণ হলে স্বয়ংক্রিয়ভাবে প্রাচীনতম রেকর্ড ফেলে নতুন রেকর্ড জায়গা করে নেয়।</p>
+    `
+  },
+  {
+    id: "mongo-15",
+    category: "MongoDB",
+    difficulty: "Advanced",
+    tags: ["Realtime","Change Streams","Events"],
+    question: "MongoDB Change Streams কীভাবে কাজ করে?",
+    answer: `
+<p>Change Streams Oplog অনুসরন করে ডাটাবেজের insert, update, delete পরিবর্তনের রিয়েল-টাইম নোটিফিকেশন অ্যাপে পাঠায়।</p>
+    `
+  },
+  {
+    id: "mongo-16",
+    category: "MongoDB",
+    difficulty: "Intermediate",
+    tags: ["Storage","GridFS","Files"],
+    question: "MongoDB-তে 16MB-এর বড় ফাইল সংরক্ষণে GridFS কীভাবে কাজ করে?",
+    answer: `
+<p>GridFS বড় ফাইলকে ২৫৫KB সাইজের ছোট ছোট Chunks-এ ভাগ করে <code>fs.files</code> এবং <code>fs.chunks</code> কালেকশনে স্টোর করে।</p>
+    `
+  },
+  {
+    id: "mongo-17",
+    category: "MongoDB",
+    difficulty: "Intermediate",
+    tags: ["Mongoose","Populate","Aggregation"],
+    question: "Mongoose Populate vs MongoDB Aggregation $lookup-এর পার্থক্য কী?",
+    answer: `
+<p>Populate অ্যাপ লেভেলে একাধিক আলাদা কোয়েরি চালায়। <code>$lookup</code> ডাটাবেজের ভেতরে ডাইনামিক LEFT JOIN সম্পন্ন করে।</p>
+    `
+  },
+  {
+    id: "mongo-18",
+    category: "MongoDB",
+    difficulty: "Advanced",
+    tags: ["Indexing","Sparse","Partial"],
+    question: "MongoDB Sparse Index এবং Partial Index-এর পার্থক্য কী?",
+    answer: `
+<p>Sparse Index ফিল্ড উপস্থিত থাকা রেকর্ডগুলো ইনডেক্স করে। Partial Index <code>partialFilterExpression</code> শর্ত মেনে ফিল্টার রেকর্ড ইনডেক্স করে।</p>
+    `
+  }
+];

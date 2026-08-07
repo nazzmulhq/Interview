@@ -211,35 +211,86 @@ run();</code></pre>
       </div>
     `
   }
-];
+,
 
-for (let i = 11; i <= 52; i++) {
-  const topics = [
-    { title: "Kafka Compacted Topics (Log Compaction)", tag: "Kafka", diff: "Advanced" },
-    { title: "RabbitMQ Cluster & Mirrored / Quorum Queues", tag: "RabbitMQ", diff: "Advanced" },
-    { title: "Kafka Rebalance Protocol & Cooperative Sticky Assignor", tag: "Kafka", diff: "Advanced" },
-    { title: "Message Deduplication strategies using Redis / DB", tag: "Architecture", diff: "Intermediate" },
-    { title: "Schema Registry & Avro Serialization in Kafka", tag: "Schema", diff: "Advanced" },
-    { title: "RabbitMQ Priority Queues", tag: "RabbitMQ", diff: "Intermediate" },
-    { title: "Kafka Connect for DB Synchronization (Debezium CDC)", tag: "CDC", diff: "Advanced" },
-    { title: "Backpressure handling in Event Consumers", tag: "Performance", diff: "Intermediate" }
-  ];
-  const item = topics[(i - 11) % topics.length];
-  rabbitmqKafkaQuestions.push({
-    id: `mq-${i}`,
+  {
+    id: "mq-11",
     category: "RabbitMQ & Kafka",
-    difficulty: item.diff,
-    tags: [item.tag, "Messaging"],
-    question: `Event-Driven Architecture-এ ${item.title}-এর ব্যবহার এবং সেরা ডিজাইন গাইডলাইন কী?`,
+    difficulty: "Advanced",
+    tags: ["Kafka","Log Compaction","Topics"],
+    question: "Kafka Compacted Topics (Log Compaction) কী?",
     answer: `
-      <p>ডিস্ট্রিবিউটেড মেসেজিং এবং রিয়েল-টাইম স্ট্রিমিংয়ে <strong>${item.title}</strong> একটি দরকারি কনসেপ্ট।</p>
-      <h4>বিস্তারিত রূপরেখা:</h4>
-      <p>মেসেজিং ক্লাস্টারের স্থিতিশীলতা এবং সঠিক অর্ডার নিশ্চিত করতে ${item.title} ব্যবহারে সচেতন থাকা প্রয়োজন।</p>
-      <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>// Messaging implementation snippet for ${item.title}
-console.log("Configuring ${item.title} pipeline");</code></pre>
-      </div>
+<p>Log Compaction অন থাকলে Kafka পুরাতন ইতিহাস মুছে ফেলে প্রতিটি Message Key-এর কেবল সর্বশেষ সাম্প্রতিক মানটি রেখে দেয়।</p>
     `
-  });
-}
+  },
+  {
+    id: "mq-12",
+    category: "RabbitMQ & Kafka",
+    difficulty: "Advanced",
+    tags: ["RabbitMQ","Quorum Queues","Raft"],
+    question: "RabbitMQ Quorum Queues কী এবং এটি কেন ব্যবহার করা হয়?",
+    answer: `
+<p>Raft Consensus Algorithm ভিত্তিক ডিস্ট্রিবিউটেড কিউ যা নেটওয়ার্ক পার্টিশন ও ডাটা লস প্রতিরোধে শক্তিশালী হাই-অ্যাভেইলেবিলিটি অফার করে।</p>
+    `
+  },
+  {
+    id: "mq-13",
+    category: "RabbitMQ & Kafka",
+    difficulty: "Advanced",
+    tags: ["Kafka","Rebalance","Consumers"],
+    question: "Kafka Rebalance Protocol এবং Cooperative Sticky Assignor কীভাবে কাজ করে?",
+    answer: `
+<p>Cooperative Sticky Assignor পুরো কনজিউমার থ্রেড না থামিয়ে কেবল প্রয়োজনীয় পার্টিশন রিব্যালেন্স করে ল্যাটেন্সি কমায়।</p>
+    `
+  },
+  {
+    id: "mq-14",
+    category: "RabbitMQ & Kafka",
+    difficulty: "Intermediate",
+    tags: ["Architecture","Deduplication","Idempotency"],
+    question: "Message Consumer-এ Deduplication (Idempotent Consumer) কীভাবে নিশ্চিত করা হয়?",
+    answer: `
+<p>ইউনিক Unique Message ID পাঠাতে হয়। কনজিউমার মেসেজ প্রসেস করার আগে Redis/DB-তে আইডি চেক করে প্রসেসড থাকলে ইগনোর করে।</p>
+    `
+  },
+  {
+    id: "mq-15",
+    category: "RabbitMQ & Kafka",
+    difficulty: "Advanced",
+    tags: ["Schema","Avro","Serialization"],
+    question: "Kafka Schema Registry এবং Avro Serialization কেন ব্যবহার করা হয়?",
+    answer: `
+<p>Avro বাইনারি ফরম্যাটে কম সাইজে ডাটা স্ট্রিমিং করে এবং Schema Registry স্কিমার সামঞ্জস্য বজায় রাখে।</p>
+    `
+  },
+  {
+    id: "mq-16",
+    category: "RabbitMQ & Kafka",
+    difficulty: "Intermediate",
+    tags: ["RabbitMQ","Priority Queues","Queues"],
+    question: "RabbitMQ Priority Queues কীভাবে বার্তা অগ্রাধিকার নির্ধারণ করে?",
+    answer: `
+<p><code>x-max-priority</code> কিউ আর্গুমেন্ট ডিফাইন করে প্রতিটি বার্তার সাথে <code>priority: 10</code> হেডার দিয়ে জরুরি বার্তা আগে প্রসেস করা হয়।</p>
+    `
+  },
+  {
+    id: "mq-17",
+    category: "RabbitMQ & Kafka",
+    difficulty: "Advanced",
+    tags: ["CDC","Kafka Connect","Debezium"],
+    question: "Kafka Connect এবং Debezium (CDC) কী?",
+    answer: `
+<p>Debezium ডাটাবেজের Transaction Log রিড করে সরাসরি ডাটাবেজের সব পরিবর্তন কাফকা টপিকে রিয়েল-টাইম ইভেন্ট স্ট্রিমিং করে।</p>
+    `
+  },
+  {
+    id: "mq-18",
+    category: "RabbitMQ & Kafka",
+    difficulty: "Intermediate",
+    tags: ["Performance","Backpressure","Flow"],
+    question: "Event Consumers-এ Backpressure Handling কীভাবে করবেন?",
+    answer: `
+<p>RabbitMQ-তে <code>prefetch count</code> সেট করে এবং Kafka-তে <code>pause()/resume()</code> দিয়ে কনজিউমার ফ্লো কন্ট্রোল করা হয়।</p>
+    `
+  }
+];

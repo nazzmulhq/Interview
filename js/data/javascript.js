@@ -553,50 +553,170 @@ console.log(sym1 === sym2); // false!</code></pre>
       </ol>
     `
   }
-];
+,
 
-// Dynamically generate remaining questions to make 50+ total high quality questions
-for (let i = 21; i <= 52; i++) {
-  const topics = [
-    { title: "Strict Mode ('use strict')", tag: "Basics", diff: "Beginner" },
-    { title: "Arrow Function vs Normal Function", tag: "ES6", diff: "Beginner" },
-    { title: "Object.freeze() vs Object.seal()", tag: "Objects", diff: "Intermediate" },
-    { title: "Array Mutator vs Non-mutator methods", tag: "Arrays", diff: "Beginner" },
-    { title: "Higher Order Functions (HOF)", tag: "Functional", diff: "Intermediate" },
-    { title: "Memoization Pattern in JS", tag: "Performance", diff: "Advanced" },
-    { title: "Tail Call Optimization (TCO)", tag: "Engine", diff: "Advanced" },
-    { title: "IntersectionObserver API", tag: "Web API", diff: "Intermediate" },
-    { title: "MutationObserver API", tag: "Web API", diff: "Advanced" },
-    { title: "Web Workers & Multithreading in Browser", tag: "Async", diff: "Advanced" },
-    { title: "Service Workers & Progressive Web Apps", tag: "Web API", diff: "Advanced" },
-    { title: "Custom Elements & Web Components", tag: "DOM", diff: "Intermediate" },
-    { title: "Intl API for Internationalization", tag: "ES6+", diff: "Beginner" },
-    { title: "BigInt and Number Precision Issues (0.1 + 0.2)", tag: "Types", diff: "Beginner" },
-    { title: "Optional Chaining (?.) and Nullish Coalescing (??)", tag: "ES6+", diff: "Beginner" },
-    { title: "Array.prototype.flat() and flatMap()", tag: "Arrays", diff: "Intermediate" }
-  ];
-  
-  const item = topics[(i - 21) % topics.length];
-  javascriptQuestions.push({
-    id: `js-${i}`,
+  {
+    id: "js-21",
     category: "JavaScript",
-    difficulty: item.diff,
-    tags: [item.tag, "JavaScript"],
-    question: `JavaScript-এ ${item.title} এর কাজ এবং গুরুত্ত্বপূর্ণ ইউজ কেস কী?`,
+    difficulty: "Advanced",
+    tags: ["Service Worker","PWA","Web API"],
+    question: "Service Worker কী? Progressive Web App (PWA)-এ Offline Caching এবং Push Notification কীভাবে কাজ করে?",
     answer: `
-      <p><strong>${item.title}</strong> বিষয়সমূহ JavaScript ডেভেলপমেন্টের অন্যতম গুরুত্বপূর্ণ অংশ।</p>
-      <h4>বিস্তারিত আলোচনা:</h4>
-      <p>ইন্টারভিউতে ${item.title} সম্পর্কিত ধারণা পরিষ্কার থাকলে ডিপ-লেভেল কনসেপ্ট সহজে বোঝা যায়। এটি অ্যাপ্লিকেশনের পারফরম্যান্স, সিকিউরিটি এবং কোডের মডুলারিটি বজায় রাখতে কার্যকর ভূমিকা পালন করে।</p>
-      <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>// Example code snippet for ${item.title}
-console.log("Demonstration of ${item.title}");
-// Best practice pattern implementation</code></pre>
-      </div>
-      <ul>
-        <li><strong>কী ফিচার:</strong> কোডের নির্ভরযোগ্যতা এবং এফিশিয়েন্সি বৃদ্ধি করা।</li>
-        <li><strong>ইন্টারভিউ টিপস:</strong> বাস্তব উদাহরণ এবং এজ কেসসহ ব্যাখ্যা করুন।</li>
-      </ul>
+<p><strong>Service Worker</strong> হলো এমন একটি বিশেষ ব্রাউজার স্ক্রিপ্ট যা ব্যাকগ্রাউন্ডে ব্রাউজারের মেইন থ্রেড এবং নেটওয়ার্কের মাঝামাঝি প্রক্সি (Proxy) হিসেবে কাজ করে। এটি সরাসরি DOM এক্সেস করতে পারে না, তবে নেটওয়ার্ক রিকুয়েস্ট ইন্টারসেপ্ট করতে পারে।</p>
+    <h4>প্রধান ফিচারসমূহ:</h4>
+    <ul>
+      <li><strong>Offline Capability:</strong> <code>CacheStorage</code> API ব্যবহার করে অ্যাসেট ও API রেসপন্স ক্যাশ করে অফলাইনে অ্যাপ সচল রাখে।</li>
+      <li><strong>Background Sync:</strong> ইউজার অফলাইনে থাকলেও নেটওয়ার্ক ফিরে আসলে ডেটা সিঙ্ক সম্পন্ন করে।</li>
+      <li><strong>Push Notifications:</strong> অ্যাপ বন্ধ থাকলেও ব্রাউজার পুশ নোটিফিকেশন পাঠাতে পারে।</li>
+    </ul>
+    <div class="code-box">
+      <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
+      <pre><code>if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js')
+    .then(reg => console.log('SW Registered!', reg))
+    .catch(err => console.error('SW Registration Failed!', err));
+}</code></pre>
+    </div>
     `
-  });
+  },
+  {
+    id: "js-22",
+    category: "JavaScript",
+    difficulty: "Advanced",
+    tags: ["Engine","Recursion","TCO"],
+    question: "Tail Call Optimization (TCO) কী? রিকারসিভ ফাংশনে এটি কীভাবে Call Stack Overflow প্রতিরোধ করে?",
+    answer: `
+<p><strong>Tail Call Optimization (TCO)</strong> হলো এমন একটি কম্পাইলার অপটিমাইজেশন কৌশল যেখানে ফাংশনের শেষ এক্সিকিউটেবল স্টেটমেন্ট যদি অন্য কোনো ফাংশন কল (বা নিজে রিকারসিভ কল) হয়, তবে নতুন Call Stack Frame তৈরি না করে বিদ্যমান ফ্রেম পুনঃব্যবহার করা হয়।</p>
+    <h4>সুবিধা:</h4>
+    <p>সাধারণ রিকারশনে প্রতি কলে স্ট্যাক তৈরি হয়ে <code>Maximum call stack size exceeded</code> এরর ঘটে। TCO প্রয়োগে এটি Constant Space O(1) স্ট্যাকে রান করে।</p>
+    <div class="code-box">
+      <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
+      <pre><code>// Non-Tail Recursive (Stack grows O(n))
+function factorial(n) {
+  if (n <= 1) return 1;
+  return n * factorial(n - 1);
 }
+
+// Tail Recursive (TCO candidate O(1))
+function factorialTail(n, acc = 1) {
+  if (n <= 1) return acc;
+  return factorialTail(n - 1, n * acc);
+}</code></pre>
+    </div>
+    `
+  },
+  {
+    id: "js-23",
+    category: "JavaScript",
+    difficulty: "Beginner",
+    tags: ["ES6+","Operators","Syntax"],
+    question: "Optional Chaining (?.) এবং Nullish Coalescing Operator (??) কীভাবে কাজ করে? Logical OR (||) এর সাথে ?? এর পার্থক্য কী?",
+    answer: `
+<p><strong>Optional Chaining (<code>?.</code>):</strong> কোনো অবজেক্টের ডিপলি নেস্টেড প্রপার্টি রিড করার সময় যদি মাঝের কোনো প্রপার্টি <code>null</code> বা <code>undefined</code> হয়, তবে <code>TypeError</code> না দিয়ে <code>undefined</code> রিটার্ন করে।</p>
+    <p><strong>Nullish Coalescing (<code>??</code>):</strong> এটি কেবল বামের অপারেন্ডটি <code>null</code> অথবা <code>undefined</code> হলেই ডানের ভ্যালু রিটার্ন করে।</p>
+    <h4><code>||</code> (Logical OR) vs <code>??</code>:</h4>
+    <p><code>||</code> যেকোনো Falsy ভ্যালুর জন্য (যেমন: <code>0</code>, <code>""</code>, <code>false</code>) ডানের ভ্যালু রিটার্ন করে। <code>??</code> কেবল <code>null</code> ও <code>undefined</code> কে চেক করে।</p>
+    <div class="code-box">
+      <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
+      <pre><code>const user = { profile: { name: "Nazmul", score: 0 } };
+console.log(user?.profile?.name); // "Nazmul"
+const score1 = user.profile.score || 100; // 100 (wrong because 0 is falsy)
+const score2 = user.profile.score ?? 100; // 0 (correct!)</code></pre>
+    </div>
+    `
+  },
+  {
+    id: "js-24",
+    category: "JavaScript",
+    difficulty: "Beginner",
+    tags: ["Types","BigInt","Numbers"],
+    question: "JavaScript-এ Number precision সমস্যা (যেমন: 0.1 + 0.2 !== 0.3) কেন ঘটে এবং BigInt কখন ব্যবহার করা উচিত?",
+    answer: `
+<p>JavaScript-এ সকল সাধারণ সংখ্যা <strong>IEEE 754 Floating-Point Standard (64-bit double precision)</strong> মেনে সংরক্ষিত হয়। এতে বাইনারি ফরম্যাটে <code>0.1</code> এবং <code>0.2</code> এর সঠিক রূপান্তর বজায় রাখা সম্ভব হয় না, যার ফলে ফ্র্যাকশনাল প্রিসিশন লস ঘটে।</p>
+    <div class="code-box">
+      <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
+      <pre><code>console.log(0.1 + 0.2); // 0.30000000000000004
+console.log(0.1 + 0.2 === 0.3); // false
+console.log(Math.abs((0.1 + 0.2) - 0.3) < Number.EPSILON); // true
+const bigNum = 9007199254740991n + 2n; // 9007199254740993n</code></pre>
+    </div>
+    `
+  },
+  {
+    id: "js-25",
+    category: "JavaScript",
+    difficulty: "Intermediate",
+    tags: ["Arrays","ES6+","Methods"],
+    question: "Array.prototype.flat() এবং flatMap() মেথড দুটি কীভাবে কাজ করে?",
+    answer: `
+<p><strong><code>flat(depth)</code>:</strong> এটি নেস্টেড অ্যারের সাব-অ্যারেগুলোকে নির্দিষ্ট গভীরতা (depth) পর্যন্ত সমতল (flatten) করে নতুন একটি অ্যারে তৈরি করে।</p>
+    <p><strong><code>flatMap(callback)</code>:</strong> এটি প্রথমে প্রতিটি এলিমেন্টে <code>map()</code> চালায় এবং তারপর রেজাল্টকে ১ লেভেল <code>flat()</code> করে।</p>
+    <div class="code-box">
+      <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
+      <pre><code>const nested = [1, [2, [3, 4]]];
+console.log(nested.flat(2)); // [1, 2, 3, 4]
+const words = ["Hello World", "JS Tips"].flatMap(str => str.split(" "));
+console.log(words); // ["Hello", "World", "JS", "Tips"]</code></pre>
+    </div>
+    `
+  },
+  {
+    id: "js-26",
+    category: "JavaScript",
+    difficulty: "Beginner",
+    tags: ["ES6+","Intl","Localization"],
+    question: "JavaScript Intl (Internationalization) API কী?",
+    answer: `
+<p><strong>Intl</strong> হলো JavaScript-এর বিল্ট-ইন নেটিভ নেমস্পেস যা আন্তর্জাতিকীকরণ ও স্থানিকীকরণের (Localization & Formatting) কাজগুলো ব্রাউজার স্তরে থার্ড-পার্টি লাইব্রেরি ছাড়াই সম্পাদন করতে সাহায্য করে।</p>
+    <div class="code-box">
+      <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
+      <pre><code>const priceFormatter = new Intl.NumberFormat("bn-BD", { style: "currency", currency: "BDT" });
+console.log(priceFormatter.format(5000)); // ৳৫,০০০.০০
+const dateFormatter = new Intl.DateTimeFormat("bn-BD", { dateStyle: "full" });
+console.log(dateFormatter.format(new Date()));</code></pre>
+    </div>
+    `
+  },
+  {
+    id: "js-27",
+    category: "JavaScript",
+    difficulty: "Intermediate",
+    tags: ["DOM","Web Components","Shadow DOM"],
+    question: "Web Components কী? Custom Elements এবং Shadow DOM কীভাবে কাজ করে?",
+    answer: `
+<p><strong>Web Components</strong> হলো ব্রাউজারের নেটিভ W3C স্ট্যান্ডার্ডের সেট যার সাহায্যে React বা Vue ছাড়াই রিইউজেবল, এনক্যাপসুলেটেড HTML ট্যাগ তৈরি করা যায়।</p>
+    <div class="code-box">
+      <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
+      <pre><code>class MyButton extends HTMLElement {
+  constructor() {
+    super();
+    const shadow = this.attachShadow({ mode: 'open' });
+    shadow.innerHTML = '<button style="background:purple;color:white;"><slot></slot></button>';
+  }
+}
+customElements.define('my-button', MyButton);</code></pre>
+    </div>
+    `
+  },
+  {
+    id: "js-28",
+    category: "JavaScript",
+    difficulty: "Advanced",
+    tags: ["Objects","Memory","API"],
+    question: "structuredClone() API কী? JSON.parse(JSON.stringify()) এর সাথে এর পার্থক্য কী?",
+    answer: `
+<p><strong>structuredClone()</strong> হলো আধুনিক ব্রাউজার ও Node.js (v17+) এর অফিশিয়াল নেটিভ ডিপ ক্লোনিং API।</p>
+    <p><code>JSON.stringify</code> ডাটাটাইপ যেমন: <code>Date</code> কে স্ট্রিং বানিয়ে ফেলে এবং <code>Set</code>, <code>Map</code>, <code>RegExp</code> বাদ দেয়। <code>structuredClone()</code> নেটিভভাবে এসব টাইপ এবং Circular Reference ক্লোন করতে পারে।</p>
+    `
+  },
+  {
+    id: "js-29",
+    category: "JavaScript",
+    difficulty: "Advanced",
+    tags: ["Event Loop","Microtask","Macrotask"],
+    question: "queueMicrotask, requestAnimationFrame এবং setTimeout-এর মধ্যে এক্সিকিউশন অর্ডার কী?",
+    answer: `
+<p>Event Loop অগ্রাধিকারের ক্রম: Synchronous Code -> Microtask Queue (Promise, queueMicrotask) -> Render Queue (requestAnimationFrame) -> Macrotask Queue (setTimeout, setInterval)।</p>
+    `
+  }
+];
