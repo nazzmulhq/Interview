@@ -1108,7 +1108,7 @@ console.log(obj); // { a: 1 }</code></pre>
       </ul>
       <div class="code-box">
         <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>const userInput = "<img src='x' onerror='alert(1)'>";
+        <pre><code>const userInput = "&lt;img src='x' onerror='alert(1)'&gt;";
 
 // DANGEROUS: Will execute the JS code
 document.body.innerHTML = userInput; 

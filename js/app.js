@@ -30,6 +30,9 @@ document.addEventListener("DOMContentLoaded", () => {
   if (typeof grpcQuestions !== 'undefined') allQuestions.push(...grpcQuestions);
   if (typeof elasticsearchQuestions !== 'undefined') allQuestions.push(...elasticsearchQuestions);
   if (typeof redisQuestions !== 'undefined') allQuestions.push(...redisQuestions);
+  if (typeof seniorFrontendQuestions !== 'undefined') allQuestions.push(...seniorFrontendQuestions.map(q => ({...q, category: `Frontend - ${q.category}`})));
+  if (typeof seniorFullstackQuestions !== 'undefined') allQuestions.push(...seniorFullstackQuestions.map(q => ({...q, category: `Full-Stack - ${q.category}`})));
+  if (typeof seniorBackendQuestions !== 'undefined') allQuestions.push(...seniorBackendQuestions.map(q => ({...q, category: `Backend - ${q.category}`})));
 
   // Initialize UI & Sidebar Sublists
   initTheme();
@@ -77,6 +80,9 @@ function renderSidebarCategories() {
     { name: "Node.js", label: "🟩 Node.js" },
     { name: "Express.js", label: "🚂 Express.js" },
     { name: "NestJS", label: "🦁 NestJS" },
+    { name: "Frontend", label: "🎨 Frontend" },
+    { name: "Backend", label: "⚙️ Backend" },
+    { name: "Full-Stack", label: "🌐 Full-Stack" },
     { name: "Database", label: "🛢️ Database (SQL)" },
     { name: "MongoDB", label: "🍃 MongoDB" },
     { name: "System Design", label: "🏗️ System Design" },
@@ -93,6 +99,9 @@ function renderSidebarCategories() {
       if (cat.name === "Database") {
         return q.category === "Database" || q.category.startsWith("Database");
       }
+      if (cat.name === "Frontend") return q.category.startsWith("Frontend");
+      if (cat.name === "Backend") return q.category.startsWith("Backend");
+      if (cat.name === "Full-Stack") return q.category.startsWith("Full-Stack");
       return q.category === cat.name;
     });
     const count = catQuestions.length;
