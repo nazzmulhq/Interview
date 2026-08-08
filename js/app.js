@@ -217,6 +217,12 @@ function renderQuestions() {
     if (currentCategory !== "All") {
       if (currentCategory === "Database") {
         if (q.category !== "Database" && !q.category.startsWith("Database")) return false;
+      } else if (currentCategory === "Frontend") {
+        if (!q.category.startsWith("Frontend")) return false;
+      } else if (currentCategory === "Backend") {
+        if (!q.category.startsWith("Backend")) return false;
+      } else if (currentCategory === "Full-Stack") {
+        if (!q.category.startsWith("Full-Stack")) return false;
       } else if (q.category !== currentCategory) {
         return false;
       }
