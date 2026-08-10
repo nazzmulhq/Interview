@@ -1,1684 +1,2902 @@
 const nodejsQuestions = [
   {
     id: "node-1",
-    category: "Node.js",
+    category: "Node.js Architecture & Execution Engine",
     difficulty: "Advanced",
-    tags: ["Libuv","Event Loop","Phases"],
-    question: "Node.js Event Loop-এর বিভিন্ন ফেজ (Phases) কী কী এবং Libuv কীভাবে এর নেটিভ থ্রেড পুল পরিচালনা করে?",
+    tags: ["Execution Flow", "V8 Engine", "Libuv", "Event Loop", "Call Stack"],
+    question: "How does the Node.js execution process work under the hood from startup to process termination?",
     answer: `
-      <p>Node.js-এর আসল ক্ষমতা হলো এর <strong>Libuv</strong> সি-লাইব্রেরি ভিত্তিক Event Loop, যা Single-threaded হওয়ার পরেও Asynchronous Non-blocking I/O সম্পাদন করে।</p>
-      <h4>Event Loop-এর ৬টি প্রধান ফেজ (সঠিক ক্রমানুসারে):</h4>
+      <p>Node.js execution relies on two core dependencies: the <strong>V8 JavaScript Engine</strong> (written by Google in C++) and the <strong>Libuv C Library</strong>. Understanding the lifecycle from startup to exit is critical for senior-level debugging and architecture design.</p>
+      
+      <h4>1. Initialization & Bootstrap Phase</h4>
+      <p>When you execute <code>node index.js</code> in your terminal:</p>
+      <ul>
+        <li><strong>Environment Setup:</strong> C++ code initializes instances of V8 and Libuv. Global objects (<code>global</code>, <code>process</code>, <code>Buffer</code>, <code>console</code>) and module wrappers (<code>require</code>, <code>module</code>, <code>exports</code>, <code>__dirname</code>, <code>__filename</code>) are attached to the runtime context.</li>
+        <li><strong>Parsing & Compilation:</strong> V8 parses the entry JavaScript file, builds an Abstract Syntax Tree (AST), and compiles it into machine code/bytecode via the Ignition interpreter and TurboFan JIT compiler.</li>
+        <li><strong>Main Thread Execution:</strong> The compiled synchronous code executes on the single thread inside the V8 Call Stack.</li>
+      </ul>
+
+      <h4>2. Asynchronous Task Offloading</h4>
+      <p>When V8 encounters an asynchronous API call, it offloads the actual operation out of the main thread:</p>
+      <ul>
+        <li><strong>OS Kernel-Level Async (Non-blocking I/O):</strong> Network calls (TCP, UDP, HTTP, Sockets) are delegated directly to the host Operating System kernel mechanisms (such as <code>epoll</code> on Linux, <code>kqueue</code> on macOS, or <code>IOCP</code> on Windows). This requires zero background threads in Node.js.</li>
+        <li><strong>Libuv Worker Thread Pool:</strong> Blocking tasks that cannot be handled asynchronously by the OS kernel—specifically file system operations (<code>fs</code>), crypto functions (<code>crypto.pbkdf2</code>, <code>scrypt</code>), compression (<code>zlib</code>), and <code>dns.lookup()</code>—are sent to Libuv's thread pool (default size = 4).</li>
+      </ul>
+
+      <h4>3. The Intermediary Microtask Queue Check</h4>
+      <p>Before the Event Loop transitions between any phases—and immediately after every single synchronous C++ execution frame drains from the V8 Call Stack—Node.js drains the <strong>Microtask Queue</strong>. The order of priority is strictly enforced:</p>
       <ol>
-        <li><strong>Timers Phase:</strong> <code>setTimeout()</code> এবং <code>setInterval()</code> কলব্যাক এক্সিকিউট করে।</li>
-        <li><strong>Pending Callbacks Phase:</strong> পূর্ববর্তী ইটারেশনের কিছু স্থগিত I/O কলব্যাক (যেমন TCP error handlers) এক্সিকিউট করে।</li>
-        <li><strong>Idle, Prepare Phase:</strong> অভ্যন্তরীণ নোড সিস্টেমের জন্য ব্যবহৃত হয়।</li>
-        <li><strong>Poll Phase:</strong> নতুন I/O ইভেন্ট গ্রহণ করে (ফাইল সিস্টেম, নেটওয়ার্ক API)। উপযুক্ত কলব্যাক রান করে। কলস্ট্যাক খালি থাকলে এখানে ব্লক করে অপেক্ষা করে।</li>
-        <li><strong>Check Phase:</strong> <code>setImmediate()</code> কলব্যাকগুলো সাথে সাথে রান করে।</li>
-        <li><strong>Close Callbacks Phase:</strong> সকেট বা হ্যান্ডেল বন্ধ হওয়ার ইভেন্ট (যেমন <code>socket.on('close', ...)</code>)।</li>
+        <li><code>process.nextTick()</code> queue (highest priority)</li>
+        <li>Promise microtasks queue (<code>Promise.then</code>, <code>catch</code>, <code>finally</code>, <code>await</code>)</li>
       </ol>
-      <h4>Libuv Thread Pool:</h4>
-      <p>Node.js কিছু ব্লকিং ফাইল সিস্টেম (fs), DNS Lookup, এবং Crypto অপারেশনগুলো <strong>Libuv Thread Pool</strong>-এ পাঠিয়ে দেয়। ডিফল্টভাবে থ্রেড পুল সাইজ ৪টি (<code>UV_THREADPOOL_SIZE=4</code>), যা পরিবেশ ভেরিয়েবল পরিবর্তন করে সর্বোচ্চ ১২৮ করা যায়।</p>
+      <p><em>Note: If microtasks continuously queue themselves recursively, the Event Loop starves and cannot proceed to its phases.</em></p>
+
+      <h4>4. Event Loop Phase Processing</h4>
+      <p>Once the V8 Call Stack is completely empty of synchronous frame calls, the Libuv Event Loop drives execution through 6 discrete phases in sequence:</p>
+      <ol>
+        <li><strong>Timers Phase:</strong> Executes callbacks scheduled by expired <code>setTimeout()</code> and <code>setInterval()</code> timers.</li>
+        <li><strong>Pending Callbacks Phase:</strong> Executes I/O callbacks deferred from previous loop iterations (e.g., specific OS-level TCP errors like <code>ECONNREFUSED</code>).</li>
+        <li><strong>Idle, Prepare Phase:</strong> Used internally by Node.js for engine orchestration.</li>
+        <li><strong>Poll Phase:</strong> Retrieves new I/O events (incoming HTTP requests, file reads) and executes their callbacks. If no timers or <code>setImmediate()</code> callbacks are pending and the Call Stack is clear, the Event Loop will block and pause here awaiting I/O.</li>
+        <li><strong>Check Phase:</strong> Executes callbacks registered with <code>setImmediate()</code>.</li>
+        <li><strong>Close Callbacks Phase:</strong> Executes handle destruction callbacks (e.g., <code>socket.on('close', ...)</code>).</li>
+      </ol>
+
+      <h4>5. Graceful Shutdown / Event Loop Exit</h4>
+      <p>When all active Libuv handles (open sockets, timers, file descriptors) count down to zero, the Event Loop exits its processing loop, emits the <code>process.on('exit')</code> event, and terminates the OS process.</p>
     `
   },
   {
     id: "node-2",
-    category: "Node.js",
-    difficulty: "Intermediate",
-    tags: ["process.nextTick","setImmediate","setTimeout"],
-    question: "process.nextTick(), setImmediate() এবং setTimeout(fn, 0)-এর মধ্যে সূক্ষ্ম পার্থক্য কী?",
+    category: "Event Loop & Control Flow",
+    difficulty: "Advanced",
+    tags: ["process.nextTick", "Event Loop Starvation", "Microtasks", "Macrotasks"],
+    question: "What is Event Loop Starvation, and how can recursive calls to process.nextTick() cause it?",
     answer: `
-      <p>তিনটিই Asynchronous কিন্তু তাদের এক্সিকিউশন টাইমিং সম্পূর্ণ আলাদা।</p>
-      <h4>পার্থক্যসমূহ:</h4>
-      <ul>
-        <li><strong>process.nextTick():</strong> এটি প্রযুক্তিগতভাবে Event Loop-এর ফেজের অংশ নয়। বর্তমান অপারেশন শেষ হওয়ার সাথে সাথেই (Event Loop পরবর্তী ফেজে যাওয়ার আগেই) <strong>Microtask Queue</strong>-এ রান হয়। এটি অনিয়ন্ত্রিতভাবে ব্যবহার করলে Event Loop Starvation ঘটাতে পারে।</li>
-        <li><strong>setImmediate():</strong> এটি Event Loop-এর <strong>Check Phase</strong>-এ রান হয়। বর্তমান Poll Phase শেষ হওয়ামাত্রই এটি এক্সিকিউট হয়।</li>
-        <li><strong>setTimeout(fn, 0):</strong> এটি <strong>Timers Phase</strong>-এ রান হয়। ন্যূনতম মিলিসেকেন্ড ডিলে হিসেব করে এক্সিকিউট হয়।</li>
-      </ul>
-      <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>setTimeout(() => console.log('setTimeout'), 0);
-setImmediate(() => console.log('setImmediate'));
-process.nextTick(() => console.log('nextTick'));
+      <p><strong>Event Loop Starvation</strong> occurs when the Event Loop is prevented from advancing through its standard phases because the JavaScript runtime is perpetually busy processing microtasks or synchronous blocking code on the main thread.</p>
 
-// Execution Order:
-// 1. nextTick
-// 2. setTimeout / setImmediate (I/O কন্টেক্সটে setImmediate সবসময় আগে রান হবে)</code></pre>
+      <h4>How process.nextTick() Operates Differently</h4>
+      <p>Unlike <code>setImmediate()</code> or <code>setTimeout()</code>—which schedule callbacks into specific phases of the Libuv Event Loop—<code>process.nextTick()</code> is technically not part of the Libuv Event Loop at all. It maintains its own dedicated queue managed by Node.js, known as the <code>NextTickQueue</code>.</p>
+      <p>The runtime processes the entire <code>NextTickQueue</code> to completion <strong>immediately after the current JavaScript operation finishes</strong>, regardless of what phase the Event Loop is currently in, and before it moves to the next phase or processes Promise microtasks.</p>
+
+      <h4>The Starvation Mechanism</h4>
+      <p>If <code>process.nextTick()</code> is invoked recursively (a <code>nextTick</code> callback schedules another <code>nextTick</code> callback), the JavaScript engine remains trapped in the <code>NextTickQueue</code> phase forever. The V8 Call Stack repeatedly clears and fills with microtasks without allowing the Event Loop to step forward into the <strong>Timers</strong>, <strong>Poll</strong>, or <strong>Check</strong> phases.</p>
+
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>// Demonstration of Event Loop Starvation
+function recursiveTick() {
+  process.nextTick(recursiveTick); // Continuously fills NextTickQueue
+}
+
+// Scheduled on Timers Phase
+setTimeout(() => {
+  console.log('This line will NEVER print');
+}, 0);
+
+// Scheduled on Check Phase
+setImmediate(() => {
+  console.log('This line will ALSO never print');
+});
+
+recursiveTick(); // Starts starving the Event Loop immediately</code></pre>
       </div>
+
+      <h4>Consequences in Production</h4>
+      <ul>
+        <li><strong>Unresponsive I/O:</strong> Incoming HTTP requests, database queries, and WebSocket messages in the Poll Phase will never be processed, leading to client timeouts (504 Gateway Timeout).</li>
+        <li><strong>Hung Timers:</strong> Active <code>setInterval</code> or <code>setTimeout</code> instances will fail to fire.</li>
+        <li><strong>Health Check Failures:</strong> Kubernetes liveness and readiness probes will time out, causing the orchestrator to forcibly kill and restart the container.</li>
+      </ul>
+
+      <h4>Mitigation Strategies</h4>
+      <p>Replace recursive <code>process.nextTick()</code> calls with <code>setImmediate()</code> when yielding control back to the event loop during heavy computations. <code>setImmediate()</code> places the callback into the Check Phase, allowing the Event Loop to continue cycling through I/O and timers between iterations.</p>
     `
   },
   {
     id: "node-3",
-    category: "Node.js",
-    difficulty: "Advanced",
-    tags: ["Streams","Backpressure","Buffer"],
-    question: "Node.js Streams কী? ৪ ধরনের স্ট্রিম কী কী এবং Backpressure সমস্যার সমাধান কীভাবে করবেন?",
+    category: "Event Loop & Timers Execution",
+    difficulty: "Intermediate",
+    tags: ["setImmediate", "setTimeout", "Poll Phase", "I/O Callbacks"],
+    question: "Why is the execution order between setTimeout(fn, 0) and setImmediate(fn) non-deterministic in the global scope, but deterministic inside an I/O callback?",
     answer: `
-      <p><strong>Stream</strong> হলো ডেটার একটি প্রবাহ যা একসাথে মেমোরিতে লোড না করে ক্রমান্বয়ে টুকরো টুকরো (Chunks) হিসেবে প্রসেস করা হয়। বড় ফাইল বা নেটওয়ার্ক রেসপন্সের ক্ষেত্রে মেমোরি দক্ষতা বাড়াতে স্ট্রিম ব্যবহৃত হয়।</p>
-      <h4>৪ ধরনের স্ট্রিম:</h4>
-      <ol>
-        <li><code>Readable:</code> ডেটা পড়ার জন্য (যেমন: <code>fs.createReadStream</code>)।</li>
-        <li><code>Writable:</code> ডেটা লেখার জন্য (যেমন: <code>fs.createWriteStream</code>)।</li>
-        <li><code>Duplex:</code> পড়া এবং লেখা দুটোই করা যায় (যেমন: TCP Socket)।</li>
-        <li><code>Transform:</code> ডেটা পড়ার পর মডিফাই করে রাইট করা (যেমন: <code>zlib.createGzip</code>)।</li>
-      </ol>
-      <h4>Backpressure এবং এর সমাধান:</h4>
-      <p>যখন Readable Stream দ্রুত গতিতে ডেটা পাঠায় কিন্তু Writable Stream সেই গতিতে ডেটা প্রসেস করতে পারে না, তখন মেমোরিতে অতিরিক্ত বাফার জমতে থাকে। একে <strong>Backpressure</strong> বলে। ম্যানুয়ালি <code>pause()</code> এবং <code>resume()</code> না করে নেটিভ <code>pipeline()</code> ব্যবহার করলে Node.js অটোমেটিক্যালি এটি ম্যানেজ করে।</p>
-      <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>const { pipeline } = require('stream/promises');
-const fs = require('fs');
-const zlib = require('zlib');
+      <p>The behavior of <code>setTimeout(fn, 0)</code> versus <code>setImmediate(fn)</code> is one of the most frequent interview topics. Their execution order depends strictly on the <strong>context (I/O vs. Global Scope)</strong> in which they are scheduled.</p>
 
-async function compressFile() {
-  await pipeline(
-    fs.createReadStream('large.log'),
-    zlib.createGzip(),
-    fs.createWriteStream('large.log.gz')
-  );
-}</code></pre>
+      <h4>1. Non-Deterministic Behavior in the Main (Global) Scope</h4>
+      <p>When executed at the root level of a script:</p>
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>setTimeout(() => console.log('setTimeout'), 0);
+setImmediate(() => console.log('setImmediate'));</code></pre>
       </div>
+      <p>Running this script repeatedly may produce mixed output: sometimes <code>setTimeout</code> prints first, sometimes <code>setImmediate</code> prints first.</p>
+
+      <p><strong>Reason:</strong></p>
+      <ul>
+        <li>In Node.js, <code>setTimeout(fn, 0)</code> is internally normalized to a minimum delay of 1ms (<code>setTimeout(fn, 1)</code>) because 0ms is mathematically invalid for timer registration in V8/Libuv.</li>
+        <li>When Node.js bootstraps the main script, entering the Libuv Event Loop takes a tiny fraction of a millisecond depending on CPU workload and system clock precision.</li>
+        <li>If the loop enters the <strong>Timers Phase</strong> in less than 1ms, the 1ms timer has not yet expired. The loop skips to subsequent phases and hits the <strong>Check Phase</strong>, running <code>setImmediate()</code> first.</li>
+        <li>If system overhead causes startup to take slightly longer than 1ms, the timer will have expired before entering the Timers Phase, causing <code>setTimeout()</code> to execute first.</li>
+      </ul>
+
+      <h4>2. Deterministic Behavior Inside an I/O Cycle</h4>
+      <p>When scheduled inside any asynchronous I/O callback (e.g., <code>fs.readFile</code>, network socket, database query):</p>
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>const fs = require('fs');
+
+fs.readFile(__filename, () => {
+  setTimeout(() => console.log('setTimeout'), 0);
+  setImmediate(() => console.log('setImmediate'));
+});
+// Output will ALWAYS be:
+// setImmediate
+// setTimeout</code></pre>
+      </div>
+
+      <p><strong>Reason:</strong></p>
+      <ol>
+        <li>An I/O callback executes inside the Event Loop's <strong>Poll Phase</strong>.</li>
+        <li>While inside the Poll Phase, <code>setImmediate()</code> queues a callback for the <strong>Check Phase</strong>, while <code>setTimeout()</code> queues a callback for the <strong>Timers Phase</strong>.</li>
+        <li>Once the Poll Phase empties, the Event Loop moves sequentially forward to the very next phase in the cycle: the <strong>Check Phase</strong>.</li>
+        <li>Because the Check Phase comes immediately after the Poll Phase, <code>setImmediate()</code> is guaranteed to execute before the loop can wrap around to the Timers Phase on the next iteration.</li>
+      </ol>
     `
   },
   {
     id: "node-4",
-    category: "Node.js",
-    difficulty: "Intermediate",
-    tags: ["Buffer","Binary Data","Memory"],
-    question: "Node.js-এ Buffer কী? V8 Heap Memory-এর বাইরে Buffer কীভাবে কাজ করে?",
+    category: "Memory Management & Garbage Collection",
+    difficulty: "Advanced",
+    tags: ["V8 Heap", "Garbage Collection", "Generational GC", "Scavenger", "Mark-Sweep"],
+    question: "How is the V8 Heap Memory structured in Node.js, and how do the Scavenger and Mark-Sweep-Compact algorithms manage it?",
     answer: `
-      <p>JavaScript মূলত টেক্সট-ভিত্তিক। তাই Raw Binary Data হ্যান্ডেল করার জন্য Node.js-এ <strong>Buffer</strong> ক্লাস ব্যবহৃত হয়।</p>
-      <h4>Buffer-এর বৈশিষ্ট্য:</h4>
+      <p>Node.js relies on the V8 engine to allocate and reclaim memory dynamically. V8 organizes its managed <strong>Heap Memory</strong> into generational spaces based on the empirical observation that most objects in software die young (the <em>Weak Generational Hypothesis</em>).</p>
+
+      <h4>Structure of V8 Heap Memory</h4>
       <ul>
-        <li>Buffer একটি নির্দিষ্ট আকারের মেমোরি স্পেস বরাদ্দ (Fixed-length memory allocation) করে।</li>
-        <li>এর মেমোরি V8 Engine-এর <strong>Heap Memory-এর বাইরে</strong> (Off-heap memory) C++ লেভেলে সরাসরি বরাদ্দ হয়, তাই এটি Garbage Collector-এর সরাসরি নিয়ন্ত্রণে থাকে না।</li>
+        <li><strong>New Space (Young Generation):</strong> A small contiguous memory region (typically 1MB to 64MB) where all newly instantiated objects, variables, and closures are initially allocated. It is optimized for extremely fast allocation and frequent collection.</li>
+        <li><strong>Old Space (Old Generation):</strong> Contains objects that survived two successive garbage collection passes in the Young Generation. It is divided into:
+          <ul>
+            <li><em>Old Pointer Space:</em> Objects containing references to other objects.</li>
+            <li><em>Old Data Space:</em> Raw payload data (strings, raw numbers, boxed primitives).</li>
+          </ul>
+        </li>
+        <li><strong>Large Object Space:</strong> Holds objects that exceed the allocation limits of other spaces. They are never moved by garbage collection.</li>
+        <li><strong>Code Space:</strong> Stores compiled JIT bytecode and machine instructions generated by TurboFan.</li>
       </ul>
+
+      <h4>1. Young Generation GC: The Scavenger (Cheney's Copying Algorithm)</h4>
+      <p>Because most objects in the New Space become unreachable quickly, V8 uses a fast copying algorithm called <strong>Scavenge</strong>:</p>
+      <ul>
+        <li>New Space is partitioned into two equal semi-spaces: <strong>From-Space</strong> and <strong>To-Space</strong>.</li>
+        <li>New allocations are written to <strong>From-Space</strong>. When From-Space fills up, a Scavenge cycle triggers.</li>
+        <li>V8 traverses object references from root pointers. Active (surviving) objects are copied contiguously into <strong>To-Space</strong>, naturally defragmenting memory. Unreachable objects are ignored and abandoned.</li>
+        <li>If an object survives a second Scavenge cycle, it is <strong>promoted</strong> directly into the Old Space.</li>
+        <li>The roles of From-Space and To-Space are swapped, resetting the cycle.</li>
+      </ul>
+
+      <h4>2. Old Generation GC: Mark-Sweep-Compact Algorithm</h4>
+      <p>Because Old Space contains large, long-lived objects, copying them would be computationally prohibitive. V8 uses a three-phase algorithm:</p>
+
+      <ol>
+        <li><strong>Marking (Tri-color Marking):</strong> V8 traces references from root objects (globals, stack frames). Objects are marked as reachable (Black/Grey) or unreachable (White). V8 uses <em>Concurrent Marking</em> on helper threads to avoid freezing the main JavaScript thread.</li>
+        <li><strong>Sweeping:</strong> V8 iterates through unallocated/White object memory addresses and adds them back to free-lists available for future allocations.</li>
+        <li><strong>Compacting:</strong> To resolve memory fragmentation (small empty gaps between allocated objects), V8 shifts surviving objects together contiguously into fragmented pages, updating all pointer addresses accordingly.</li>
+      </ol>
+
+      <h4>Memory Tuning Flag</h4>
+      <p>To adjust the default V8 heap limit in production (e.g., setting maximum heap size to 4GB):</p>
       <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>const buf = Buffer.alloc(10);
-buf.write('Hello');
-console.log(buf.toString('utf-8')); // Output: Hello</code></pre>
+        <div class="code-header"><span>bash</span></div>
+        <pre><code>node --max-old-space-size=4096 server.js</code></pre>
       </div>
     `
   },
   {
     id: "node-5",
-    category: "Node.js",
+    category: "Memory Management & Profiling",
     difficulty: "Advanced",
-    tags: ["Cluster","IPC","Multiprocessing"],
-    question: "Node.js-এ Cluster Module কীভাবে কাজ করে? Master এবং Worker প্রসেসের মধ্যে কমুনিকেশন কীভাবে হয়?",
+    tags: ["Memory Leak", "v8.getHeapSnapshot", "Chrome DevTools", "Debugging"],
+    question: "What are the primary causes of Memory Leaks in Node.js, and how do you diagnose and debug them in a production environment?",
     answer: `
-      <p>Node.js সিঙ্গেল থ্রেডে চলে, ফলে মাল্টি-কোর CPU-এর পুরো ক্ষমতা ব্যবহার করা যায় না। এই সীমাবদ্ধতা দূর করতে <strong>Cluster Module</strong> ব্যবহার করে একই পোর্টে একাধিক Child Process (Worker) চালু করা হয়।</p>
-      <h4>কাজের পদ্ধতি:</h4>
-      <ul>
-        <li><strong>Primary (Master) Process:</strong> সার্ভারের মেইন পোর্টে লিসেন করে এবং ইনকামিং কানেকশন গ্রহণ করে।</li>
-        <li><strong>Worker Processes:</strong> Master প্রসেস Round-robin অ্যালগরিদম ব্যবহার করে লোড Worker-দের মধ্যে ভাগ করে দেয়।</li>
-      </ul>
-      <h4>Inter-Process Communication (IPC):</h4>
-      <p>Master এবং Worker প্রসেসের মেমোরি আলাদা। তারা <code>process.send()</code> এবং <code>process.on('message')</code>-এর মাধ্যমে IPC চ্যানেল দিয়ে বার্তা আদান-প্রদান করে।</p>
-      <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>const cluster = require('cluster');
-const http = require('http');
-const numCPUs = require('os').cpus().length;
+      <p>A <strong>Memory Leak</strong> in Node.js occurs when objects are no longer needed by application logic but remain referenced directly or indirectly from a root object (such as the <code>global</code> context or an active closure), preventing V8's Garbage Collector from reclaiming their memory.</p>
 
-if (cluster.isPrimary) {
-  for (let i = 0; i < numCPUs; i++) cluster.fork();
-} else {
-  http.createServer((req, res) => res.end('Hello')).listen(8000);
-}</code></pre>
+      <h4>4 Common Causes of Node.js Memory Leaks</h4>
+      <ol>
+        <li><strong>Accidental Global Variables:</strong> Assigning values without <code>const</code>, <code>let</code>, or <code>var</code> attaches them permanently to the <code>global</code> object.</li>
+        <li><strong>Dangling Event Listeners / EventEmitters:</strong> Adding event listeners (e.g., <code>emitter.on('data', ...)</code>) to long-lived objects without invoking <code>removeListener()</code> or <code>off()</code> when connection handlers disconnect.</li>
+        <li><strong>Unbounded In-Memory Caches:</strong> Using standard JavaScript objects or Maps as application caches without setting a Maximum Size or Time-To-Live (TTL) eviction policy.</li>
+        <li><strong>Closure Scoping Issues:</strong> Retaining references to large outer-scope variables inside long-lived inner callback functions.</li>
+      </ol>
+
+      <h4>Step-by-Step Diagnostic & Debugging Process</h4>
+
+      <h5>Step 1: Monitor Heap Growth Metrics</h5>
+      <p>Continuously monitor memory usage via APM tools or using native Node.js APIs:</p>
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>const mem = process.memoryUsage();
+console.log(`Heap Used: ${(mem.heapUsed / 1024 / 1024).toFixed(2)} MB`);
+console.log(`External (Off-Heap Buffers): ${(mem.external / 1024 / 1024).toFixed(2)} MB`);</code></pre>
       </div>
+
+      <h5>Step 2: Generate Heap Snapshots in Production</h5>
+      <p>When memory consumption crosses a danger threshold, trigger an explicit V8 heap snapshot programmatically or via signals without killing the process:</p>
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>const v8 = require('v8');
+const fs = require('fs');
+
+function captureHeapSnapshot(filename) {
+  const snapshotStream = v8.getHeapSnapshot();
+  const fileStream = fs.createWriteStream(filename);
+  snapshotStream.pipe(fileStream);
+}
+
+// Capture baseline snapshot at startup, and another during high memory stress
+captureHeapSnapshot(`./snapshot-${Date.now()}.heapsnapshot`);</code></pre>
+      </div>
+
+      <h5>Step 3: Analyze via Chrome DevTools</h5>
+      <ol>
+        <li>Open Google Chrome and navigate to <code>chrome://inspect</code>.</li>
+        <li>Load two <code>.heapsnapshot</code> files (Baseline vs. Memory Leak State) into the <strong>Memory</strong> tab.</li>
+        <li>Select the newer snapshot and switch the view perspective to <strong>Comparison</strong>.</li>
+        <li>Sort constructors by <strong># Delta</strong> (number of new uncollected objects) and <strong>Size Delta</strong>.</li>
+        <li>Inspect the <strong>Retainers Tree</strong> at the bottom. Follow the red reference lines to discover which root reference is holding onto the uncollected memory.</li>
+      </ol>
     `
   },
   {
     id: "node-6",
-    category: "Node.js",
+    category: "Multiprocessing & Concurrency",
     difficulty: "Advanced",
-    tags: ["Worker Threads","CPU Intensive","Parallelism"],
-    question: "Worker Threads এবং Child Process (fork)-এর মধ্যে পার্থক্য কী? CPU Heavy টাস্কের জন্য কোনটি উপযুক্ত?",
+    tags: ["Cluster", "Worker Threads", "Child Process", "Architecture Comparison"],
+    question: "Compare Cluster Module, Worker Threads, and Child Process (fork). Which one should be selected for scaling HTTP servers vs CPU-intensive tasks?",
     answer: `
-      <p>উভয়ই CPU Intensive কাজের জন্য ব্যবহৃত হলেও মেমোরি আর্কিটেকচারে বড় পার্থক্য রয়েছে।</p>
+      <p>Node.js provides three distinct primitives for parallel execution and concurrency. Choosing the wrong strategy can severely impact memory consumption and throughput.</p>
+
+      <h4>Architectural Comparison Matrix</h4>
+      <table>
+        <thead>
+          <tr>
+            <th>Dimension</th>
+            <th>Cluster Module</th>
+            <th>Worker Threads (<code>worker_threads</code>)</th>
+            <th>Child Process (<code>fork</code>)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Memory Model</strong></td>
+            <td>Isolated (Completely separate OS process memory)</td>
+            <td>Shared Memory capable via <code>SharedArrayBuffer</code></td>
+            <td>Isolated (Completely separate OS process memory)</td>
+          </tr>
+          <tr>
+            <td><strong>V8 Isolates</strong></td>
+            <td>One V8 instance per worker process</td>
+            <td>Multiple V8 isolates inside the <em>same</em> process</td>
+            <td>One V8 instance per child process</td>
+          </tr>
+          <tr>
+            <td><strong>IPC Communication Overhead</strong></td>
+            <td>Medium (Serialized messaging via IPC sockets)</td>
+            <td>Extremely Low (Direct memory pointer sharing or MessagePort)</td>
+            <td>High (Process-level serialization & pipe overhead)</td>
+          </tr>
+          <tr>
+            <td><strong>Creation Overhead</strong></td>
+            <td>Heavy (Full OS process initialization)</td>
+            <td>Lightweight (Thread creation inside existing process)</td>
+            <td>Heavy (Full OS process initialization)</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>Detailed Use-Case Breakdown</h4>
+
+      <h4>1. Scaling HTTP Servers: Use the Cluster Module</h4>
+      <p>Because Node.js runs on a single main thread, a single process cannot natively utilize multi-core CPUs. The <strong>Cluster Module</strong> forks multiple identical worker processes that share the same listening TCP port.</p>
       <ul>
-        <li><strong>Child Process (fork):</strong> সম্পূর্ণ নতুন OS Process তৈরি করে। নিজস্ব Isolated মেমোরি ও V8 ইনস্ট্যান্স থাকে। ক্রিয়েশন ভারী (Heavyweight)।</li>
-        <li><strong>Worker Threads:</strong> একই প্রসেসের ভেতরে থ্রেড তৈরি করে। <code>SharedArrayBuffer</code>-এর মাধ্যমে <strong>শেয়ার্ড মেমোরি</strong> এক্সেস করতে পারে। লাইটওয়েট ও দ্রুততর।</li>
+        <li>The Primary (Master) process binds to the target port and distributes incoming connections across worker processes using a Round-Robin algorithm (on Unix-like systems).</li>
+        <li>If one worker process crashes due to an uncaught exception, other workers continue handling traffic uninterrupted while the Primary process forks a replacement worker.</li>
       </ul>
-      <p><em>সিদ্ধান্ত:</em> ইমেজ প্রসেসিং, ক্রিপ্টো বা ডেটা অ্যানালিটিক্সের মতো CPU Heavy টাস্কের জন্য <strong>Worker Threads</strong> সবচেয়ে উপযুক্ত।</p>
+
+      <h4>2. CPU-Intensive Tasks: Use Worker Threads</h4>
+      <p>When executing heavy synchronous tasks (e.g., image resizing, AES encryption, machine learning inference, parsing multi-megabyte JSONs):</p>
+      <ul>
+        <li>Running these on the main thread blocks the Event Loop entirely.</li>
+        <li>Using <code>child_process.fork()</code> incurs heavy OS overhead by copying memory structures and spinning up a full engine instance.</li>
+        <li><strong>Worker Threads</strong> run inside the same OS process using isolated V8 isolates. They can instantly transfer large ArrayBuffers without copying, enabling ultra-fast parallel computing with minimal RAM overhead.</li>
+      </ul>
+
+      <h4>3. Isolated External Scripts or Unsafe Code: Use Child Process</h4>
+      <p>Use <code>child_process.fork()</code> or <code>spawn()</code> when running independent CLI tools, executing shell commands, or running third-party code that requires complete isolation from the host process's memory space and lifecycles.</p>
     `
   },
   {
     id: "node-7",
-    category: "Node.js",
-    difficulty: "Intermediate",
-    tags: ["EventEmitter","Events","Memory Leak"],
-    question: "EventEmitter কী? maxListeners বাড়ানো বা কমানো এবং Memory Leak সঙ্কেত কীভাবে দূর করবেন?",
+    category: "Libuv Architecture & Thread Pool",
+    difficulty: "Advanced",
+    tags: ["Libuv", "UV_THREADPOOL_SIZE", "Asynchronous I/O", "Concurrency Bottlenecks"],
+    question: "What is UV_THREADPOOL_SIZE, which operations rely on Libuv's thread pool, and how do you diagnose thread pool bottlenecks?",
     answer: `
-      <p>Node.js-এর একটি কোর মডিউল <strong>EventEmitter</strong>, যা Observer Pattern বাস্তবায়ন করে। Node.js-এর ভেতরের অধিকাংশ মডিউল (http server, stream) এর ওপর নির্ভরশীল।</p>
-      <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>const EventEmitter = require('events');
-const myEmitter = new EventEmitter();
+      <p>While Node.js uses non-blocking OS kernel calls for network I/O, certain core operations cannot be performed asynchronously by operating system kernels. For these operations, Libuv offloads the synchronous blocking C/C++ library calls to a background <strong>Worker Thread Pool</strong>.</p>
 
-myEmitter.on('userRegistered', (user) => console.log('Email sent'));
-myEmitter.emit('userRegistered', { email: 'test@example.com' });</code></pre>
+      <h4>1. Operations Managed by Libuv Thread Pool</h4>
+      <ul>
+        <li><strong>All Async File System Operations (<code>fs</code> module):</strong> Operations like <code>fs.readFile</code>, <code>fs.writeFile</code>, and <code>fs.stat</code> are executed on background threads because OS file systems generally lack universal non-blocking APIs.</li>
+        <li><strong>Crypto Operations:</strong> CPU-heavy asymmetric/hashing async functions such as <code>crypto.pbkdf2()</code>, <code>crypto.scrypt()</code>, and <code>crypto.randomBytes()</code>.</li>
+        <li><strong>Compression APIs (<code>zlib</code> module):</strong> Asynchronous compression and decompression (gzip, deflate, brotli).</li>
+        <li><strong>DNS Resolution (<code>dns.lookup()</code> ONLY):</strong> <code>dns.lookup()</code> calls the underlying OS system function <code>getaddrinfo()</code>, which is blocking. <em>(Note: <code>dns.resolve()</code> does NOT use the thread pool; it uses c-ares over the network).</em></li>
+      </ul>
+
+      <h4>2. Default Size & How to Modify It</h4>
+      <p>The default Libuv thread pool size is <strong>4</strong>. You can increase this up to a maximum of <strong>1024</strong> by setting the <code>UV_THREADPOOL_SIZE</code> environment variable <em>before</em> the application starts:</p>
+
+      <div class="code-box">
+        <div class="code-header"><span>bash</span></div>
+        <pre><code># Setting thread pool size in terminal
+export UV_THREADPOOL_SIZE=16
+node server.js</code></pre>
       </div>
-      <h4>MaxListeners Warning:</h4>
-      <p>ডিফল্টভাবে একটি ইভেন্টে সর্বোচ্চ ১০টি Listener রেজিস্টার করা যায়। এর বেশি হলে <code>MaxListenersExceededWarning</code> দেখায়, যা মেমোরি লিক শনাক্ত করে। <code>myEmitter.setMaxListeners(20)</code> দিয়ে সংখ্যা বাড়ানো যায়, তবে কাজ শেষে <code>removeListener()</code> করে ডিলিট করাই সবচেয়ে ভালো প্র্যাকটিস।</p>
+
+      <p><em>Warning: Programmatically attempting to set <code>process.env.UV_THREADPOOL_SIZE = 16</code> inside your JavaScript code after execution begins will have NO effect, because Libuv initializes its thread pool when Node.js bootstraps before executing user code.</em></p>
+
+      <h4>3. Diagnosing Thread Pool Bottlenecks</h4>
+      <p>If your application processes 5 simultaneous <code>crypto.pbkdf2</code> hashing operations or 5 simultaneous async file reads using the default pool size of 4:</p>
+      <ul>
+        <li>The first 4 operations immediately occupy all 4 background Libuv threads.</li>
+        <li>The 5th operation is queued in Libuv's waiting list, completely dormant, even if system CPU utilization is at 10%.</li>
+        <li>This causes latency spikes that do not correlate with main thread Event Loop delays or CPU limits.</li>
+      </ul>
+
+      <p><strong>Diagnosis Test:</strong> Measure execution times of concurrent async crypto operations in batches. If 4 tasks take 100ms, but 5 tasks take 200ms, the 5th task is waiting for a free thread in the thread pool queue.</p>
     `
   },
   {
     id: "node-8",
-    category: "Node.js",
-    difficulty: "Intermediate",
-    tags: ["Error Handling","UncaughtException","Graceful Shutdown"],
-    question: "Node.js-এ Uncaught Exception এবং Unhandled Rejection কীভাবে হ্যান্ডেল করবেন? Graceful Shutdown কীভাবে বাস্তবায়ন করবেন?",
+    category: "Streams & Memory Optimization",
+    difficulty: "Advanced",
+    tags: ["Streams", "Backpressure", "highWaterMark", "stream.pipeline"],
+    question: "What is Backpressure in Node.js Streams, why does highWaterMark matter, and how does stream.pipeline() prevent memory leaks?",
     answer: `
-      <p>প্রোডাকশন অ্যাপ্লিকেশনে ক্র্যাশ এড়াতে গ্লোবাল এরর হ্যান্ডলিং অত্যন্ত জরুরি।</p>
+      <p>Node.js <strong>Streams</strong> allow data processing chunk-by-chunk without loading entire payloads into V8 Memory Heap, enabling efficient handling of gigabyte-sized files or real-time network streams.</p>
+
+      <h4>Understanding Backpressure</h4>
+      <p><strong>Backpressure</strong> is a build-up of unprocessed data that occurs when a <code>Readable</code> stream produces data at a rate faster than the <code>Writable</code> stream can process or transmit it.</p>
+      
+      <p>If an application ignores backpressure and continuously reads data into memory without pausing the source, unconsumed data accumulates in RAM internal buffers, eventually triggering V8 <strong>Out-Of-Memory (OOM) crashes</strong>.</p>
+
+      <h4>The Role of highWaterMark</h4>
+      <p>The <code>highWaterMark</code> option acts as a buffer threshold (not a strict capacity limit):</p>
       <ul>
-        <li><code>process.on('uncaughtException')</code>: সিঙ্ক্রোনাস কোডের আনহ্যান্ডেলড ভুল ধরে।</li>
-        <li><code>process.on('unhandledRejection')</code>: আনহ্যান্ডেলড Promise Rejection ধরে।</li>
+        <li>For standard byte streams, the default <code>highWaterMark</code> is <strong>64 KB</strong> (or 16 KB for HTTP streams).</li>
+        <li>For streams operating in <code>objectMode</code>, it defaults to <strong>16 objects</strong>.</li>
+        <li>When a Writable Stream's internal buffer reaches or exceeds <code>highWaterMark</code>, <code>writable.write(chunk)</code> returns <strong><code>false</code></strong>. This is a critical signal telling the Readable Stream to pause reading until a <code>'drain'</code> event is emitted.</li>
       </ul>
-      <p>সার্ভার শাটডাউনের সময় চলমান রিকোয়েস্ট সম্পন্ন করা ও ডাটাবেজ কানেকশন ক্লোজ করাকে <strong>Graceful Shutdown</strong> বলে।</p>
+
+      <h4>Why stream.pipe() is Dangerous vs stream.pipeline()</h4>
+      <p>Traditionally, developers chained streams using <code>readable.pipe(writable)</code>. However, <code>.pipe()</code> suffers from a fatal architectural flaw:</p>
+      <ul>
+        <li>If an error occurs mid-stream inside the Writable destination, <code>.pipe()</code> does <strong>not automatically destroy or close</strong> the source Readable Stream or intermediary Transform Streams.</li>
+        <li>The source stream remains open in memory, continuing to leak file descriptors and memory resources.</li>
+      </ul>
+
+      <h4>The Solution: stream.pipeline()</h4>
+      <p>Introduced to properly handle errors, <code>stream.pipeline()</code> forwards errors cleanly across all chained streams and guarantees automatic cleanup of resources if any stream in the pipeline fails or closes unexpectedly.</p>
+
       <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>process.on('SIGTERM', () => {
-  console.log('SIGTERM received: closing server');
-  server.close(() => {
-    mongoose.connection.close(false, () => process.exit(0));
-  });
-});</code></pre>
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>const { pipeline } = require('stream/promises');
+const fs = require('fs');
+const zlib = require('zlib');
+
+async function compressFileSecurely() {
+  try {
+    // Safely pipe with backpressure & error forwarding
+    await pipeline(
+      fs.createReadStream('heavy_audit.log', { highWaterMark: 128 * 1024 }), // 128KB chunks
+      zlib.createGzip(),
+      fs.createWriteStream('heavy_audit.log.gz')
+    );
+    console.log('Compression successful and streams safely destroyed.');
+  } catch (err) {
+    // If ANY stream fails, all file descriptors are automatically closed/destroyed here
+    console.error('Pipeline failed gracefully:', err);
+  }
+}</code></pre>
       </div>
     `
   },
   {
     id: "node-9",
-    category: "Node.js",
+    category: "Microservices Architecture & Messaging",
     difficulty: "Advanced",
-    tags: ["V8 Flags","Garbage Collection","Memory Management"],
-    question: "Node.js-এ Heap Memory কীভাবে ম্যানেজ হয়? --max-old-space-size এবং Garbage Collection টিউনিং কীভাবে করবেন?",
+    tags: ["Event-Driven Architecture", "Microservices", "Message Broker", "Decoupling"],
+    question: "How do you design an Event-Driven Layered Microservices Architecture using Node.js and Message Brokers?",
     answer: `
-      <p>Node.js-এর সমস্ত JS অবজেক্ট V8 Engine-এর Heap Memory-তে জমা থাকে।</p>
-      <h4>V8 Heap Structure:</h4>
+      <p>In distributed production systems, synchronous HTTP communications (REST/gRPC) between Node.js microservices introduce tight coupling, cascading failures, latency accumulation, and availability bottlenecks. An <strong>Event-Driven Microservices Architecture</strong> replaces direct HTTP calls with asynchronous message passing.</p>
+
+      <h4>Key Architectural Layers</h4>
+
+      <h4>1. API Gateway Layer</h4>
       <ul>
-        <li><strong>New Space (Young Generation):</strong> নতুন অবজেক্ট এখানে থাকে। <em>Scavenger Algorithm</em> দ্রুত মেমোরি রিলিজ করে।</li>
-        <li><strong>Old Space (Old Generation):</strong> দীর্ঘস্থায়ী অবজেক্ট এখানে আসে। <em>Mark-Sweep-Compact Algorithm</em> চলে, যা ভারী।</li>
+        <li>Acts as the single point of entry for clients.</li>
+        <li>Handles TLS termination, JWT validation, rate limiting, and request routing.</li>
+        <li>Transforms synchronous HTTP REST requests into asynchronous domain events.</li>
       </ul>
-      <h4>Memory Tuning:</h4>
-      <p>ডিফল্ট V8 ম্যাক্স মেমোরি লিমিট 1.4 GB। বড় অ্যাপের জন্য এটি বাড়ানো যায়:</p>
+
+      <h4>2. Domain Microservices Layer (Decoupled Nodes)</h4>
+      <ul>
+        <li>Each Node.js service owns its private database (Database-per-Service pattern).</li>
+        <li>Services communicate strictly via domain events published to a centralized Message Broker (e.g., Apache Kafka, RabbitMQ, or NATS).</li>
+        <li>Services publish state changes (e.g., <code>OrderCreated</code>) without needing knowledge of which downstream services consume them.</li>
+      </ul>
+
+      <h4>3. Message Broker Infrastructure Layer</h4>
+      <ul>
+        <li>Acts as a durable buffer and distribution hub.</li>
+        <li>Provides consumer groups, message replay capabilities, and configurable retry mechanisms.</li>
+      </ul>
+
       <div class="code-box">
-        <div class="code-header"><span>bash</span><button class="copy-btn">Copy</button></div>
-        <pre><code>node --max-old-space-size=4096 server.js # Sets heap limit to 4GB</code></pre>
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>// Example: Order Service (Publisher)
+async function createOrder(orderPayload) {
+  const order = await db.orders.insert(orderPayload);
+  
+  // Publish event asynchronously; do not wait for email/inventory HTTP responses
+  await messageBroker.publish('order.events', {
+    eventType: 'ORDER_CREATED',
+    payload: { orderId: order.id, userId: order.userId, amount: order.total }
+  });
+
+  return order; // Instant fast response back to client
+}
+
+// Example: Notification Service (Subscriber / Consumer)
+messageBroker.subscribe('order.events', async (event) => {
+  if (event.eventType === 'ORDER_CREATED') {
+    await sendReceiptEmail(event.payload.userId, event.payload.orderId);
+  }
+});</code></pre>
       </div>
+
+      <h4>Core Resilience Patterns in Node.js Event-Driven Design</h4>
+      <ul>
+        <li><strong>Transactional Outbox Pattern:</strong> Ensures database updates and event publishing occur atomically in a single database transaction to prevent data inconsistencies if the broker is briefly offline.</li>
+        <li><strong>Dead Letter Queue (DLQ):</strong> Messages that fail processing repeatedly due to errors are routed to a DLQ for manual inspection without halting the main event consumer.</li>
+        <li><strong>Idempotent Consumers:</strong> Consumers track processed message IDs (e.g., using Redis) to safely handle duplicate message deliveries gracefully.</li>
+      </ul>
     `
   },
   {
     id: "node-10",
-    category: "Node.js",
-    difficulty: "Intermediate",
-    tags: ["Security","ReDoS","Event Loop Blocking"],
-    question: "Event Loop Blocking কী কী কারণে হতে পারে এবং Node.js-এ তা কীভাবে প্রতিরোধ করা যায়?",
+    category: "Production Hardening & System Resilience",
+    difficulty: "Advanced",
+    tags: ["Graceful Shutdown", "SIGTERM", "Kubernetes", "Production Readiness"],
+    question: "Why is handling SIGTERM/SIGINT signals critical in containerized Node.js environments (Docker/Kubernetes), and how do you implement a production-grade Graceful Shutdown?",
     answer: `
-      <p>Node.js সিঙ্গেল থ্রেডে চলায় কলস্ট্যাকে কোনো ভারী কাজ দীর্ঘক্ষণ চললে পুরো অ্যাপ্লিকেশন ব্লক হয়ে যায়।</p>
-      <h4>সাধারণ কারণসমূহ:</h4>
+      <p>When orchestrators like <strong>Kubernetes</strong> or <strong>Docker Swarm</strong> deploy updates, scale down instances, or rebalance nodes, they do not kill application containers instantly. Instead, they issue an OS termination signal to give the application time to shut down cleanly.</p>
+
+      <h4>The Termination Sequence in Kubernetes</h4>
       <ol>
-        <li><strong>Heavy Synchronous Operations:</strong> <code>fs.readFileSync</code>, বড় JSON পার্সিং।</li>
-        <li><strong>ReDoS:</strong> ক্যাটাস্ট্রফিক ব্যাকট্র্যাকিং সম্বলিত রেগুলার এক্সপ্রেশন যা CPU ১০০% খরচ করে।</li>
-        <li><strong>Complex Loops:</strong> বিলিয়ন ইটারেশনের ফর-লুপ।</li>
+        <li>Kubernetes changes the Pod state to <code>Terminating</code> and removes its IP address from Service Endpoints (stopping new traffic routing).</li>
+        <li>Kubernetes sends a <strong><code>SIGTERM</code></strong> (Signal Terminate) to process ID 1 inside the container.</li>
+        <li>Kubernetes initiates a countdown timer defined by <code>terminationGracePeriodSeconds</code> (default: 30 seconds).</li>
+        <li>If the Node.js application is still running when the grace period expires, Kubernetes sends a <strong><code>SIGKILL</code></strong> signal, which immediately terminates the process. <code>SIGKILL</code> cannot be intercepted or handled by code.</li>
       </ol>
-      <h4>প্রতিরোধের উপায়:</h4>
+
+      <h4>Risks of Failing to Handle SIGTERM</h4>
       <ul>
-        <li>সবসময় Asynchronous Non-blocking API ব্যবহার করা।</li>
-        <li>ভারী CPU টাস্কের জন্য <strong>Worker Threads</strong> ব্যবহার করা।</li>
-        <li>ReDoS প্রতিরোধে <code>safe-regex</code> লাইব্রেরি ব্যবহার করা।</li>
+        <li>Active HTTP requests are abruptly disconnected, returning 502 Bad Gateway errors to clients.</li>
+        <li>In-flight database transactions are aborted mid-stream, potentially leaving data corrupted or partially written.</li>
+        <li>Background jobs pull messages off queues without committing processing status, causing lost or stuck tasks.</li>
       </ul>
+
+      <h4>Production-Grade Graceful Shutdown Implementation</h4>
+
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>const express = require('express');
+const http = require('http');
+const db = require('./db'); // Hypothetical database interface
+
+const app = express();
+const server = http.createServer(app);
+
+server.listen(3000, () => console.log('Server running on port 3000'));
+
+// Flag to track shutdown status for readiness health probes
+let isShuttingDown = false;
+
+app.get('/health/readiness', (req, res) => {
+  if (isShuttingDown) {
+    return res.status(503).send('Server is shutting down');
+  }
+  res.status(200).send('OK');
+});
+
+async function gracefulShutdown(signal) {
+  console.log(`[${signal}] Received. Initiating graceful shutdown...`);
+  isShuttingDown = true;
+
+  // 1. Force kill timeout fallback if cleanup gets stuck
+  const forceKillTimer = setTimeout(() => {
+    console.error('Graceful shutdown timeout exceeded. Forcing process exit!');
+    process.exit(1);
+  }, 10000); // 10s fallback limit
+
+  // Unref ensures this timer does not keep the Event Loop open by itself
+  forceKillTimer.unref();
+
+  try {
+    // 2. Stop accepting new incoming HTTP connections
+    server.close(async () => {
+      console.log('HTTP server closed. No longer accepting connections.');
+
+      // 3. Drain and disconnect infrastructure dependencies cleanly
+      console.log('Closing database connections...');
+      await db.disconnect();
+
+      console.log('Closing Redis/Message Queue connections...');
+      await messageQueue.close();
+
+      console.log('Cleanup completed. Exiting process gracefully.');
+      process.exit(0);
+    });
+  } catch (err) {
+    console.error('Error during shutdown:', err);
+    process.exit(1);
+  }
+}
+
+// Intercept operating system termination signals
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));</code></pre>
+      </div>
     `
   },
   {
     id: "node-11",
-    category: "Node.js",
+    category: "Security & Hardening",
     difficulty: "Advanced",
-    tags: ["Native","C++ Addons","N-API"],
-    question: "Node.js-এ Node-API (N-API) এবং C++ Addons কী?",
+    tags: ["ReDoS", "Regular Expressions", "Event Loop Blocking", "CPU Starvation"],
+    question: "What is Regular Expression Denial of Service (ReDoS), how does Catastrophic Backtracking block the Event Loop, and how do you prevent it?",
     answer: `
-      <p>N-API (Node-API) হলো একটি ABI (Application Binary Interface) স্টেবল API, যা C/C++ দিয়ে তৈরি নেটিভ মডিউলগুলোকে Node.js-এর সাথে যুক্ত করে। সাধারণ C++ Addons Node.js ভার্সন আপগ্রেড হলে ব্রেক হয়ে যেতে পারে, কিন্তু N-API সেই সমস্যা সমাধান করে।</p>
-      <h4>ব্যবহার:</h4>
-      <p>অত্যন্ত ভারী গাণিতিক হিসাব, ইমেজ প্রসেসিং (যেমন- Sharp), বা সিস্টেম-লেভেল মেমোরি অ্যাক্সেসের জন্য এটি ব্যবহৃত হয়।</p>
+      <p><strong>Regular Expression Denial of Service (ReDoS)</strong> is an algorithmic complexity attack where a specially crafted input string causes an inefficient regular expression to take exponential time to execute. In a single-threaded runtime like Node.js, this completely freezes the Event Loop, causing a total application outage.</p>
+
+      <h4>1. How Catastrophic Backtracking Works</h4>
+      <p>Most regular expression engines (including V8's Irregexp engine) use Nondeterministic Finite Automata (NFA) with a backtracking algorithm to find matches. When a regular expression contains nested quantifiers or overlapping alternative paths, the number of evaluated combinations grows exponentially with input length (from $O(n)$ to $O(2^n)$ or worse).</p>
+
       <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>// node-addon-api প্যাকেজ ব্যবহার করে N-API মডিউল ইম্পোর্ট
-const nativeAddon = require('./build/Release/nativeaddon.node');
-console.log(nativeAddon.doHeavyCalculation());</code></pre>
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>// Vulnerable regex pattern containing overlapping grouping with nested quantifiers
+const vulnerableRegex = /(a+)+$/;
+
+// Short input string matches instantly
+console.time('Fast');
+vulnerableRegex.test('aaaaaaaaaa!'); 
+console.timeEnd('Fast'); // ~0.1ms
+
+// Input string with 30 'a's followed by a non-matching character
+console.time('ReDoS');
+vulnerableRegex.test('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!'); 
+console.timeEnd('ReDoS'); // Takes several SECONDS of 100% CPU utilization on the main thread!</code></pre>
       </div>
+
+      <p>During those seconds, V8 cannot yield control back to the Event Loop. Zero incoming HTTP requests, database callbacks, or background timers can execute on that process thread during backtracking.</p>
+
+      <h4>2. Common Vulnerable RegEx Patterns</h4>
+      <ul>
+        <li><strong>Nested Quantifiers:</strong> <code>(a+)+</code>, <code>([a-zA-Z]+)*</code></li>
+        <li><strong>Overlapping Alternations with Quantifiers:</strong> <code>(a|a)+</code>, <code>(a|a?)+</code></li>
+      </ul>
+
+      <h4>3. Prevention & Mitigation Strategies</h4>
+      <ul>
+        <li><strong>Static Analysis Tools:</strong> Use linters like <code>eslint-plugin-security</code> or specialized tools (e.g., <code>safe-regex</code>) in your CI/CD pipeline to catch vulnerable regexes before deployment.</li>
+        <li><strong>Avoid Dynamic RegEx on User Inputs:</strong> Never pass un-sanitized user strings directly into <code>new RegExp(userInput)</code>.</li>
+        <li><strong>Use Non-Backtracking RegEx Engines:</strong> For user-configurable string matching, use linear-time regex libraries like <code>re2</code> (C++ wrapper for Google's RE2 engine that guarantees $O(n)$ time execution).</li>
+        <li><strong>Delegate Validation to Background Workers:</strong> If evaluating complex regexes on arbitrary data is required, execute them inside a <strong>Worker Thread</strong> with a strict execution timeout.</li>
+      </ul>
     `
   },
   {
     id: "node-12",
-    category: "Node.js",
-    difficulty: "Intermediate",
-    tags: ["Security","Path Traversal","FS"],
-    question: "Node.js path মডিউল ব্যবহারে Path Traversal সিকিউরিটি ঝুঁকি কী?",
+    category: "Diagnostics & Observability",
+    difficulty: "Advanced",
+    tags: ["AsyncLocalStorage", "async_hooks", "Context Propagation", "Distributed Tracing"],
+    question: "How does AsyncLocalStorage work under the hood, and how do you use it for request context propagation without drilling parameters?",
     answer: `
-      <p>Path Traversal হলো এমন একটি হ্যাকিং কৌশল যেখানে অ্যাটাকার <code>../</code> (ডিরেক্টরি ব্যাক) ব্যবহার করে সার্ভারের বেস ডিরেক্টরির বাইরের ফাইল অ্যাক্সেস করার চেষ্টা করে। ইউজার ইনপুট সরাসরি ফাইল রিড ফাংশনে দিলে এই ঝুঁকি থাকে।</p>
+      <p>In multithreaded runtimes (like Java or C#), **Thread-Local Storage (TLS)** allows binding contextual data (such as a Trace ID or User Context) to the current executing thread. Because Node.js handles multiple concurrent asynchronous operations on a single thread using non-blocking I/O callbacks, traditional TLS models do not apply.</p>
+
+      <h4>1. The Evolution: From Domain & async_hooks to AsyncLocalStorage</h4>
+      <p>Node.js introduced <code>AsyncLocalStorage</code> (part of the <code>async_hooks</code> module) to track the asynchronous execution graph across callback chains, Promises, and timers, allowing contextual storage to persist through asynchronous boundaries seamlessly.</p>
+
+      <h4>2. Practical Architecture: Distributed Tracing & Request Context</h4>
+      <p>Instead of manually passing a <code>requestId</code> parameter through every layer (Controllers, Services, Repositories, Helpers), <code>AsyncLocalStorage</code> allows any deep internal function to access context effortlessly.</p>
+
       <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>const path = require('path');
-const fs = require('fs');
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>const { AsyncLocalStorage } = require('async_hooks');
+const express = require('express');
+const crypto = require('crypto');
 
-const unsafePath = '../../etc/passwd';
-const baseDir = '/var/www/public';
+const asyncLocalStorage = new AsyncLocalStorage();
+const app = express();
 
-// Safe way: resolve করে baseDir এর সাথে মেলানো
-const safePath = path.normalize(path.join(baseDir, unsafePath));
-if (!safePath.startsWith(baseDir)) {
-  throw new Error('Path Traversal Detected!');
+// Express Middleware: Initialize store at the entry point of every HTTP request
+app.use((req, res, next) => {
+  const context = {
+    requestId: req.headers['x-request-id'] || crypto.randomUUID(),
+    userId: req.headers['x-user-id'] || 'anonymous'
+  };
+
+  // Run the rest of the request handler within this isolated store scope
+  asyncLocalStorage.run(context, () => {
+    next();
+  });
+});
+
+// Deep inside a business domain layer function (No parameter drilling required!)
+async function executeDatabaseQuery() {
+  const store = asyncLocalStorage.getStore();
+  const requestId = store ? store.requestId : 'N/A';
+  
+  console.log(`[ReqID: ${requestId}] Executing SQL query for user ${store?.userId}`);
+  // Database execution logic...
 }</code></pre>
       </div>
+
+      <h4>3. Performance Considerations & Overhead</h4>
+      <ul>
+        <li>Earlier iterations using raw <code>async_hooks</code> caused high runtime performance penalties. <code>AsyncLocalStorage</code> has been heavily optimized in V8/Node.js, but still incurs a slight (~2-5%) throughput overhead.</li>
+        <li><strong>Memory Safety:</strong> Memory allocated within <code>AsyncLocalStorage.run()</code> is automatically garbage-collected when the underlying async resource (Promise/Callback chain) resolves, preventing context memory leaks.</li>
+      </ul>
     `
   },
   {
     id: "node-13",
-    category: "Node.js",
-    difficulty: "Beginner",
-    tags: ["Config","Env","Node20"],
-    question: "Node.js 20.6+ এর নেটিভ --env-file ফ্ল্যাগ কীভাবে কাজ করে?",
+    category: "HTTP Architecture & Networking",
+    difficulty: "Intermediate",
+    tags: ["HTTP Keep-Alive", "Socket Reuse", "http.Agent", "Connection Pooling"],
+    question: "How does HTTP Keep-Alive connection pooling work in Node.js client agents, and how does it reduce external API latency?",
     answer: `
-      <p>Node.js 20.6+ এ <code>--env-file</code> ফ্ল্যাগ যুক্ত হওয়ার আগে, <code>.env</code> ফাইল থেকে environment variable লোড করতে প্রায় প্রতিটি প্রজেক্টে <code>dotenv</code> নামের একটি তৃতীয়-পক্ষ প্যাকেজ ইনস্টল করতে হতো। এখন এটি Node.js-এ <strong>নেটিভ</strong>।</p>
+      <p>When a Node.js microservice communicates with another service or external API, established network connections carry significant overhead if closed prematurely.</p>
+
+      <h4>1. The Cost of Short-Lived Connections (No Keep-Alive)</h4>
+      <p>By default, Node.js's underlying <code>http.Agent</code> has <code>keepAlive: false</code> for outgoing requests. Every single external HTTP/HTTPS request forces a full network handshake cycle:</p>
+      <ul>
+        <li><strong>DNS Lookup:</strong> Resolve domain to IP (1 Round-Trip Time - RTT).</li>
+        <li><strong>TCP Three-Way Handshake:</strong> SYN -> SYN-ACK -> ACK (1 RTT).</li>
+        <li><strong>TLS Handshake (for HTTPS):</strong> Key exchange and certificate validation (1 to 2 RTTs).</li>
+      </ul>
+      <p>If network latency between services is 50ms, opening a new connection for every API call introduces <strong>150ms-200ms of latency</strong> before a single byte of actual data is transmitted.</p>
+
+      <h4>2. How Keep-Alive Optimizes Outgoing Requests</h4>
+      <p>Setting <code>keepAlive: true</code> on <code>http.Agent</code> or <code>https.Agent</code> keeps TCP connections open in a pool after a request completes. Subsequent HTTP requests targeting the same origin reuse an active, pre-established TCP socket—reducing latency to <strong>1 RTT</strong> (just the raw HTTP request/response cycle).</p>
+
       <div class="code-box">
-        <div class="code-header"><span>bash</span><button class="copy-btn">Copy</button></div>
-        <pre><code># .env ফাইল
-DATABASE_URL=postgres://localhost/mydb
-API_KEY=secret123
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>const https = require('https');
+const axios = require('axios');
 
-# ⚠️ কোনো dependency ইনস্টল ছাড়াই
-node --env-file=.env server.js
+// Create a persistent reusable agent
+const keepAliveAgent = new https.Agent({
+  keepAlive: true,
+  maxSockets: 100,        // Max simultaneous open sockets per host
+  maxFreeSockets: 10,     // Max idle sockets to keep open in pool
+  timeout: 60000          // Free socket timeout (ms)
+});
 
-# একাধিক ফাইল লোড করা (Node.js 21.7+)
-node --env-file=.env --env-file=.env.local server.js
-# পরের ফাইলের মান আগেরটির উপর ওভাররাইড করে
+// Configure client library to use custom agent
+const apiClient = axios.create({
+  httpsAgent: keepAliveAgent
+});
 
-# কোডে যাচাই
-console.log(process.env.DATABASE_URL);</code></pre>
+// All subsequent calls reuse open TCP sockets seamlessly
+async function fetchOrders() {
+  return await apiClient.get('https://api.internal.service/orders');
+}</code></pre>
       </div>
-      <h4>কেন এটি গুরুত্বপূর্ণ</h4>
-      <ul>
-        <li><strong>একটি কম dependency:</strong> <code>dotenv</code> npm প্যাকেজ বাদ দেওয়া যায় — সরবরাহ শৃঙ্খল (supply chain) ঝুঁকি কমে, <code>node_modules</code> ছোট হয়।</li>
-        <li><strong>ভাষার স্তরে সমর্থন:</strong> কোনো <code>require('dotenv').config()</code> বয়লারপ্লেট লাগে না — কমান্ড লাইন থেকেই কাজ হয়ে যায়।</li>
-        <li><strong>Docker/CI-তে সহজ:</strong> এন্ট্রিপয়েন্ট স্ক্রিপ্টে একটি ফ্ল্যাগ যোগ করলেই যথেষ্ট।</li>
-      </ul>
-      <h4>এখনও experimental — সতর্কতার সাথে ব্যবহার করুন</h4>
-      <p>Node.js 20-22 এ এই ফিচারটি <strong>experimental</strong> চিহ্নিত (একটি সতর্কবার্তা দেখায়)। এর মানে API ভবিষ্যতে সামান্য বদলাতে পারে। প্রোডাকশনে ব্যবহারের আগে আপনার Node.js সংস্করণে স্থিতিশীলতার অবস্থা যাচাই করুন।</p>
-      <h4>dotenv-এর তুলনায় সীমাবদ্ধতা</h4>
-      <ul>
-        <li><strong>Variable interpolation নেই:</strong> <code>dotenv</code>-এ একটি ভ্যারিয়েবলের ভেতরে আরেকটি ভ্যারিয়েবল রেফারেন্স করা যায় (dotenv-expand সহ, যেমন <code>BASE_URL</code> ব্যবহার করে <code>API_URL</code> বানানো); নেটিভ <code>--env-file</code>-এ এই সুবিধা নেই।</li>
-        <li><strong>কম নমনীয় পার্সিং:</strong> কমেন্ট, multiline value-এর সমর্থন dotenv-এর মতো সমৃদ্ধ নয়।</li>
-        <li><strong>প্রোগ্রাম্যাটিক নিয়ন্ত্রণ কম:</strong> <code>dotenv</code>-এ কোড থেকে কখন, কোন ফাইল লোড হবে তা নিয়ন্ত্রণ করা যায় (পরিবেশ অনুযায়ী শর্তসাপেক্ষে); নেটিভ ফ্ল্যাগ স্টার্টআপেই নির্ধারিত।</li>
-      </ul>
-      <h4>ব্যবহারিক সিদ্ধান্ত</h4>
-      <p>সাধারণ প্রজেক্টে (একটি <code>.env</code> ফাইল, সরল key-value) নেটিভ <code>--env-file</code> ব্যবহার করে একটি dependency বাদ দেওয়া যুক্তিসঙ্গত। জটিল প্রয়োজনে (একাধিক পরিবেশ-নির্ভর ফাইল, variable interpolation, রানটাইমে শর্তসাপেক্ষ লোডিং) <code>dotenv</code> এখনও বেশি নমনীয়।</p>
-      <h4>Follow-up প্রশ্ন</h4>
-      <ul>
-        <li>Environment variable-এ সিক্রেট রাখা কতটা নিরাপদ?</li>
-        <li>Production-এ .env ফাইলের বদলে কী ব্যবহার করা উচিত (secret manager)?</li>
-      </ul>
+
+      <h4>3. Hidden Pitfall: Port Exhaustion (TIME_WAIT State)</h4>
+      <p>Under heavy request volumes without Keep-Alive, local ephemeral ports used to initiate outgoing connections enter the <code>TIME_WAIT</code> OS socket state after closing (lasting 60-120 seconds). High-throughput systems quickly exhaust available ephemeral ports (~28,000 available ports), causing <code>EADDRNOTAVAIL</code> errors. Connection pooling completely mitigates this issue.</p>
     `
   },
   {
     id: "node-14",
-    category: "Node.js",
-    difficulty: "Intermediate",
-    tags: ["Networking","Keep-Alive","Sockets"],
-    question: "Node.js HTTP Keep-Alive এবং socket reuse সুবিধা কী?",
+    category: "Diagnostics & Performance Measurement",
+    difficulty: "Advanced",
+    tags: ["perf_hooks", "PerformanceObserver", "Event Loop Delay", "Sub-millisecond Timing"],
+    question: "How do you measure high-precision latency and monitor Event Loop Delay using node:perf_hooks?",
     answer: `
-      <p>HTTP Keep-Alive একই TCP কানেকশনে <strong>একাধিক request-response</strong> চালাতে দেয় — প্রতিটি রিকোয়েস্টে নতুন কানেকশন খোলার খরচ এড়িয়ে।</p>
-      <h4>কানেকশন ছাড়া প্রতিটি রিকোয়েস্টের খরচ</h4>
-      <p>Keep-Alive ছাড়া প্রতিটি HTTP রিকোয়েস্টে লাগে: TCP three-way handshake (১ RTT), এবং HTTPS হলে TLS handshake (আরও ১-২ RTT)। একই সার্ভারে ১০০টি রিকোয়েস্ট পাঠালে এই খরচ ১০০ বার দিতে হয়।</p>
-      <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>// সার্ভার-সাইড — Node.js-এর HTTP সার্ভার ডিফল্টে keep-alive সমর্থন করে
-const server = http.createServer(handler);
-server.keepAliveTimeout = 65000;    // ⚠️ লোড ব্যালেন্সারের timeout-এর চেয়ে বড় রাখুন
-server.headersTimeout = 66000;      // keepAliveTimeout-এর চেয়ে বড় হতেই হবে
+      <p>Using standard <code>Date.now()</code> or <code>console.time()</code> for performance profiling is inadequate in production because system clock synchronization (NTP adjustments) can skew values, and accuracy is capped at standard milliseconds. The <code>node:perf_hooks</code> module provides sub-millisecond, monotonic, high-precision performance monitoring.</p>
 
-// ক্লায়েন্ট-সাইড — Node.js-এর ডিফল্ট http.Agent-এ keep-alive বন্ধ থাকে!
-const https = require('https');
-const agent = new https.Agent({ keepAlive: true, maxSockets: 50 });
-https.get('https://api.example.com/data', { agent }, callback);</code></pre>
+      <h4>1. Monotonic Time vs Wall Clock Time</h4>
+      <p><code>performance.now()</code> measures high-resolution <strong>monotonic time</strong> (nanosecond resolution) from an arbitrary fixed point in time (process start). It never ticks backwards, making it mathematically immune to NTP clock drift.</p>
+
+      <h4>2. Measuring Operation Latency with PerformanceObserver</h4>
+
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>const { performance, PerformanceObserver } = require('perf_hooks');
+
+// Set up an observer to decouple performance reporting from business logic
+const obs = new PerformanceObserver((items) => {
+  const entries = items.getEntries();
+  entries.forEach((entry) => {
+    console.log(`[METRIC] ${entry.name}: ${entry.duration.toFixed(3)} ms`);
+  });
+});
+
+// Observe measure and GC events
+obs.observe({ entryTypes: ['measure', 'gc'], buffered: true });
+
+async function processOrderBatch() {
+  performance.mark('order-batch-start');
+
+  // Business logic simulation
+  await new Promise(resolve => setTimeout(resolve, 150));
+
+  performance.mark('order-batch-end');
+  
+  // Calculate duration between marks automatically
+  performance.measure('Order Batch Processing Time', 'order-batch-start', 'order-batch-end');
+}</code></pre>
       </div>
-      <h4>একটি সূক্ষ্ম কিন্তু গুরুত্বপূর্ণ সমস্যা: timeout সামঞ্জস্য</h4>
-      <p>Node.js-এর ডিফল্ট <code>keepAliveTimeout</code> ৫ সেকেন্ড। এটি যদি সামনের লোড ব্যালেন্সার (Nginx/ALB)-এর timeout-এর চেয়ে <strong>কম</strong> হয়, তবে একটি race condition তৈরি হয়: লোড ব্যালেন্সার একটি "idle" কানেকশন পুনর্ব্যবহার করতে চাইল, ঠিক সেই মুহূর্তে Node.js সেটি বন্ধ করে দিল — ফলাফল মাঝে মাঝে <strong>502 Bad Gateway</strong>।</p>
-      <p><strong>নিয়ম:</strong> ব্যাকএন্ডের <code>keepAliveTimeout</code> সবসময় সামনের প্রক্সির timeout-এর চেয়ে <em>বড়</em> রাখুন — তাহলে প্রক্সিই আগে কানেকশন বন্ধ করবে, Node.js নয়।</p>
-      <h4>Client-side keep-alive — প্রায়ই ভুলে যাওয়া হয়</h4>
-      <p>Node.js-এর <strong>ডিফল্ট HTTP agent-এ keep-alive বন্ধ</strong> — প্রতিটি বাইরের API কলে (payment gateway, third-party API) নতুন TCP+TLS handshake হয়। আপনার সার্ভিস যখন নিজেই অন্য সার্ভিস কল করে (মাইক্রোসার্ভিসে অত্যন্ত সাধারণ), তখন <code>keepAlive: true</code> সহ একটি কাস্টম agent ব্যবহার করলে latency নাটকীয়ভাবে কমে।</p>
-      <h4>Follow-up প্রশ্ন</h4>
-      <ul>
-        <li>মাঝে মাঝে 502 আসছে — কীভাবে ডিবাগ করবেন?</li>
-        <li>HTTP/2-এ keep-alive-এর ধারণা কীভাবে বদলায়?</li>
-      </ul>
+
+      <h4>3. Monitoring Event Loop Delay (Histogram Metrics)</h4>
+      <p>To detect whether CPU-bound operations or synchronous callbacks are delaying execution, Node.js provides <code>monitorEventLoopDelay()</code> to measure histogram latency statistics:</p>
+
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>const { monitorEventLoopDelay } = require('perf_hooks');
+
+const h = monitorEventLoopDelay({ resolution: 20 }); // Resolution in ms
+h.enable();
+
+// Periodically export latency percentiles to monitoring systems (e.g., Prometheus)
+setInterval(() => {
+  console.log(`Event Loop Delay - Mean: ${(h.mean / 1e6).toFixed(2)} ms`);
+  console.log(`Event Loop Delay - P95: ${(h.percentile(95) / 1e6).toFixed(2)} ms`);
+  console.log(`Event Loop Delay - P99: ${(h.percentile(99) / 1e6).toFixed(2)} ms`);
+  h.reset();
+}, 5000);</code></pre>
+      </div>
     `
   },
   {
     id: "node-15",
-    category: "Node.js",
+    category: "Cryptography & Security",
     difficulty: "Intermediate",
-    tags: ["Security","Crypto","Hashing"],
-    question: "Node.js crypto module দিয়ে পাসওয়ার্ড হ্যশিং এবং এনক্রিপশন কীভাবে করবেন?",
+    tags: ["Crypto", "AES-256-GCM", "Scrypt", "Authenticated Encryption"],
+    question: "How do you securely hash passwords and perform authenticated symmetric encryption (AES-256-GCM) using Node.js's native crypto module?",
     answer: `
-      <p>পাসওয়ার্ড হ্যাশিংয়ের জন্য <code>crypto.scrypt</code> বা <code>bcrypt</code> ব্যবহার করা নিরাপদ। আর সিমেট্রিক এনক্রিপশনের জন্য <code>aes-256-gcm</code> অ্যালগরিদম ব্যবহৃত হয়।</p>
+      <p>Node.js's built-in <code>crypto</code> module wraps OpenSSL to provide cryptographic primitives. Modern web applications require distinct approaches for **password storage** (one-way hashing) vs **data protection** (reversible symmetric encryption).</p>
+
+      <h4>1. Secure Password Hashing with scrypt</h4>
+      <p>Passwords must never be encrypted with reversible algorithms or hashed with fast hash functions (MD5, SHA-256). They require slow, memory-hard Key Derivation Functions (KDFs) like <code>scrypt</code> or <code>argon2</code> to resist GPU/ASIC brute-force attacks.</p>
+
       <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
+        <div class="code-header"><span>javascript</span></div>
         <pre><code>const crypto = require('crypto');
+const { promisify } = require('util');
 
-// Password Hashing
-const salt = crypto.randomBytes(16).toString('hex');
-const hashedPassword = crypto.scryptSync('myPassword', salt, 64).toString('hex');
+const scryptAsync = promisify(crypto.scrypt);
 
-// Encryption
-const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
-let encrypted = cipher.update('secret text', 'utf8', 'hex');
-encrypted += cipher.final('hex');</code></pre>
+async function hashPassword(password) {
+  // Generate a unique 16-byte cryptographically secure random salt
+  const salt = crypto.randomBytes(16).toString('hex');
+  
+  // Derive a 64-byte key using scrypt
+  const derivedKey = await scryptAsync(password, salt, 64);
+  
+  return `${salt}:${derivedKey.toString('hex')}`;
+}
+
+async function verifyPassword(password, storedHash) {
+  const [salt, originalHash] = storedHash.split(':');
+  const derivedKey = await scryptAsync(password, salt, 64);
+  
+  // Timing-safe comparison prevents side-channel timing attacks
+  return crypto.timingSafeEqual(
+    Buffer.from(originalHash, 'hex'),
+    derivedKey
+  );
+}</code></pre>
+      </div>
+
+      <h4>2. Authenticated Symmetric Encryption using AES-256-GCM</h4>
+      <p>For sensitive data that must be decrypted later (e.g., PII data, API tokens), use <strong>AES-256-GCM</strong> (Galois/Counter Mode). GCM provides **Authenticated Encryption**, ensuring both confidentiality and data integrity (detecting tampering).</p>
+
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>const ALGORITHM = 'aes-256-gcm';
+// Secret key must be exactly 32 bytes (256 bits)
+const KEY = crypto.randomBytes(32); 
+
+function encrypt(text) {
+  const iv = crypto.randomBytes(12); // Initialization Vector (12 bytes for GCM)
+  const cipher = crypto.createCipheriv(ALGORITHM, KEY, iv);
+  
+  let encrypted = cipher.update(text, 'utf8', 'hex');
+  encrypted += cipher.final('hex');
+  
+  const authTag = cipher.getAuthTag(); // Authentication Tag ensures integrity
+  
+  return {
+    iv: iv.toString('hex'),
+    encryptedData: encrypted,
+    authTag: authTag.toString('hex')
+  };
+}
+
+function decrypt(encryptedObj) {
+  const decipher = crypto.createDecipheriv(
+    ALGORITHM, 
+    KEY, 
+    Buffer.from(encryptedObj.iv, 'hex')
+  );
+  
+  decipher.setAuthTag(Buffer.from(encryptedObj.authTag, 'hex'));
+  
+  let decrypted = decipher.update(encryptedObj.encryptedData, 'hex', 'utf8');
+  decrypted += decipher.final('utf8'); // Throws an error if data was tampered with!
+  
+  return decrypted;
+}</code></pre>
       </div>
     `
   },
   {
     id: "node-16",
-    category: "Node.js",
+    category: "Networking & DNS Resolution",
     difficulty: "Advanced",
-    tags: ["DNS","Libuv","Threads"],
-    question: "dns.lookup() এবং dns.resolve()-এর মধ্যে মূল পার্থক্য কী?",
+    tags: ["dns.lookup", "dns.resolve", "Libuv Thread Pool Bottlenecks", "c-ares"],
+    question: "What is the critical implementation difference between dns.lookup() and dns.resolve(), and how can dns.lookup() cause production performance degradation?",
     answer: `
-      <p>এই দুটি ফাংশন দেখতে একই কাজ করে মনে হলেও — একটি DNS নাম থেকে IP বের করে — এদের ভেতরের বাস্তবায়ন সম্পূর্ণ ভিন্ন, এবং এই পার্থক্য প্রোডাকশনে গুরুত্বপূর্ণ পারফরম্যান্স প্রভাব ফেলে।</p>
+      <p>Node.js exposes two different APIs in the <code>dns</code> module that appear to perform the same task (resolving a hostname to an IP address). However, their underlying C level implementations are radically different.</p>
+
+      <h4>1. Architectural Comparison</h4>
       <table>
-        <tr><th>দিক</th><th><code>dns.lookup()</code></th><th><code>dns.resolve()</code></th></tr>
-        <tr><td>ব্যবহার করে</td><td>OS-এর <code>getaddrinfo()</code></td><td>c-ares লাইব্রেরি (সরাসরি DNS)</td></tr>
-        <tr><td>থ্রেড</td><td><strong>libuv thread pool</strong></td><td>Event loop-এই (অ-ব্লকিং)</td></tr>
-        <tr><td>OS ক্যাশ/hosts ফাইল</td><td>✅ ব্যবহার করে</td><td>❌ করে না</td></tr>
-        <tr><td>ফলাফলের ধরন</td><td>একটি IP</td><td>সব রেকর্ড (A, AAAA, MX...)</td></tr>
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th><code>dns.lookup()</code></th>
+            <th><code>dns.resolve()</code> / <code>dns.resolve4()</code></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Underlying Engine</strong></td>
+            <td>Calls C library <code>getaddrinfo(3)</code></td>
+            <td>Calls <strong>c-ares</strong> (C library for async DNS)</td>
+          </tr>
+          <tr>
+            <td><strong>Execution Model</strong></td>
+            <td><strong>Synchronous & Blocking</strong> (Offloaded to Libuv Thread Pool)</td>
+            <td><strong>Asynchronous & Non-Blocking</strong> (Executes directly on the Event Loop)</td>
+          </tr>
+          <tr>
+            <td><strong>OS Config Respect</strong></td>
+            <td><strong>YES:</strong> Respects <code>/etc/hosts</code>, nsswitch.conf, local DNS caches</td>
+            <td><strong>NO:</strong> Bypasses OS config; queries DNS servers directly via network</td>
+          </tr>
+          <tr>
+            <td><strong>Default In Node Modules</strong></td>
+            <td>Used by default in <code>http.get</code>, <code>net.connect</code>, and <code>axios</code></td>
+            <td>Must be explicitly invoked by developer code</td>
+          </tr>
+        </tbody>
       </table>
-      <h4>কেন এই পার্থক্যটি গুরুত্বপূর্ণ</h4>
-      <p><code>dns.lookup()</code> সিস্টেমের <code>getaddrinfo()</code> সিস্টেম কল ব্যবহার করে, যা একটি <strong>ব্লকিং</strong> অপারেশন। Node.js এটিকে event loop-এ না চালিয়ে <strong>libuv thread pool</strong>-এ পাঠায় (ডিফল্ট মাত্র ৪টি থ্রেড)।</p>
-      <p>একটি অ্যাপ্লিকেশন যদি সেকেন্ডে অনেকবার নতুন হোস্টনেম resolve করে (যেমন বহু বাইরের API-তে কল), এবং একই সময়ে ফাইল সিস্টেম অপারেশনও চলে (যা একই thread pool ব্যবহার করে), তাহলে DNS lookup <strong>thread pool bottleneck</strong> তৈরি করতে পারে — এমনকি CPU ও নেটওয়ার্ক দুটোই অলস থাকা সত্ত্বেও।</p>
-      <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>const dns = require('dns');
 
-// থ্রেড পুল ব্যবহার করে — hosts ফাইল, OS ক্যাশ সম্মান করে
-dns.lookup('example.com', (err, address, family) => {
-  console.log(address);   // '93.184.216.34'
-});
+      <h4>2. The Production Performance Bottleneck</h4>
+      <p>Because <code>dns.lookup()</code> relies on the OS <code>getaddrinfo()</code> function, which is synchronous and blocking, Node.js offloads every invocation to the <strong>Libuv Thread Pool</strong> (default size = 4).</p>
 
-// থ্রেড পুল ব্যবহার করে না — সরাসরি DNS সার্ভারে c-ares দিয়ে
-dns.resolve4('example.com', (err, addresses) => {
-  console.log(addresses);   // ['93.184.216.34', ...] — সব A রেকর্ড
-});
-
-dns.resolveMx('example.com', callback);   // MX রেকর্ড
-dns.resolveTxt('example.com', callback);  // TXT রেকর্ড</code></pre>
-      </div>
-      <h4>কখন কোনটি</h4>
+      <p><strong>The Failure Scenario:</strong></p>
       <ul>
-        <li><strong><code>dns.lookup()</code>:</strong> সাধারণ ব্যবহারের জন্য — এটি সিস্টেমের <code>/etc/hosts</code> ফাইল ও লোকাল DNS ক্যাশ সম্মান করে, যা Docker/Kubernetes পরিবেশে সার্ভিস ডিসকভারির জন্য প্রায়ই গুরুত্বপূর্ণ (কনটেইনার নাম থেকে IP)।</li>
-        <li><strong><code>dns.resolve*()</code>:</strong> উচ্চ থ্রুপুট DNS lookup-এ, যেখানে thread pool bottleneck এড়াতে হবে, অথবা নির্দিষ্ট রেকর্ড টাইপ (MX, TXT, SRV) দরকার। কিন্তু এটি <code>hosts</code> ফাইল দেখে না — কনটেইনার নেটওয়ার্কিংয়ে এটি সমস্যা তৈরি করতে পারে।</li>
+        <li>If an application handles thousands of concurrent outbound HTTP calls (e.g., a scraping engine or API aggregator) while simultaneously executing async file system I/O (which also relies on the Libuv thread pool):</li>
+        <li>The 4 Libuv threads become entirely saturated by blocking DNS resolution calls.</li>
+        <li>File I/O and crypto operations are queued indefinitely in Libuv, leading to high latency spikes and worker timeouts—even if overall CPU and network utilization remain low.</li>
       </ul>
-      <p><strong>প্রোডাকশন সমস্যা যা এই জ্ঞান দিয়ে ডিবাগ হয়:</strong> একটি অ্যাপ্লিকেশনে হঠাৎ latency spike দেখা যাচ্ছিল যখন একই সাথে অনেক বাইরের API কল ও ফাইল আপলোড চলছিল — কারণ ছিল <code>dns.lookup()</code> এবং <code>fs</code> অপারেশন একই ছোট thread pool শেয়ার করছিল। <code>UV_THREADPOOL_SIZE</code> বাড়ানো বা DNS resolution ক্যাশ করাই সমাধান ছিল।</p>
-      <h4>Follow-up প্রশ্ন</h4>
+
+      <h4>3. Mitigation & Best Practices</h4>
       <ul>
-        <li>DNS lookup ফলাফল কীভাবে ক্যাশ করবেন?</li>
-        <li>Kubernetes-এ <code>dns.resolve()</code> ব্যবহার করলে কী সমস্যা হতে পারে?</li>
+        <li><strong>Increase Thread Pool Size:</strong> If using heavy <code>dns.lookup()</code> workloads, scale <code>UV_THREADPOOL_SIZE</code> (e.g., 16 or 32).</li>
+        <li><strong>Implement In-Memory DNS Caching:</strong> Use libraries like <code>cacheable-lookup</code> to cache DNS query results in memory, avoiding thread pool offloading entirely on recurring requests.</li>
+        <li><strong>Use Custom Lookup Functions:</strong> Pass a custom lookup function based on <code>dns.resolve4()</code> into HTTP agents when local <code>/etc/hosts</code> files do not need to be evaluated.</li>
       </ul>
     `
   },
   {
     id: "node-17",
-    category: "Node.js",
+    category: "Module System & Internals",
     difficulty: "Intermediate",
-    tags: ["Modules","Cache","Require"],
-    question: "Node.js require.cache কীভাবে কাজ করে?",
+    tags: ["require.cache", "CommonJS", "ES Modules", "Singleton Pattern"],
+    question: "How does require.cache work in CommonJS, how does it enforce module singletons, and how do you clear it safely?",
     answer: `
-      <p>Node.js যখন একটি মডিউল <code>require()</code> করে, সে প্রথমে মডিউলের কোড রান করে, তারপর ফলাফলটি <strong><code>require.cache</code></strong>-এ সংরক্ষণ করে রাখে। একই মডিউল পরে আবার <code>require()</code> করলে <em>পুনরায় চালানো হয় না</em> — সরাসরি ক্যাশ থেকে ফেরত আসে।</p>
+      <p>In Node.js's CommonJS module system, when a file is imported via <code>require('./module')</code> for the first time, Node.js executes the module file once, captures its <code>module.exports</code> reference, and caches it inside the <strong><code>require.cache</code></strong> object.</p>
+
+      <h4>1. Structure of require.cache</h4>
+      <p>The <code>require.cache</code> object stores loaded modules using their fully resolved **absolute file path** as the key:</p>
+
       <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>// a.js
-console.log('a.js চলছে');   // এটি শুধু একবার প্রিন্ট হবে
-module.exports = { count: 0 };
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>// Viewing the module cache entry
+const absolutePath = require.resolve('./myService');
+console.log(require.cache[absolutePath]);
 
-// b.js
-const a1 = require('./a');
-a1.count = 5;
-
-// c.js
-const a2 = require('./a');
-console.log(a2.count);   // 5 — একই অবজেক্ট, cache থেকে
-
-// key = রিজলভড absolute পাথ
-console.log(require.cache[require.resolve('./a')]);
-// { id, exports, children, filename, loaded: true, ... }</code></pre>
+/* Output Module Object Structure:
+{
+  id: '/absolute/path/to/myService.js',
+  path: '/absolute/path/to',
+  exports: { ... }, // The exported interface/instance
+  filename: '/absolute/path/to/myService.js',
+  loaded: true,
+  children: [...],
+  paths: [...]
+}
+*/</code></pre>
       </div>
-      <h4>Cache key কীভাবে কাজ করে</h4>
-      <p>ক্যাশের key হলো <strong>রিজলভড absolute ফাইল পাথ</strong>, মডিউলের নাম নয়। এর মানে একই ফাইল ভিন্ন relative পাথে <code>require()</code> করলেও (<code>./utils</code> বনাম <code>../lib/utils</code>) সেগুলো <em>একই absolute পাথে</em> রিজলভ হলে একই ক্যাশ এন্ট্রি ব্যবহার হবে — একটিই instance।</p>
-      <h4>Singleton প্যাটার্ন — এর সবচেয়ে গুরুত্বপূর্ণ প্রভাব</h4>
-      <p>এই ক্যাশিংয়ের কারণেই Node.js-এ মডিউল-লেভেল state স্বাভাবিকভাবেই singleton আচরণ করে — একটি ডাটাবেজ কানেকশন পুল বা কনফিগ অবজেক্ট একবার তৈরি হলে গোটা অ্যাপ্লিকেশনে একই instance শেয়ার হয়, কোনো ম্যানুয়াল singleton প্যাটার্ন লেখার দরকার নেই।</p>
-      <h4>Cache clear করা — টেস্টিংয়ে দরকার হয়</h4>
+
+      <h4>2. Native Singleton Pattern</h4>
+      <p>Because Node.js caches the <code>exports</code> object upon initial load, subsequent calls to <code>require('./myService')</code> anywhere across the application bypass file system access and code re-execution—returning the exact same object reference in memory.</p>
+      
+      <p>This behavior transforms exported instances (e.g., Database Connection Pools, Stateful Managers) into singletons across the entire application process runtime automatically.</p>
+
+      <h4>3. Busting the Module Cache (Use with Caution)</h4>
+      <p>You can force Node.js to re-read and re-execute a module file on the next <code>require()</code> call by deleting its absolute path key from <code>require.cache</code>:</p>
+
       <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>// একটি মডিউল জোর করে আবার লোড করানো
-delete require.cache[require.resolve('./config')];
-const freshConfig = require('./config');   // এবার আসলেই আবার চলবে
-
-// ⚠️ সতর্কতা: circular dependency-তে এটি বিপজ্জনক হতে পারে —
-//    অন্য মডিউল এখনও পুরনো instance রেফারেন্স করে থাকতে পারে</code></pre>
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>function reloadModule(moduleRelativePath) {
+  const resolvedPath = require.resolve(moduleRelativePath);
+  
+  // Delete the cached instance
+  delete require.cache[resolvedPath];
+  
+  // Re-require returns a fresh module execution instance
+  return require(resolvedPath);
+}</code></pre>
       </div>
-      <p><strong>ব্যবহারিক ক্ষেত্র:</strong> টেস্টে প্রতিটি টেস্ট কেসের আগে একটি মডিউলের fresh state দরকার হলে (যেমন কনফিগারেশন পরীক্ষা করা)। প্রোডাকশন কোডে এটি প্রায় কখনও ব্যবহার করা উচিত নয় — এটি সহজেই অসঙ্গত অবস্থা তৈরি করতে পারে।</p>
-      <h4>ESM-এ এই ক্যাশ নেই</h4>
-      <p>ES module (<code>import</code>) সম্পূর্ণ ভিন্ন একটি মডিউল রেজিস্ট্রি ব্যবহার করে — <code>require.cache</code>-এর মতো সরাসরি ম্যানিপুলেট করা যায় না। ESM-এ singleton নিশ্চিত হয় module specifier resolution-এর মাধ্যমে, কিন্তু cache clear করার কোনো পাবলিক API নেই — এটি ESM ডিজাইনের একটি ইচ্ছাকৃত সিদ্ধান্ত (module identity স্থিতিশীল রাখতে)।</p>
-      <h4>Follow-up প্রশ্ন</h4>
+
+      <h4>4. Pitfalls & ESM Distinction</h4>
       <ul>
-        <li>Circular dependency-তে require.cache কীভাবে আচরণ করে?</li>
-        <li>Hot module reloading কীভাবে এই ক্যাশ কাজে লাগায় বা এড়ায়?</li>
+        <li><strong>Dangling References:</strong> If other modules already stored a reference to the old <code>module.exports</code> before the cache was cleared, they will retain references to the old instance in memory, creating state inconsistencies.</li>
+        <li><strong>ES Modules (ESM) Difference:</strong> Standard ES Modules (<code>import</code> / <code>export</code>) do NOT expose a mutable global cache object like <code>require.cache</code>. ESM module graphs are evaluated deterministically during static parsing and cannot be dynamically invalidated at runtime.</li>
       </ul>
     `
   },
   {
     id: "node-18",
-    category: "Node.js",
+    category: "Security & Sandbox",
     difficulty: "Advanced",
-    tags: ["Performance","Perf Hooks","Metrics"],
-    question: "Node.js perf_hooks API দিয়ে কোডের ল্যাটেন্সি কীভাবে মাপবেন?",
+    tags: ["Security", "eval", "RCE", "VM Module", "isolated-vm"],
+    question: "Why are eval() and new Function() catastrophic security risks in Node.js, and how do you execute untrusted user code safely?",
     answer: `
-      <p><code>perf_hooks</code> Node.js-এর বিল্ট-ইন performance measurement API — উচ্চ-নির্ভুলতার (sub-millisecond) সময় পরিমাপ এবং ভেতরের ইভেন্ট (GC, HTTP) পর্যবেক্ষণ করতে দেয়।</p>
+      <p>Executing dynamic strings as code via <code>eval()</code> or <code>new Function()</code> is one of the most critical security vulnerabilities in server-side JavaScript, opening the door directly to <strong>Remote Code Execution (RCE)</strong>.</p>
+
+      <h4>1. The Threat Model: Server-Side vs Browser RCE</h4>
+      <p>In a browser environment, <code>eval()</code> is sandboxed within the browser window context. In Node.js, code executed inside <code>eval()</code> runs with the full system privileges of the Node.js process—allowing attackers to access host file systems, environment variables, network sockets, and child processes.</p>
+
       <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>const { performance, PerformanceObserver } = require('perf_hooks');
-
-// মৌলিক মাপ — Date.now()-এর চেয়ে অনেক বেশি নির্ভুল
-performance.mark('db-query-start');
-await db.query('SELECT * FROM orders');
-performance.mark('db-query-end');
-performance.measure('db-query', 'db-query-start', 'db-query-end');
-
-// সব measurement একসাথে পর্যবেক্ষণ করা
-const obs = new PerformanceObserver((list) => {
-  for (const entry of list.getEntries()) {
-    console.log(\`\${entry.name}: \${entry.duration.toFixed(2)}ms\`);
-    if (entry.duration > 100) {
-      metrics.recordSlowOperation(entry.name, entry.duration);
-    }
-  }
-});
-obs.observe({ entryTypes: ['measure'], buffered: true });
-
-// GC ইভেন্ট পর্যবেক্ষণ — GC pause ধরার জন্য
-const gcObs = new PerformanceObserver((list) => {
-  for (const entry of list.getEntries()) {
-    console.log(\`GC: \${entry.kind}, সময়: \${entry.duration}ms\`);
-  }
-});
-gcObs.observe({ entryTypes: ['gc'] });</code></pre>
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>// Vulnerable endpoint evaluating user-supplied mathematical expression
+app.post('/calculate', (req, res) => {
+  // Attacker inputs payload: "process.env" or "require('child_process').execSync('rm -rf /')"
+  const result = eval(req.body.expression); 
+  res.json({ result });
+});</code></pre>
       </div>
-      <h4><code>Date.now()</code>-এর চেয়ে ভালো কেন</h4>
-      <ul>
-        <li><strong>নির্ভুলতা:</strong> <code>performance.now()</code> সাব-মিলিসেকেন্ড (মাইক্রোসেকেন্ড) নির্ভুলতা দেয়; <code>Date.now()</code> শুধু মিলিসেকেন্ড, এবং সিস্টেম ঘড়ি বদলালে (NTP sync) মান পিছিয়েও যেতে পারে।</li>
-        <li><strong>একঘেয়ে (monotonic):</strong> <code>performance.now()</code> কখনও পিছিয়ে যায় না — এটি একটি নির্দিষ্ট রেফারেন্স পয়েন্ট থেকে পার হওয়া সময় গোনে, সিস্টেম ঘড়ির উপর নির্ভর করে না। latency পরিমাপে এটি অত্যন্ত গুরুত্বপূর্ণ, নাহলে ঘড়ি সমন্বয়ে ভুল (এমনকি ঋণাত্মক) সময় দেখাতে পারে।</li>
-      </ul>
-      <h4>GC pause ধরা — সবচেয়ে মূল্যবান ব্যবহার</h4>
-      <p>একটি অ্যাপ্লিকেশনে মাঝে মাঝে অস্পষ্ট latency spike দেখা যায়, কোনো নির্দিষ্ট কোডে দোষ পাওয়া যায় না — প্রায়ই এটি garbage collection pause। <code>entryTypes: ['gc']</code> দিয়ে ঠিক কোন মুহূর্তে GC চলেছে এবং কতক্ষণ ধরে তা দেখা যায়, যা latency spike-এর সাথে মিলিয়ে মূল কারণ শনাক্ত করা যায়।</p>
-      <h4>Event loop delay মাপা</h4>
+
+      <h4>2. Why Native Node.js vm Module is NOT a Security Sandbox</h4>
+      <p>Developers often assume Node.js's built-in <code>vm</code> module (e.g., <code>vm.runInNewContext()</code>) can safely isolate untrusted code. **The official Node.js documentation explicitly states: "The vm module is not a security mechanism. Do not use it to run untrusted code."**</p>
+
+      <p>An attacker can escape the <code>vm</code> context back to the host process via prototype chain traversal:</p>
+
       <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>const { monitorEventLoopDelay } = require('perf_hooks');
-const histogram = monitorEventLoopDelay({ resolution: 20 });
-histogram.enable();
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>const vm = require('vm');
 
-setInterval(() => {
-  console.log('event loop delay p99:', histogram.percentile(99), 'ms');
-  histogram.reset();
-}, 10000);
-// ক্রমাগত বাড়তে থাকলে → event loop ব্লক হচ্ছে, CPU-নিবিড় কাজ সরাতে হবে</code></pre>
+// Malicious payload escaping the vm context
+const untrustedCode = `
+  const ForeignConstructor = this.constructor.constructor;
+  const processObj = ForeignConstructor('return process')();
+  processObj.mainModule.require('child_process').execSync('whoami').toString();
+`;
+
+// Executes malicious host process commands despite vm context!
+vm.runInNewContext(untrustedCode);</code></pre>
       </div>
-      <p>এটি একটি সহজ কিন্তু অত্যন্ত কার্যকর স্বাস্থ্য মেট্রিক — event loop delay বাড়তে থাকলে বোঝা যায় সিঙ্ক্রোনাস/ব্লকিং কোড event loop-কে থামিয়ে রাখছে।</p>
-      <h4>ব্যবহারিক পরামর্শ</h4>
-      <p>এই সব ম্যানুয়ালি সেটআপ করার বদলে প্রোডাকশনে OpenTelemetry বা APM টুল (Datadog, New Relic) ব্যবহার করুন — সেগুলো ভেতরে <code>perf_hooks</code>-এর মতো একই API ব্যবহার করে, কিন্তু ড্যাশবোর্ড, alert ও historical trend দিয়ে ঘিরে দেয়। <code>perf_hooks</code> সরাসরি ব্যবহার করা ভালো নির্দিষ্ট, লক্ষ্যভিত্তিক প্রোফাইলিংয়ের জন্য।</p>
-      <h4>Follow-up প্রশ্ন</h4>
+
+      <h4>3. Safe Alternatives for Executing Untrusted Code</h4>
       <ul>
-        <li>Event loop delay বেশি দেখলে কীভাবে root cause খুঁজবেন?</li>
-        <li><code>performance.timerify()</code> কী কাজ করে?</li>
+        <li><strong>Use Dedicated Expression Parsers:</strong> For dynamic math or logic evaluation, use non-executable AST parsers like <code>mathjs</code> or <code>expr-eval</code>.</li>
+        <li><strong>Use isolated-vm:</strong> Use the third-party <code>isolated-vm</code> library, which leverages native V8 Isolates to enforce strict memory bounds, CPU execution limits, and zero access to host Node.js bindings.</li>
+        <li><strong>Isolated Container Environments:</strong> Execute untrusted user-written code in short-lived, unprivileged Docker containers or AWS Lambda functions with restricted network interfaces and read-only file systems.</li>
       </ul>
     `
   },
   {
     id: "node-19",
-    category: "Node.js",
-    difficulty: "Advanced",
-    tags: ["Debugging","Heapdump","Diagnostics"],
-    question: "Node.js Diagnostic Reports (process.report) কী?",
+    category: "Process Management & Deployment",
+    difficulty: "Intermediate",
+    tags: ["PM2", "Zero-Downtime Reload", "Cluster Mode", "State Management"],
+    question: "How does PM2 achieve Zero-Downtime Reloads in Cluster Mode, and what is the difference between reload and restart?",
     answer: `
-      <p><strong>Diagnostic Report</strong> একটি JSON স্ন্যাপশট — প্রসেসের অবস্থা, স্ট্যাক ট্রেস, মেমরি ব্যবহার ও সিস্টেম তথ্য একসাথে ধারণ করে। এটি production ক্র্যাশ বা অস্বাভাবিক আচরণ পরবর্তীতে বিশ্লেষণের জন্য অমূল্য — যখন সমস্যাটি ইতিমধ্যে ঘটে গেছে এবং আর reproduce করা যাচ্ছে না।</p>
-      <div class="code-box">
-        <div class="code-header"><span>bash</span><button class="copy-btn">Copy</button></div>
-        <pre><code># নির্দিষ্ট শর্তে স্বয়ংক্রিয়ভাবে রিপোর্ট তৈরি
-node --report-uncaught-exception \\
-     --report-on-signal \\
-     --report-on-fatalerror \\
-     --report-directory=/var/reports \\
-     app.js
+      <p>In production process management, maintaining 100% service availability during code updates or environment reconfigurations is critical. PM2 leverages Node.js's native <code>cluster</code> module while providing sophisticated operational automation.</p>
 
-# রানিং প্রসেসে ম্যানুয়ালি ট্রিগার (সিগন্যাল পাঠিয়ে)
-kill -USR2 &lt;pid&gt;
-
-# অথবা কোড থেকে
-process.report.writeReport();</code></pre>
-      </div>
-      <h4>রিপোর্টে যা থাকে</h4>
+      <h4>1. PM2 Restart vs PM2 Reload</h4>
       <ul>
-        <li><strong>জাভাস্ক্রিপ্ট ও নেটিভ স্ট্যাক ট্রেস</strong> — ঠিক কোন লাইনে সমস্যা হয়েছে।</li>
-        <li><strong>Heap পরিসংখ্যান</strong> — মেমরি ব্যবহার, GC-এর অবস্থা।</li>
-        <li><strong>Event loop-এর অবস্থা</strong> — কী কী pending handle/request আছে (timer, সকেট, ফাইল হ্যান্ডেল)।</li>
-        <li><strong>সিস্টেম তথ্য</strong> — CPU, মেমরি, লোড এভারেজ, environment variable।</li>
-        <li><strong>libuv-এর resource usage।</strong></li>
+        <li><strong><code>pm2 restart <app></code>:</strong> Kills all running worker processes simultaneously and re-spawns them. During the seconds it takes for the new instances to boot, connect to databases, and start listening, <strong>incoming requests fail (Downtime occurred)</strong>.</li>
+        <li><strong><code>pm2 reload <app></code>:</strong> Sequentially restarts worker processes <strong>one by one</strong>. At any given moment during deployment, active worker processes remain online handling live HTTP traffic (Zero-Downtime).</li>
       </ul>
-      <h4>কেন এটি সাধারণ লগের চেয়ে বেশি কার্যকর</h4>
-      <p>একটি প্রোডাকশন ক্র্যাশ (বিশেষত মেমরি লিক বা মাঝে মাঝে ঘটা crash) ডিবাগ করার সবচেয়ে বড় সমস্যা — <strong>সমস্যাটি পুনরুৎপাদন করা যায় না</strong>। সাধারণ লগে হয়তো "process crashed" ছাড়া কিছুই থাকে না।</p>
-      <p>Diagnostic report ক্র্যাশের মুহূর্তেই একটি সম্পূর্ণ স্ন্যাপশট নেয় — event loop-এ কী কী আটকে ছিল, মেমরি কোথায় ব্যবহৃত হচ্ছিল, স্ট্যাক কী ছিল। এটি অনেকটা এয়ারক্রাফটের "ব্ল্যাক বক্স"-এর মতো — ঘটনার পরে পুনর্গঠনের জন্য প্রমাণ।</p>
-      <h4>ব্যবহারিক ট্রিগার</h4>
-      <table>
-        <tr><th>ফ্ল্যাগ</th><th>কখন রিপোর্ট তৈরি হয়</th></tr>
-        <tr><td><code>--report-uncaught-exception</code></td><td>ধরা না পড়া exception-এ</td></tr>
-        <tr><td><code>--report-on-fatalerror</code></td><td>OOM বা অন্য fatal error-এ</td></tr>
-        <tr><td><code>--report-on-signal</code></td><td>SIGUSR2 পেলে (রানিং প্রসেসেও)</td></tr>
-      </table>
-      <p><strong>প্রোডাকশন পরামর্শ:</strong> সব ফ্ল্যাগ ডিফল্টে চালু রাখুন — এতে রানটাইম খরচ প্রায় নগণ্য, কিন্তু কোনো অস্বাভাবিক ঘটনা ঘটলে সাথে সাথে বিস্তারিত তথ্য পাওয়া যায়। <code>report-on-signal</code> বিশেষভাবে দরকারি — একটি প্রসেস হ্যাং করলে বা মেমরি ক্রমাগত বাড়তে থাকলে, না মেরেই একটি স্ন্যাপশট নিয়ে বিশ্লেষণ করা যায়।</p>
-      <h4>Follow-up প্রশ্ন</h4>
+
+      <h4>2. Step-by-Step Architecture of Zero-Downtime Reload</h4>
+
+      <ol>
+        <li>PM2 spawns a <strong>new worker process</strong> with updated code alongside the existing running workers.</li>
+        <li>PM2 waits for the new worker process to successfully bind to the socket and emit a <code>'listening'</code> event (or a custom <code>process.send('ready')</code> signal).</li>
+        <li>Once the new worker is fully operational, PM2 sends a <code>SIGINT</code> signal to one of the <strong>old worker processes</strong>.</li>
+        <li>The old worker stops accepting new incoming connections, finishes processing its active in-flight requests (Graceful Shutdown), and exits.</li>
+        <li>This sequence repeats sequentially across all worker instances until the entire cluster is running the updated codebase.</li>
+      </ol>
+
+      <div class="code-box">
+        <div class="code-header"><span>bash</span></div>
+        <pre><code># Start application utilizing all available CPU cores in Cluster Mode
+pm2 start app.js -i max --name "core-api"
+
+# Perform zero-downtime rolling update across all instances
+pm2 reload core-api</code></pre>
+      </div>
+
+      <h4>3. Operational Requirements for Zero-Downtime Reloads</h4>
       <ul>
-        <li>Heap snapshot ও diagnostic report-এর পার্থক্য কী?</li>
-        <li>উৎপাদনে মেমরি লিক সন্দেহ হলে কীভাবে তদন্ত করবেন?</li>
+        <li><strong>Stateless Application Layer:</strong> Cluster mode workers do not share in-memory state. User sessions, rate limits, and dynamic data must be stored in centralized external stores like Redis.</li>
+        <li><strong>Graceful Shutdown Signals:</strong> Code inside application instances must intercept <code>SIGINT</code> to complete pending database operations before exiting.</li>
       </ul>
     `
   },
   {
     id: "node-20",
-    category: "Node.js",
-    difficulty: "Intermediate",
-    tags: ["OS","Signals","Process"],
-    question: "Node.js-এ SIGINT এবং SIGTERM সিগন্যাল কেন হ্যান্ডেল করা উচিত?",
+    category: "Diagnostics & Crash Analysis",
+    difficulty: "Advanced",
+    tags: ["process.report", "Diagnostic Reports", "Crash Dumps", "Post-Mortem Analysis"],
+    question: "What are Node.js Diagnostic Reports (process.report), and how do you use them for post-mortem analysis of production crashes?",
     answer: `
-      <p><code>SIGINT</code> ও <code>SIGTERM</code> সিগন্যাল হ্যান্ডেল না করলে একটি Node.js প্রসেস <strong>হঠাৎ বন্ধ হয়ে যায়</strong> — চলমান রিকোয়েস্ট, খোলা ডাটাবেজ কানেকশন, বা অসম্পূর্ণ ফাইল লেখা সবকিছুসহ। এটি প্রোডাকশনে ডেটা হারানো ও দুর্নীতির একটি সাধারণ উৎস।</p>
+      <p>A major challenge in production environments is debugging sporadic crashes, Out-Of-Memory (OOM) events, or process hangs that cannot be easily reproduced in local development. Node.js provides native **Diagnostic Reports** to capture an instant, comprehensive snapshot of system state at the moment of failure.</p>
+
+      <h4>1. What a Diagnostic Report Contains</h4>
+      <p>A Diagnostic Report is a structured JSON document generated instantly by the runtime containing:</p>
+      <ul>
+        <li><strong>JavaScript & Native Stack Traces:</strong> Identifies exact lines of executing code across both V8 and C++ layers.</li>
+        <li><strong>V8 Heap Statistics:</strong> Memory allocation summaries, heap capacity, space usage, and top retainers.</li>
+        <li><strong>Event Loop State:</strong> Active Libuv handles, open sockets, pending file descriptors, and timer queues.</li>
+        <li><strong>Resource Usage & OS Context:</strong> Memory utilization, CPU load averages, environment variables, OS signal masks, and system limits (<code>ulimit</code>).</li>
+      </ul>
+
+      <h4>2. Configuring Automatic Report Generation</h4>
+      <p>Configure Node.js via CLI flags to automatically write a diagnostic JSON report file to disk when critical failures occur:</p>
+
       <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>const server = app.listen(3000);
-
-async function gracefulShutdown(signal) {
-  console.log(\`\${signal} পেয়েছি, graceful shutdown শুরু...\`);
-
-  // ১. নতুন কানেকশন নেওয়া বন্ধ করুন
-  server.close(async () => {
-    console.log('HTTP সার্ভার বন্ধ — নতুন রিকোয়েস্ট নিচ্ছে না');
-
-    // ২. নির্ভরতা বন্ধ করুন (চলমান কাজ শেষ হওয়ার পর)
-    await db.close();
-    await redis.quit();
-    await messageQueue.close();
-
-    console.log('সব সংযোগ বন্ধ — নিরাপদে প্রস্থান');
-    process.exit(0);
-  });
-
-  // ৩. জোর করে বন্ধ করার সময়সীমা — কোনো কিছু আটকে গেলে
-  setTimeout(() => {
-    console.error('Graceful shutdown সময়সীমা পার — জোর করে বন্ধ');
-    process.exit(1);
-  }, 10000).unref();
-}
-
-process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
-process.on('SIGINT',  () => gracefulShutdown('SIGINT'));</code></pre>
+        <div class="code-header"><span>bash</span></div>
+        <pre><code>node --report-uncaught-exception \
+     --report-on-fatalerror \
+     --report-on-signal \
+     --report-directory=/var/log/reports \
+     --report-filename=crash-report.json \
+     server.js</code></pre>
       </div>
-      <h4>দুটি সিগন্যালের পার্থক্য</h4>
-      <table>
-        <tr><th>সিগন্যাল</th><th>কে পাঠায়</th><th>প্রসঙ্গ</th></tr>
-        <tr><td><strong>SIGINT</strong></td><td>Ctrl+C (ইউজার)</td><td>ডেভেলপমেন্টে টার্মিনালে বন্ধ করা</td></tr>
-        <tr><td><strong>SIGTERM</strong></td><td>Kubernetes, Docker, PM2, systemd</td><td><strong>প্রোডাকশনে সবচেয়ে গুরুত্বপূর্ণ</strong></td></tr>
-      </table>
-      <h4>কেন Kubernetes/Docker-এ এটি অপরিহার্য</h4>
-      <p>যখন Kubernetes একটি পড বন্ধ করে (ডিপ্লয়, স্কেল-ডাউন, বা নোড drain), সে প্রথমে <code>SIGTERM</code> পাঠায় এবং <strong>একটি নির্দিষ্ট সময়</strong> (<code>terminationGracePeriodSeconds</code>, ডিফল্ট ৩০s) অপেক্ষা করে। এই সময়ে অ্যাপ্লিকেশন যদি চলমান রিকোয়েস্ট শেষ না করে, সেগুলো <strong>মাঝপথে কেটে যায়</strong> — ইউজার ৫০২ এরর পান বা অসম্পূর্ণ ট্রানজেকশন থেকে যায়।</p>
-      <p>সময়সীমা পার হলে Kubernetes <code>SIGKILL</code> পাঠায় — যা <strong>কখনও ধরা যায় না</strong>, তাই graceful shutdown কোড অবশ্যই <code>SIGTERM</code>-এর সময়সীমার মধ্যেই শেষ হতে হবে।</p>
-      <h4>যে বিষয়গুলো ভুলে গেলে বিপদ</h4>
-      <ul>
-        <li><strong>Load balancer-এর দৃষ্টিকোণ থেকে সময় দিন:</strong> <code>SIGTERM</code> পাওয়ামাত্র সার্ভার বন্ধ করলেও, লোড ব্যালেন্সার তখনও কিছুক্ষণ (endpoint propagation delay) নতুন ট্রাফিক পাঠাতে পারে। তাই readiness প্রোব প্রথমে "not ready" করে কিছুক্ষণ অপেক্ষা করার পর সার্ভার বন্ধ করা ভালো অভ্যাস।</li>
-        <li><strong>জোর করে বন্ধ করার সময়সীমা রাখুন</strong> (<code>setTimeout</code>) — একটি আটকে থাকা কানেকশন বা অসীম অপেক্ষা যেন পুরো shutdown প্রক্রিয়া আটকে না দেয়।</li>
-        <li><strong>কিউ/ওয়ার্কার প্রসেসেও একই নিয়ম:</strong> একটি মেসেজ প্রসেস করার মাঝপথে SIGKILL পেলে সেটি অসম্পূর্ণ অবস্থায় থেকে যেতে পারে — ack না দিয়ে ওয়ার্কার বন্ধ হলে মেসেজ কিউতে ফিরে যাবে (at-least-once ডেলিভারিতে এটি প্রত্যাশিত)।</li>
-      </ul>
-      <h4>Follow-up প্রশ্ন</h4>
-      <ul>
-        <li><code>terminationGracePeriodSeconds</code> কত রাখা উচিত?</li>
-        <li>Graceful shutdown-এর সময় নতুন রিকোয়েস্ট এলে কী হবে?</li>
-      </ul>
+
+      <h4>3. Triggering Reports Programmatically or via OS Signals</h4>
+      <p>For investigating a hanging process in production without killing it:</p>
+
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>// Trigger report programmatically inside an exception handler
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection detected! Writing diagnostic report...');
+  process.report.writeReport('./reports/unhandled-rejection.json');
+});</code></pre>
+      </div>
+
+      <p>Alternatively, trigger a diagnostic dump on a running production Linux process via command line using signals:</p>
+
+      <div class="code-box">
+        <div class="code-header"><span>bash</span></div>
+        <pre><code># Sends SIGUSR2 to the target process ID to generate a diagnostic JSON report instantly
+kill -USR2 <pid></code></pre>
+      </div>
     `
   },
   {
     id: "node-21",
-    category: "Node.js",
-    difficulty: "Advanced",
-    tags: ["Async","AsyncLocalStorage","Tracing"],
-    question: "AsyncLocalStorage (async_hooks) কী এবং ডিস্ট্রিবিউটেড লগার বা রিকুয়েস্ট কনটেক্সট ট্র্যাকিংয়ে এটি কীভাবে কাজ করে?",
+    category: "Modern Node.js Features & Web APIs",
+    difficulty: "Intermediate",
+    tags: ["Native Testing", "node:test", "Mocking", "Assertions"],
+    question: "How do you use Node.js's native test runner (node:test) and built-in mocking API without third-party frameworks like Jest or Mocha?",
     answer: `
-      <p>এটি Thread-local storage এর Node.js বিকল্প। কোনো ফাংশন প্যারামিটারে কন্টিনিউয়াস Trace ID না পাঠিয়ে সম্পূর্ণ Async Request Chain জুড়ে ভ্যারিয়েবল (যেমন- Current User, Request ID) শেয়ার করতে সাহায্য করে।</p>
+      <p>Node.js includes a fully stable native test runner in the <code>node:test</code> module. This eliminates the need for heavy external testing frameworks (like Jest, Mocha, or Vitest) for unit and integration tests, reducing project dependencies, cold-start latency, and maintenance overhead.</p>
+
+      <h4>1. Core Advantages of Native Testing</h4>
+      <ul>
+        <li><strong>Zero Dependencies:</strong> No extra <code>node_modules</code> bloat or supply-chain vulnerability surfaces.</li>
+        <li><strong>Native ESM & TypeScript Support:</strong> Executes modern JavaScript and TypeScript without complex Babel/SWC compilation layers.</li>
+        <li><strong>Built-in Assertions & Mocking:</strong> Pairs natively with <code>node:assert/strict</code> and built-in function/timer mock primitives.</li>
+      </ul>
+
+      <h4>2. Complete Test Suite with Spies and Mocks</h4>
+
       <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>const { AsyncLocalStorage } = require('async_hooks');
-const als = new AsyncLocalStorage();
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>import test, { describe, it, beforeEach } from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
 
-app.use((req, res, next) => {
-  als.run({ requestId: req.headers['x-request-id'] }, () => next());
-});
+// Domain function to test
+async function readAndParseConfig(filePath) {
+  const rawData = await fs.readFile(filePath, 'utf-8');
+  return JSON.parse(rawData);
+}
 
-// Deep inside any function
-function logMessage() {
-  const store = als.getStore();
-  console.log(\`[\${store.requestId}] Processing... \`);
-}</code></pre>
+describe('Config Reader Integration', () => {
+
+  it('should successfully read and parse a JSON config file', async (t) => {
+    // 1. Mocking fs.readFile using the test context's builtin mock library
+    t.mock.method(fs, 'readFile', async () => {
+      return JSON.stringify({ port: 8080, env: 'production' });
+    });
+
+    const result = await readAndParseConfig('/fake/path/config.json');
+
+    // 2. Strict Assertions
+    assert.deepStrictEqual(result, { port: 8080, env: 'production' });
+    assert.strictEqual(fs.readFile.mock.callCount(), 1);
+  });
+
+  it('should throw an error if JSON is malformed', async (t) => {
+    t.mock.method(fs, 'readFile', async () => 'INVALID_JSON_STRING');
+
+    await assert.rejects(
+      async () => await readAndParseConfig('/fake/path/bad.json'),
+      { name: 'SyntaxError' }
+    );
+  });
+});</code></pre>
+      </div>
+
+      <h4>3. Running Native Tests</h4>
+      <p>Execute tests directly using the CLI flag. Node.js automatically detects test files matching patterns like <code>*.test.js</code> or <code>*.spec.js</code>:</p>
+
+      <div class="code-box">
+        <div class="code-header"><span>bash</span></div>
+        <pre><code># Run all tests recursively with parallel execution
+node --test
+
+# Run tests in watch mode (auto-reruns on code changes)
+node --test --watch</code></pre>
       </div>
     `
   },
   {
     id: "node-22",
-    category: "Node.js",
+    category: "Modern Node.js Features & Security",
     difficulty: "Advanced",
-    tags: ["Diagnostics","Heap Dump","v8"],
-    question: "v8.getHeapSnapshot() এবং Chrome DevTools দিয়ে Node.js Memory Leak কীভাবে ডেবাগ করবেন?",
+    tags: ["Permission Model", "Sandboxing", "--experimental-permission", "Security Hardening"],
+    question: "How does Node.js's Permission Model work, and how do you restrict system resources like file access and child processes?",
     answer: `
-      <p>মেমোরি লিক সনাক্ত করতে রানটাইমে হিপ স্ন্যাপশট নিতে হয়। <code>v8.getHeapSnapshot()</code> দিয়ে স্ন্যাপশট ফাইল তৈরি করে তা Chrome DevTools-এর Memory Tab-এ লোড করা হয়।</p>
-      <p>এখানে <strong>Retained Size</strong> বেশি এমন অবজেক্ট খুঁজে বের করতে হয়। ডিটাচড DOM নোড বা ক্লোজার রেফারেন্স সাধারণত মেমোরি লিকের কারণ।</p>
+      <p>Node.js includes an explicit <strong>Permission Model</strong>. Historically, any Node.js process possessed full system privileges assigned to the host OS user—meaning compromised third-party <code>npm</code> dependencies could read environment secrets (<code>process.env</code>), execute shell binaries, or delete files.</p>
+
+      <h4>1. Principle of Least Privilege in Runtime</h4>
+      <p>The Permission Model allows developers to explicitly restrict what resources the application runtime can touch. If a dependency attempts an unauthorized operation, Node.js throws an immediate <code>ERR_ACCESS_DENIED</code> security exception.</p>
+
+      <h4>2. Restricting Privileges via Command Line Flags</h4>
+
       <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>const v8 = require('v8');
-const fs = require('fs');
-const snapshotStream = v8.getHeapSnapshot();
-snapshotStream.pipe(fs.createWriteStream('heap.heapsnapshot'));</code></pre>
+        <div class="code-header"><span>bash</span></div>
+        <pre><code># Enable permissions, allowing read access ONLY to /app/data, write access ONLY to /app/logs
+# and completely blocking child process execution
+node --experimental-permission \
+     --allow-fs-read=/app/data \
+     --allow-fs-write=/app/logs \
+     --allow-child-process=false \
+     server.js</code></pre>
       </div>
+
+      <h4>3. Inspecting Permissions at Runtime</h4>
+      <p>Applications can query the permission status programmatically using <code>process.permission</code>:</p>
+
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>if (process.permission) {
+  // Returns true if read access to specific directory is explicitly granted
+  const canReadData = process.permission.has('fs.read', '/app/data/users.json');
+  console.log(`Read Permission: ${canReadData}`);
+
+  // Check if spawning child processes is allowed
+  const canSpawnProcess = process.permission.has('child-process');
+  if (!canSpawnProcess) {
+    console.warn('Child process creation is explicitly disabled by security policy.');
+  }
+}</code></pre>
+      </div>
+
+      <h4>4. Production Considerations</h4>
+      <ul>
+        <li><strong>Defense-in-Depth:</strong> The Permission Model is an added layer of internal defense. It does not replace container isolation (Docker/Kubernetes) or standard OS-level user privileges.</li>
+        <li><strong>Native C++ Addons Exception:</strong> Native C++ modules (N-API) can bypass the JS permission model if compiled with raw system bindings, so native modules still require independent security vetting.</li>
+      </ul>
     `
   },
   {
     id: "node-23",
-    category: "Node.js",
+    category: "Architecture & Dependency Management",
     difficulty: "Intermediate",
-    tags: ["Security","Graceful Shutdown","SIGTERM"],
-    question: "Node.js Application Graceful Shutdown (process.on('SIGTERM'), process.on('SIGINT')) কীভাবে বাস্তবায়ন করবেন?",
+    tags: ["Monorepo", "pnpm Workspaces", "Hoisting", "Phantom Dependencies"],
+    question: "How do Workspace Package Managers (like pnpm) resolve Phantom Dependencies and Symlink strictness in Monorepo architectures?",
     answer: `
-      <p>গ্রেসফুল শাটডাউন মানে হঠাৎ করে প্রসেস কিল না করে, নতুন রিকুয়েস্ট বন্ধ করা, ডাটাবেজ কানেকশন সুন্দরভাবে ড্রেন করা এবং রানিং জবগুলো শেষ করে <code>process.exit(0)</code> দেওয়া।</p>
-      <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>function gracefulShutdown() {
-  server.close(async () => {
-    await db.close();
-    process.exit(0);
-  });
-  setTimeout(() => process.exit(1), 10000); // Force kill after 10s
-}
+      <p>In modern enterprise development, applications are frequently organized into <strong>Monorepos</strong> containing shared libraries, utility packages, and multiple services. Managing <code>node_modules</code> efficiently across these sub-packages requires a clear understanding of package hosting algorithms.</p>
 
-process.on('SIGTERM', gracefulShutdown);
-process.on('SIGINT', gracefulShutdown);</code></pre>
+      <h4>1. What is a Phantom Dependency?</h4>
+      <p>Traditional package managers (like standard <code>npm</code> or <code>yarn v1</code>) use a <strong>flat node_modules hoisting model</strong>. When Package A depends on Package B, and Package B depends on <code>lodash</code>, the package manager hoists <code>lodash</code> up to the root <code>node_modules</code> folder.</p>
+
+      <p>If Package A imports <code>lodash</code> directly <em>without explicitly declaring it in its own package.json</em>, the code still works locally because the module resolution algorithm walks up the directory tree and finds <code>lodash</code> hoisted at the root. This is a <strong>Phantom Dependency</strong>.</p>
+
+      <p><strong>The Failure:</strong> When deployed or published elsewhere (or when Package B updates and drops <code>lodash</code>), Package A instantly breaks with <code>MODULE_NOT_FOUND</code> in production.</p>
+
+      <h4>2. The pnpm Content-Addressable Symlinked Solution</h4>
+      <p><code>pnpm</code> resolves phantom dependencies structurally using a <strong>symlinked node_modules structure</strong> backed by a single global content-addressable storage pool on disk:</p>
+
+      <div class="code-box">
+        <div class="code-header"><span>text</span></div>
+        <pre><code>node_modules/
+├── .pnpm/                        <-- Global hard-linked content store
+│   ├── express@4.18.2/
+│   │   └── node_modules/
+│   │       ├── express           <-- Real package contents
+│   │       └── body-parser       <-- Symlinks to Express's explicit deps
+├── express -> .pnpm/express@4.18.2/node_modules/express (Symlink)</code></pre>
+      </div>
+
+      <p>Because the top-level <code>node_modules</code> directory ONLY contains symlinks to dependencies explicitly listed in that package's <code>package.json</code> file, attempting to import an undeclared Phantom Dependency immediately throws a runtime error during local development, preventing subtle production deployment failures.</p>
+
+      <h4>3. Workspace Configuration Example (pnpm-workspace.yaml)</h4>
+
+      <div class="code-box">
+        <div class="code-header"><span>yaml</span></div>
+        <pre><code># pnpm-workspace.yaml
+packages:
+  - 'apps/*'
+  - 'packages/*'</code></pre>
+      </div>
+
+      <div class="code-box">
+        <div class="code-header"><span>json</span></div>
+        <pre><code>// apps/api/package.json
+{
+  "name": "@myorg/api",
+  "dependencies": {
+    "@myorg/shared-utils": "workspace:*"  // Symlinks directly to packages/shared-utils
+  }
+}</code></pre>
       </div>
     `
   },
   {
     id: "node-24",
-    category: "Node.js",
-    difficulty: "Advanced",
-    tags: ["Streams","Transform Stream","pipeline"],
-    question: "stream.pipeline() এবং stream.finished() ব্যবহার করে Stream Error & Memory Leak কীভাবে প্রতিরোধ করবেন?",
+    category: "HTTP Architecture & Compression",
+    difficulty: "Intermediate",
+    tags: ["Response Compression", "Gzip", "Brotli", "CPU Overhead", "Reverse Proxy"],
+    question: "How does dynamic response compression work in Node.js, and why should compression be offloaded to reverse proxies (Nginx/CDN)?",
     answer: `
-      <p>সরাসরি <code>src.pipe(dest)</code> ব্যবহার করলে গন্তব্য স্ট্রিম ক্র্যাশ করলে বা এরর হলে সোর্স স্ট্রিম বন্ধ হয় না, যা মেমোরি লিক করে। <code>stream.pipeline()</code> স্বয়ংক্রিয়ভাবে সব স্ট্রিম ক্লিনআপ করে।</p>
-      <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>const { pipeline } = require('stream');
-const fs = require('fs');
-const zlib = require('zlib');
+      <p>HTTP response compression shrinks textual response payloads (JSON, HTML, CSS, JS) by 60% to 80%, reducing network transfer times and bandwidth costs. However, doing dynamic compression inside the Node.js process introduces a significant trade-off.</p>
 
-pipeline(
-  fs.createReadStream('input.txt'),
-  zlib.createGzip(),
-  fs.createWriteStream('output.txt.gz'),
-  (err) => {
-    if (err) console.error('Pipeline failed', err);
-    else console.log('Pipeline succeeded');
+      <h4>1. The CPU vs Bandwidth Trade-Off</h4>
+      <p>Compression algorithms (Gzip and Brotli) are mathematically CPU-intensive. When dynamic compression middleware (e.g., Express <code>compression()</code>) runs on every incoming HTTP request:</p>
+      <ul>
+        <li>The single-threaded V8 engine spends valuable CPU cycles compressing string payloads instead of executing business logic.</li>
+        <li>Under high request concurrency, Node.js CPU utilization spikes to 100%, causing Event Loop delay and throughput bottlenecks.</li>
+      </ul>
+
+      <h4>2. Implementing Node.js Middleware (For Standalone Nodes)</h4>
+      <p>If Node.js is exposed directly without an intermediary proxy, configure response threshold limits to avoid compressing small payloads where compression headers actually increase total byte size:</p>
+
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>const express = require('express');
+const compression = require('compression');
+
+const app = express();
+
+app.use(compression({
+  threshold: 1024, // Only compress responses larger than 1 KB (1024 bytes)
+  level: 6,        // Compression level balance (1 = fastest/least compressed, 9 = slowest/most compressed)
+  filter: (req, res) => {
+    if (req.headers['x-no-compression']) return false;
+    return compression.filter(req, res); // Default filter checks content-type
   }
-);</code></pre>
+}));</code></pre>
       </div>
+
+      <h4>3. Why Offloading to Nginx / Cloudflare CDN is Preferred</h4>
+      <p>In production architectures, response compression should be completely offloaded to an upstream **Reverse Proxy (Nginx, HAProxy)** or a **Content Delivery Network (CDN)**:</p>
+
+      <ul>
+        <li><strong>Multithreaded C Efficiency:</strong> Nginx handles compression in native multithreaded C, utilizing multi-core server processors far more efficiently than V8.</li>
+        <li><strong>Zero Application CPU Impact:</strong> Keeps the Node.js Event Loop 100% dedicated to application state and database orchestration.</li>
+        <li><strong>Static Asset Pre-compression:</strong> Edge CDNs compress static assets once at build time (e.g., Gzip/Brotli files stored on disk/S3) and serve them directly without runtime CPU overhead.</li>
+      </ul>
     `
   },
   {
     id: "node-25",
-    category: "Node.js",
-    difficulty: "Intermediate",
-    tags: ["Process","PM2","Cluster"],
-    question: "PM2 Process Manager (Cluster Mode, Reload vs Restart) কীভাবে নোড অ্যাপ স্কেল করে?",
+    category: "System Monitoring & Observability",
+    difficulty: "Advanced",
+    tags: ["diagnostics_channel", "Telemetry", "OpenTelemetry", "Zero-Invasive Monitoring"],
+    question: "How does the node:diagnostics_channel API work, and how does it enable zero-overhead telemetry without monkey-patching?",
     answer: `
-      <p><strong>PM2</strong> একটি প্রোডাকশন প্রসেস ম্যানেজার যা Node.js-এর বিল্ট-ইন cluster module-এর উপর একটি সুবিধাজনক স্তর যোগ করে — অটো-রিস্টার্ট, লগ ব্যবস্থাপনা, এবং সবচেয়ে গুরুত্বপূর্ণ, <strong>zero-downtime reload</strong>।</p>
+      <p>Historically, Application Performance Monitoring (APM) tools (like Datadog, New Relic, or Dynatrace) collected internal library metrics by **monkey-patching** core modules and third-party libraries (overriding native functions like <code>http.request</code> or <code>pg.query</code> at runtime). This introduced risk, brittle code dependencies, and subtle bugs.</p>
+
+      <h4>1. The Role of node:diagnostics_channel</h4>
+      <p>The <code>node:diagnostics_channel</code> module provides a native, high-performance publish-subscribe channel infrastructure inside Node.js core. Libraries (like <code>undici</code>, <code>express</code>, <code>pg</code>, <code>prisma</code>) publish internal lifecycle events directly to diagnostic channels without exposing internal state or altering function prototypes.</p>
+
+      <h4>2. Zero-Overhead When Unsubscribed</h4>
+      <p>If no subscriber is listening to a specific channel, calling <code>channel.publish()</code> short-circuits instantly with near-zero CPU/memory overhead. This allows libraries to ship instrumentation code natively turned on at all times in production without degrading performance.</p>
+
+      <h4>3. Implementing Custom Publisher and Subscriber</h4>
+
       <div class="code-box">
-        <div class="code-header"><span>bash</span><button class="copy-btn">Copy</button></div>
-        <pre><code># সব CPU কোরে cluster mode-এ চালানো
-pm2 start app.js -i max --name api
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>import diagnostics_channel from 'node:diagnostics_channel';
 
-pm2 list                    # সব প্রসেসের অবস্থা
-pm2 logs api                # লগ দেখা
-pm2 monit                   # লাইভ মনিটরিং
+// 1. Define or retrieve a named channel
+const dbQueryChannel = diagnostics_channel.channel('db:query:execution');
 
-# ⚠️ এই দুটি সম্পূর্ণ আলাদা আচরণ করে
-pm2 reload api               # ✅ zero-downtime — একে একে worker বদলায়
-pm2 restart api              # ❌ সব worker একসাথে মেরে নতুন করে — সংক্ষিপ্ত ডাউনটাইম</code></pre>
+// 2. Subscriber Layer (e.g., APM or Telemetry Collector)
+diagnostics_channel.subscribe('db:query:execution', (message, name) => {
+  console.log(`[TELEMETRY] Channel: ${name}`);
+  console.log(`Query: ${message.query} | Duration: ${message.duration}ms | Success: ${message.success}`);
+});
+
+// 3. Publisher Layer (Inside a Database Client or ORM)
+async function executeDatabaseQuery(sqlQuery) {
+  const startTime = performance.now();
+  let success = true;
+
+  try {
+    // Perform database operation...
+    return await rawDbCall(sqlQuery);
+  } catch (err) {
+    success = false;
+    throw err;
+  } finally {
+    const duration = performance.now() - startTime;
+
+    // Publish telemetry event if active subscribers exist
+    if (dbQueryChannel.hasSubscribers) {
+      dbQueryChannel.publish({
+        query: sqlQuery,
+        duration: parseFloat(duration.toFixed(2)),
+        success
+      });
+    }
+  }
+}</code></pre>
       </div>
-      <h4>Reload বনাম Restart — মূল পার্থক্য</h4>
-      <p><strong><code>restart</code></strong>: সব worker প্রসেস একসাথে বন্ধ করে নতুন করে চালু করে। সহজ, কিন্তু সেই মুহূর্তে সব worker ডাউন থাকায় সংক্ষিপ্ত সময়ের জন্য কোনো রিকোয়েস্ট সার্ভ হয় না।</p>
-      <p><strong><code>reload</code></strong>: PM2 <strong>একে একে</strong> প্রতিটি worker বদলায় — একটি নতুন worker চালু করে, সেটি প্রস্তুত হলে একটি পুরনো worker বন্ধ করে, এই ক্রম চলতে থাকে। যেকোনো মুহূর্তে অন্তত একটি worker ট্রাফিক সার্ভ করছে — <strong>ডাউনটাইম শূন্য</strong>।</p>
-      <pre class="mermaid">
-flowchart LR
-    subgraph Reload["pm2 reload — একে একে"]
-      A["W1(পুরনো) W2 W3 W4"] --> B["W1(নতুন) W2 W3 W4"]
-      B --> C["W1 W2(নতুন) W3 W4"]
-      C --> D["...সব বদলানো পর্যন্ত"]
-    end
-      </pre>
-      <span class="diagram-caption">সবসময় অন্তত ৩টি worker ট্রাফিক সার্ভ করছে</span>
-      <h4>Cluster mode-এর ভিত্তি</h4>
-      <p>PM2 ভেতরে Node.js-এর <code>cluster</code> মডিউল ব্যবহার করে — একই পোর্টে একাধিক worker প্রসেস চালিয়ে সব CPU কোর কাজে লাগায় (Node.js একক-থ্রেডেড হওয়ায় এটি প্রয়োজনীয়)। PM2 শুধু এই মডিউল ব্যবহারকে সহজ করে এবং তার সাথে অপারেশনাল ফিচার যোগ করে।</p>
-      <h4>গুরুত্বপূর্ণ সীমাবদ্ধতা</h4>
-      <ul>
-        <li><strong>Graceful shutdown নিজে লিখতে হয়:</strong> reload সঠিকভাবে কাজ করতে হলে অ্যাপ্লিকেশনকে <code>SIGINT</code> পেয়ে চলমান রিকোয়েস্ট শেষ করে তবেই বন্ধ হতে হবে — নাহলে reload-এর সময় রিকোয়েস্ট হারানোর ঝুঁকি থাকে।</li>
-        <li><strong>In-memory state ভাগ হয় না:</strong> প্রতিটি worker আলাদা প্রসেস, আলাদা মেমরি। rate-limit কাউন্টার বা লোকাল ক্যাশ worker-ভেদে আলাদা থাকবে — Redis-এর মতো শেয়ার্ড স্টোর দরকার।</li>
-        <li><strong>Kubernetes-এ প্রায়ই অপ্রয়োজনীয়:</strong> k8s নিজেই পড-স্তরে স্কেলিং, রোলিং আপডেট ও রিস্টার্ট সামলায়। সেখানে সাধারণত <strong>প্রতি পডে একটি Node প্রসেস</strong> চালানো হয় (cluster mode নয়), এবং replica সংখ্যা বাড়িয়ে স্কেল করা হয় — এতে রিসোর্স লিমিট ও অবজারভেবিলিটি অনেক পরিষ্কার থাকে।</li>
-      </ul>
-      <p><strong>বাস্তব নিয়ম:</strong> VM বা bare-metal সার্ভারে PM2 চমৎকার। Kubernetes-এ থাকলে PM2-এর বেশিরভাগ ফিচার (স্কেলিং, রোলিং আপডেট, স্বয়ংক্রিয় রিস্টার্ট) k8s নিজেই দেয় — PM2 যোগ করলে জটিলতা বাড়ে, লাভ কম।</p>
-      <h4>Follow-up প্রশ্ন</h4>
-      <ul>
-        <li>PM2-তে graceful shutdown কীভাবে বাস্তবায়ন করবেন?</li>
-        <li>Kubernetes-এ Node.js অ্যাপে কীভাবে স্কেল করবেন?</li>
-      </ul>
     `
   },
   {
     id: "node-26",
-    category: "Node.js",
-    difficulty: "Advanced",
-    tags: ["Security","Helmet","Rate Limiting"],
-    question: "Node.js Production Hardening: Helmet, Rate Limiting, HPP (HTTP Parameter Pollution) প্রতিরোধ বেস্ট প্র্যাকটিস কী?",
+    category: "Security & Path Traversal",
+    difficulty: "Intermediate",
+    tags: ["Path Traversal", "path.normalize", "Directory Climbing", "FS Security"],
+    question: "What is a Path Traversal vulnerability in Node.js file system handling, and how do you sanitize user inputs using path.resolve()?",
     answer: `
-      <ul>
-        <li><strong>Helmet:</strong> সিকিউর HTTP হেডার (যেমন- CSP, X-Frame-Options) সেট করতে <code>helmet()</code> মিডলওয়্যার ব্যবহৃত হয়।</li>
-        <li><strong>Rate Limiting:</strong> Brute-force ঠেকাতে <code>express-rate-limit</code> দিয়ে পার-আইপি রিকুয়েস্ট লিমিট করা হয়।</li>
-        <li><strong>HPP:</strong> ডুপ্লিকেট কুয়েরি প্যারামিটার (যেমন <code>?id=1&id=2</code>) এড়াতে <code>hpp</code> মিডলওয়্যার ব্যবহার করা হয়।</li>
-      </ul>
-      <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
-const hpp = require('hpp');
+      <p>A <strong>Path Traversal (or Directory Traversal)</strong> vulnerability occurs when user-supplied input is concatenated directly into file system path operations (e.g., <code>fs.readFile</code>). An attacker supplies path control sequences like <code>../</code> to escape the intended directory root and read sensitive system files (e.g., <code>/etc/passwd</code>, <code>.env</code> configs, private SSL keys).</p>
 
-app.use(helmet());
-app.use(hpp());
-app.use(rateLimit({ windowMs: 15*60*1000, max: 100 }));</code></pre>
+      <h4>1. The Vulnerable Pattern</h4>
+
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>const fs = require('fs');
+const path = require('path');
+
+// VULNERABLE ENDPOINT
+app.get('/download', (req, res) => {
+  const fileName = req.query.file; // Attacker inputs: "../../../.env"
+  const filePath = path.join(__dirname, 'public', fileName);
+
+  // Reads and returns sensitive environment secrets outside intended public/ folder!
+  fs.readFile(filePath, 'utf8', (err, data) => {
+    res.send(data);
+  });
+});</code></pre>
+      </div>
+
+      <h4>2. Secure Remediation Pattern</h4>
+      <p>To safely prevent path traversal, resolve the fully qualified target path using <code>path.resolve()</code> or <code>path.normalize()</code>, and explicitly verify that the resolved path **starts with the absolute base directory prefix** before accessing the file system:</p>
+
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>const fs = require('fs');
+const path = require('path');
+
+const PUBLIC_BASE_DIR = path.resolve(__dirname, 'public');
+
+app.get('/download', (req, res) => {
+  const userInputFile = req.query.file;
+
+  if (!userInputFile) {
+    return res.status(400).send('File parameter is required.');
+  }
+
+  // 1. Resolve relative path to its absolute normalized path
+  const safeTargetPath = path.resolve(PUBLIC_BASE_DIR, userInputFile);
+
+  // 2. Strict Prefix Verification (Ensure target directory is still inside public folder)
+  if (!safeTargetPath.startsWith(PUBLIC_BASE_DIR + path.sep)) {
+    console.warn(`[SECURITY ALERT] Path traversal attempt detected: ${userInputFile}`);
+    return res.status(403).send('Access Denied: Invalid file path.');
+  }
+
+  // 3. File access is safe
+  res.sendFile(safeTargetPath);
+});</code></pre>
       </div>
     `
   },
   {
     id: "node-27",
-    category: "Node.js",
-    difficulty: "Intermediate",
-    tags: ["Performance","Compression","gzip"],
-    question: "compression middleware (Gzip/Brotli) দিয়ে Node.js Response Payload সাশ্রয় কীভাবে করবেন?",
+    category: "Real-Time Communications & Networking",
+    difficulty: "Advanced",
+    tags: ["WebSockets", "Sticky Sessions", "Socket.io", "Load Balancing"],
+    question: "Why are Sticky Sessions required when running Socket.io across a clustered Node.js environment, and how do you scale WebSockets horizontally?",
     answer: `
-      <p>HTTP response compression টেক্সট-ভিত্তিক পেলোড (JSON, HTML, CSS, JS) এর আকার নাটকীয়ভাবে কমায় — সাধারণত ৬০-৮০% পর্যন্ত। Node.js-এ <code>compression</code> middleware দিয়ে এটি সহজে যোগ করা যায়।</p>
-      <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>const compression = require('compression');
+      <p>Scaling real-time WebSocket applications (like Socket.io) across multiple Node.js processes or server nodes introduces network routing and state isolation challenges that do not exist in stateless REST APIs.</p>
 
-app.use(compression({
-  threshold: 1024,       // এর চেয়ে ছোট রেসপন্স কম্প্রেস করবে না
-  level: 6,               // 1 (দ্রুত) থেকে 9 (সর্বোচ্চ); ডিফল্ট 6 ভালো ভারসাম্য
-  filter: (req, res) => {
-    if (req.headers['x-no-compression']) return false;
-    return compression.filter(req, res);   // ডিফল্ট: Content-Type দেখে সিদ্ধান্ত
-  }
-}));</code></pre>
+      <h4>1. The Handshake Problem & Sticky Sessions</h4>
+      <p>Socket.io begins its connection lifecycle by establishing an initial HTTP long-polling handshake before upgrading the connection to a persistent WebSocket protocol. If a client sends its first HTTP handshake request to Worker A, but a round-robin load balancer routes the immediate HTTP upgrade request to Worker B:</p>
+      <ul>
+        <li>Worker B has no knowledge of the handshake session initialized on Worker A.</li>
+        <li>Worker B rejects the connection with an <code>HTTP 400 Bad Request</code> ("Session ID unknown").</li>
+      </ul>
+
+      <p><strong>Solution: Sticky Sessions</strong> configure the upstream Load Balancer (e.g., Nginx, AWS ALB) to bind a client's IP address or session cookie to the **exact same Node.js worker instance** throughout the handshake phase.</p>
+
+      <h4>2. Horizontal State Propagation via Redis Adapter</h4>
+      <p>Once clients are connected across separate worker processes or separate server nodes, Worker A cannot broadcast events directly to clients connected to Worker B because their TCP socket instances reside in isolated process memories.</p>
+
+      <p>To scale WebSockets horizontally, integrate a shared **Redis Pub/Sub Adapter**:</p>
+
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>const { Server } = require('socket.io');
+const { createClient } = require('redis');
+const { createAdapter } = require('@socket.io/redis-adapter');
+
+const io = new Server(server);
+
+// Create dedicated Redis Pub/Sub clients
+const pubClient = createClient({ url: 'redis://localhost:6379' });
+const subClient = pubClient.duplicate();
+
+Promise.all([pubClient.connect(), subClient.connect()]).then(() => {
+  // Attach Redis adapter to Socket.io
+  io.adapter(createAdapter(pubClient, subClient));
+});
+
+// Broadcasting an event on Worker A automatically publishes to Redis
+// Redis relays the event to Worker B, which emits it to its local WebSocket clients!
+io.emit('chat:message', { text: 'Global broadcast across all server nodes' });</code></pre>
       </div>
-      <h4>কেন <code>threshold</code> গুরুত্বপূর্ণ</h4>
-      <p>ছোট রেসপন্সে কম্প্রেশন <strong>ক্ষতিকর</strong> হতে পারে — gzip হেডার ও metadata-র ওভারহেড আসল ডেটার চেয়ে বেশি জায়গা নিতে পারে, এবং CPU খরচ করেও কোনো নেটওয়ার্ক লাভ হয় না। ১ KB-র নিচের রেসপন্সে compression সাধারণত বাদ দেওয়াই ভালো — এটিই <code>threshold</code>-এর কাজ।</p>
-      <h4>CPU বনাম নেটওয়ার্ক — মূল আপস</h4>
-      <p>Compression একটি সরাসরি ট্রেড-অফ: <strong>CPU সময় খরচ করে নেটওয়ার্ক ব্যান্ডউইথ বাঁচানো</strong>। <code>level: 9</code> সবচেয়ে ছোট আউটপুট দেয়, কিন্তু <code>level: 1</code>-এর চেয়ে কয়েকগুণ বেশি CPU লাগে — প্রায়ই মাত্র ২-৫% অতিরিক্ত সংকোচনের জন্য। উচ্চ থ্রুপুট সার্ভারে <code>level: 9</code> সহজেই CPU bottleneck তৈরি করতে পারে।</p>
-      <p><strong>নিয়ম:</strong> <code>level: 6</code> (ডিফল্ট) বেশিরভাগ ক্ষেত্রে সেরা ভারসাম্য। CPU-সীমিত পরিবেশে <code>level: 4-5</code> বিবেচনা করুন।</p>
-      <h4>একটি ভালো বিকল্প: প্রি-কম্প্রেশন</h4>
-      <p>ডায়নামিক কম্প্রেশন প্রতিটি রিকোয়েস্টে CPU খরচ করে — একই স্ট্যাটিক ফাইল বারবার কম্প্রেস করা অপচয়। বিল্ড টাইমে একবার কম্প্রেস করে রাখলে (<code>express.static</code> + <code>.gz</code> ফাইল, বা Nginx-এর <code>gzip_static</code>) প্রতি-রিকোয়েস্ট CPU খরচ শূন্য হয়ে যায়।</p>
-      <h4>Reverse proxy-তে করা প্রায়ই ভালো</h4>
-      <p>অনেক প্রোডাকশন আর্কিটেকচারে compression Node.js অ্যাপ্লিকেশনে না করে <strong>Nginx বা CDN-এ</strong> করা হয়:</p>
-      <ul>
-        <li>Node.js-এর CPU সময় ব্যবসায়িক লজিকের জন্য মুক্ত থাকে।</li>
-        <li>Nginx-এ compression C-তে লেখা, সাধারণত বেশি দক্ষ।</li>
-        <li>একই কনফিগ সব ব্যাকএন্ড সার্ভিসে প্রযোজ্য — প্রতিটিতে আলাদা middleware লিখতে হয় না।</li>
-      </ul>
-      <p><strong>ব্যবহারিক সিদ্ধান্ত:</strong> Nginx বা CDN-এর পেছনে অ্যাপ চালালে সেখানেই compression করুন। Node.js সরাসরি এক্সপোজ করা থাকলে (বা প্রক্সিতে compression চালু করার নিয়ন্ত্রণ না থাকলে) <code>compression</code> middleware ব্যবহার করুন।</p>
-      <h4>Follow-up প্রশ্ন</h4>
-      <ul>
-        <li>SSE বা streaming রেসপন্সে compression সমস্যা তৈরি করে কেন?</li>
-        <li>Brotli কীভাবে যোগ করবেন এবং gzip-এর চেয়ে কী সুবিধা দেয়?</li>
-      </ul>
     `
   },
   {
     id: "node-28",
-    category: "Node.js",
-    difficulty: "Advanced",
-    tags: ["Architecture","Domain Driven","Clean Architecture"],
-    question: "Clean Architecture in Node.js: Controllers, Use Cases, Repositories, Domain Entities কীভাবে সাজাবেন?",
+    category: "Real-Time Communications & Dead Sockets",
+    difficulty: "Intermediate",
+    tags: ["WebSockets", "ws Library", "Heartbeat", "Ping/Pong", "Half-Open Connections"],
+    question: "How do you implement a robust Ping/Pong Heartbeat mechanism in the ws library to detect and terminate Dead Sockets?",
     answer: `
-      <p>Clean Architecture-এ বিজনেস লজিককে ফ্রেমওয়ার্ক (Express) বা ডাটাবেজ (MongoDB) থেকে সম্পূর্ণ স্বাধীন রাখা হয়।</p>
-      <ol>
-        <li><strong>Entities:</strong> কোর বিজনেস অবজেক্ট (যেমন- User, Order)।</li>
-        <li><strong>Use Cases:</strong> অ্যাপ্লিকেশনের নির্দিষ্ট কাজের লজিক (যেমন- CreateUser)।</li>
-        <li><strong>Repositories (Interfaces):</strong> ডাটাবেজ অ্যাক্সেসের ইন্টারফেস।</li>
-        <li><strong>Controllers:</strong> HTTP রিকোয়েস্ট গ্রহণ করে Use Case-এ পাঠায়।</li>
-      </ol>
-      <p>Dependency Injection (DI) ব্যবহার করে ইনফ্রাস্ট্রাকচার লেয়ারকে ডোমেইন লেয়ার থেকে আলাদা রাখা হয়।</p>
+      <p>In network applications using raw WebSockets, network connections often break abruptly without cleanly emitting a TCP <code>FIN</code> or <code>CLOSE</code> packet (e.g., client loses Wi-Fi connection, mobile device enters tunnel, client abruptly powers off). This leaves a **Half-Open Connection** where the server believes the socket is active, leaking open file descriptors and memory resources indefinitely.</p>
+
+      <h4>1. The Ping/Pong Protocol Solution</h4>
+      <p>The WebSocket specification (RFC 6455) includes built-in ping and pong frame opcodes designed specifically for connection state verification. The server sends periodic <code>ping</code> frames; clients must respond automatically with <code>pong</code> frames.</p>
+
+      <h4>2. Production Implementation in ws Module</h4>
+
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>const { WebSocketServer } = require('ws');
+
+const wss = new WebSocketServer({ port: 8080 });
+
+function heartbeat() {
+  // Mark socket instance as active when pong frame is received
+  this.isAlive = true;
+}
+
+wss.on('connection', (ws) => {
+  ws.isAlive = true;
+
+  // Listen for native pong frame response from client
+  ws.on('pong', heartbeat);
+});
+
+// Periodically audit connected clients every 30 seconds
+const interval = setInterval(() => {
+  wss.clients.forEach((ws) => {
+    // If the socket did NOT respond with a pong since the last ping check, terminate it
+    if (ws.isAlive === false) {
+      console.log('Terminating dead socket connection...');
+      return ws.terminate(); // Instantly destroys TCP socket resources
+    }
+
+    // Reset flag to false and issue a new ping frame
+    ws.isAlive = false;
+    ws.ping(); // Sends WebSocket Ping Frame
+  });
+}, 30000);
+
+// Clear interval timer when the WebSocket server closes
+wss.on('close', () => clearInterval(interval));</code></pre>
+      </div>
     `
   },
   {
     id: "node-29",
-    category: "Node.js",
+    category: "Modern Node.js Features & Utilities",
     difficulty: "Intermediate",
-    tags: ["Package","pnpm","npm"],
-    question: "pnpm / yarn / npm Workspaces দিয়ে Monorepo Package Management কীভাবে পরিচালিত হয়?",
+    tags: ["util.promisify", "Custom Promisify Symbol", "Async/Await Integration"],
+    question: "How does util.promisify work, and how do you implement a custom promisify function using util.promisify.custom?",
     answer: `
-      <p>Monorepo-তে একাধিক প্যাকেজ (frontend, backend, shared libraries) একটি রিপোজিটরিতে থাকে। Package manager-এর <strong>workspace</strong> ফিচার এদের মধ্যে dependency শেয়ারিং ও লোকাল প্যাকেজ লিংকিং সামলায়।</p>
-      <div class="code-box">
-        <div class="code-header"><span>json</span><button class="copy-btn">Copy</button></div>
-        <pre><code>// package.json (root)
-{
-  "name": "my-monorepo",
-  "workspaces": ["apps/*", "packages/*"]
-}
+      <p>Legacy Node.js codebases and certain core APIs rely on error-first callback conventions <code>(err, value) => {}</code>. The <code>util.promisify()</code> utility transforms standard callback-based functions into modern functions that return Promises compatible with <code>async/await</code>.</p>
 
-// apps/api/package.json
-{
-  "dependencies": {
-    "@myorg/shared-utils": "workspace:*",   // pnpm/yarn-এ লোকাল প্যাকেজ রেফারেন্স
-    "express": "^4.18.0"
+      <h4>1. Standard Promisification Pattern</h4>
+
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>const util = require('util');
+const fs = require('fs');
+
+// Convert traditional callback function to promise-returning function
+const readFileAsync = util.promisify(fs.readFile);
+
+async function loadData() {
+  try {
+    const data = await readFileAsync('./data.json', 'utf8');
+    console.log(data);
+  } catch (err) {
+    console.error('Failed to read file:', err);
   }
 }</code></pre>
       </div>
-      <h4>মূল সুবিধা: symlink দিয়ে লোকাল প্যাকেজ লিংকিং</h4>
-      <p>প্রতিটি প্যাকেজের <code>node_modules</code>-এ <code>@myorg/shared-utils</code> npm থেকে ডাউনলোড হওয়ার বদলে <strong>একটি symlink</strong> হয়ে থাকে, যা সরাসরি <code>packages/shared-utils</code> ফোল্ডারে নির্দেশ করে। ফলে shared code-এ পরিবর্তন করলেই সব ব্যবহারকারী অ্যাপে সাথে সাথে প্রতিফলিত হয় — আলাদা করে publish বা reinstall করতে হয় না।</p>
-      <h4>Hoisting — এবং এর সমস্যা</h4>
-      <p>npm/yarn (classic mode) সাধারণ dependency গুলো root <code>node_modules</code>-এ <strong>hoist</strong> করে, ডুপ্লিকেশন এড়াতে। কিন্তু এতে <strong>phantom dependency</strong> সমস্যা হয় — একটি প্যাকেজ নিজের <code>package.json</code>-এ ঘোষণা না করেই hoist হওয়া একটি প্যাকেজ ব্যবহার করতে পারে, কারণ সেটি node_modules-এ "কাকতালীয়ভাবে" আছে। অন্য পরিবেশে (বা hoisting অ্যালগরিদম বদলালে) এটি ভেঙে পড়ে।</p>
-      <h4>pnpm-এর সমাধান — সবচেয়ে কঠোর ও নির্ভরযোগ্য</h4>
+
+      <h4>2. Custom Promisification via Symbol (util.promisify.custom)</h4>
+      <p>Certain legacy APIs do not follow standard error-first callback signatures (e.g., functions returning multiple result arguments, or libraries using non-standard callback placements). For these scenarios, attach a custom promisified function using the <code>util.promisify.custom</code> Symbol:</p>
+
       <div class="code-box">
-        <div class="code-header"><span>text</span><button class="copy-btn">Copy</button></div>
-        <pre><code>pnpm-এ node_modules structure:
-  node_modules/
-    .pnpm/                    ← আসল ফাইল, content-addressable store থেকে
-      express@4.18.0/
-    express -> .pnpm/express@4.18.0/node_modules/express   (symlink)
-    # শুধু package.json-এ ঘোষিত dependency-র symlink থাকে
-    # → phantom dependency ব্যবহার করলে সাথে সাথে "module not found"</code></pre>
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>const util = require('util');
+
+// Legacy function with non-standard callback signature (callback receives two result parameters)
+function legacyGetCoordinates(city, callback) {
+  setTimeout(() => {
+    // Passes: err, lat, lng
+    callback(null, 40.7128, -74.0060); 
+  }, 100);
+}
+
+// Attach a custom promise handler directly to the legacy function
+legacyGetCoordinates[util.promisify.custom] = (city) => {
+  return new Promise((resolve, reject) => {
+    legacyGetCoordinates(city, (err, lat, lng) => {
+      if (err) return reject(err);
+      resolve({ lat, lng }); // Resolve as a clean object
+    });
+  });
+};
+
+// Now util.promisify uses the custom implementation automatically!
+const getCoordinatesAsync = util.promisify(legacyGetCoordinates);
+
+async function fetchLocation() {
+  const coords = await getCoordinatesAsync('New York');
+  console.log(`Lat: ${coords.lat}, Lng: ${coords.lng}`);
+}</code></pre>
       </div>
-      <p>pnpm একটি <strong>global content-addressable store</strong> ব্যবহার করে — একই সংস্করণের প্যাকেজ ডিস্কে একবারই থাকে, সব প্রজেক্টে hard-link হয়ে শেয়ার হয়। ফলে ডিস্ক ব্যবহার নাটকীয়ভাবে কমে এবং প্রতিটি প্যাকেজ কেবল তার ঘোষিত dependency-ই দেখতে পায় — hoisting-জনিত বাগ কাঠামোগতভাবেই অসম্ভব।</p>
-      <table>
-        <tr><th>Manager</th><th>Hoisting</th><th>ডিস্ক দক্ষতা</th><th>Phantom dep সুরক্ষা</th></tr>
-        <tr><td>npm workspaces</td><td>হ্যাঁ</td><td>মাঝারি</td><td>❌ না</td></tr>
-        <tr><td>yarn classic</td><td>হ্যাঁ</td><td>মাঝারি</td><td>❌ না</td></tr>
-        <tr><td>yarn (Plug'n'Play)</td><td>না</td><td>ভালো</td><td>✅ হ্যাঁ</td></tr>
-        <tr><td><strong>pnpm</strong></td><td>না (কড়া)</td><td><strong>সেরা</strong></td><td>✅ হ্যাঁ</td></tr>
-      </table>
-      <h4>বিল্ড টুলের সাথে সমন্বয়</h4>
-      <p>Workspace শুধু dependency ব্যবস্থাপনা করে — <strong>টাস্ক অর্কেস্ট্রেশন</strong> (কোন ক্রমে বিল্ড হবে, কোনটি ক্যাশ করা যায়) আলাদা টুলের কাজ। Turborepo বা Nx-এর মতো টুল প্যাকেজের নির্ভরতা গ্রাফ বুঝে সঠিক ক্রমে বিল্ড চালায় এবং যা বদলায়নি তা পুনরায় বিল্ড করে না।</p>
-      <h4>Follow-up প্রশ্ন</h4>
-      <ul>
-        <li>Monorepo-তে ভার্সনিং একসাথে না আলাদা রাখবেন?</li>
-        <li>CI-তে শুধু বদলানো প্যাকেজ কীভাবে টেস্ট করবেন?</li>
-      </ul>
     `
   },
   {
     id: "node-30",
-    category: "Node.js",
-    difficulty: "Advanced",
-    tags: ["Performance","uv_threadpool_size","libuv"],
-    question: "UV_THREADPOOL_SIZE (Default 4) কীভাবে বাড়াবেন এবং এটি কোন কোন অপারেশনে প্রভাব ফেলে?",
+    category: "Modern Node.js Features & Configuration",
+    difficulty: "Beginner",
+    tags: ["Native Env Files", "--env-file", "Configuration Management", "Zero Dependencies"],
+    question: "How does Node.js's native --env-file flag work, and how does it replace third-party dependencies like dotenv?",
     answer: `
-      <p>Node.js একক-থ্রেডেড হলেও কিছু ব্লকিং অপারেশন (ফাইল সিস্টেম, DNS lookup, কিছু crypto, zlib) <strong>Libuv-এর thread pool</strong>-এ পাঠিয়ে দেয়, যাতে মূল event loop আটকে না থাকে।</p>
-      <div class="code-box">
-        <div class="code-header"><span>bash</span><button class="copy-btn">Copy</button></div>
-        <pre><code># ডিফল্ট মাত্র 4 — অনেক কম-লোড অ্যাপে এটি bottleneck হয়
-UV_THREADPOOL_SIZE=4 node app.js
+      <p>Starting in Node.js 20.6+, Node.js introduced native support for loading environment variables directly from <code>.env</code> files without requiring third-party libraries (such as <code>dotenv</code>).</p>
 
-# বাড়ানো — সর্বোচ্চ 1024
-UV_THREADPOOL_SIZE=16 node app.js
+      <h4>1. Usage and Execution Syntax</h4>
+      <p>Instead of adding <code>require('dotenv').config()</code> boilerplate into your application entry points, pass the file path via the CLI flag directly at startup:</p>
 
-# ⚠️ প্রোগ্রাম শুরু হওয়ার আগে সেট করতেই হবে — রানটাইমে বদলানো যায় না
-process.env.UV_THREADPOOL_SIZE = 16;   // ❌ কাজ করবে না, খুব দেরি</code></pre>
-      </div>
-      <h4>কোন কোন অপারেশন এই pool ব্যবহার করে</h4>
-      <ul>
-        <li><strong><code>fs</code> মডিউল</strong> — <code>fs.readFile</code>, <code>fs.writeFile</code> ইত্যাদি সব async ফাইল অপারেশন (ব্যতিক্রম: কিছু নতুন Linux io_uring-ভিত্তিক অপারেশন)।</li>
-        <li><strong><code>dns.lookup()</code></strong> — সিস্টেমের <code>getaddrinfo</code> কল করে, যা ব্লকিং। (<code>dns.resolve*()</code> এই pool ব্যবহার করে <strong>না</strong> — সরাসরি নেটওয়ার্কে c-ares লাইব্রেরি দিয়ে অ-ব্লকিংভাবে যায়।)</li>
-        <li><strong><code>crypto</code></strong> — <code>pbkdf2</code>, <code>scrypt</code>, <code>randomBytes</code> (async ভার্সন)। <code>createHash</code>/<code>createCipher</code> সিঙ্ক্রোনাস, pool ব্যবহার করে না।</li>
-        <li><strong><code>zlib</code></strong> — gzip/gunzip compression।</li>
-      </ul>
-      <h4>Bottleneck কীভাবে ধরবেন</h4>
-      <p>ডিফল্ট সাইজ মাত্র <strong>৪</strong>। একটি অ্যাপ্লিকেশন প্রচুর ফাইল পড়ে বা bcrypt/pbkdf2 দিয়ে পাসওয়ার্ড হ্যাশ করে, এবং একসাথে ৫টির বেশি এমন অপারেশন এলে, ৫ম-টি প্রথম ৪টি শেষ না হওয়া পর্যন্ত <strong>কিউতে অপেক্ষা করে</strong> — এমনকি CPU ও I/O দুটোই অলস থাকলেও।</p>
       <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>// সন্দেহ থাকলে পরীক্ষা করুন: pool size বাড়িয়ে থ্রুপুট বাড়ে কি না
-console.time('bcrypt-batch');
-await Promise.all(
-  Array(20).fill(0).map(() => bcrypt.hash('password', 10))
-);
-console.timeEnd('bcrypt-batch');
-// UV_THREADPOOL_SIZE=4 এ ধীর, =20 এ দ্রুত হলে → এটিই bottleneck ছিল</code></pre>
+        <div class="code-header"><span>bash</span></div>
+        <pre><code># Load environment variables from default .env file
+node --env-file=.env server.js
+
+# Pass multiple environment configuration files (later files override earlier keys)
+node --env-file=.env --env-file=.env.local server.js</code></pre>
       </div>
-      <h4>ব্যবহারিক পরামর্শ</h4>
-      <ul>
-        <li><strong>CPU কোর সংখ্যার সাথে মিলিয়ে বাড়ান</strong> (যেমন ৮-১৬), অতিরিক্ত বাড়ালে কোনো লাভ নেই — সিস্টেমেরই তো সীমিত কোর।</li>
-        <li><strong>Cluster module ব্যবহার করলে</strong> প্রতিটি worker প্রসেসের <em>নিজস্ব</em> thread pool থাকে — তাই মোট থ্রেড সংখ্যা <code>worker সংখ্যা × UV_THREADPOOL_SIZE</code>। খুব বড় করবেন না।</li>
-        <li><strong>এটি CPU-বাউন্ড কাজে সাহায্য করে না</strong> (যেমন ভারী loop) — শুধু I/O-বাউন্ড ও crypto-বাউন্ড অপারেশনে যা libuv-এ যায়। CPU-নিবিড় কাজে <code>worker_threads</code> ব্যবহার করুন।</li>
-      </ul>
-      <h4>Follow-up প্রশ্ন</h4>
-      <ul>
-        <li><code>dns.lookup()</code> ও <code>dns.resolve()</code> কেন আলাদাভাবে আচরণ করে?</li>
-        <li>Thread pool ও <code>worker_threads</code>-এর পার্থক্য কী?</li>
-      </ul>
+
+      <h4>2. Accessing Loaded Variables in JavaScript</h4>
+
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>// .env file contents:
+// PORT=8080
+// DATABASE_URL="postgres://user:pass@localhost:5432/db"
+
+// server.js - Variables are automatically attached to process.env at engine startup
+const port = process.env.PORT || 3000;
+const dbUrl = process.env.DATABASE_URL;
+
+console.log(`Server starting on port ${port} connected to ${dbUrl}`);</code></pre>
+      </div>
+
+      <h4>3. Key Comparisons: Native --env-file vs dotenv Package</h4>
+      <table>
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>Native <code>--env-file</code></th>
+            <th><code>dotenv</code> npm package</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Dependency Cost</strong></td>
+            <td><strong>Zero dependencies:</strong> Reduces supply-chain attack surface and install sizes.</td>
+            <td>Requires external <code>npm</code> package installation.</td>
+          </tr>
+          <tr>
+            <td><strong>Execution Order</strong></td>
+            <td>Loads <strong>before</strong> any JavaScript code executes, ensuring global setups see variables.</td>
+            <td>Loads when JavaScript hits the <code>require('dotenv').config()</code> line.</td>
+          </tr>
+          <tr>
+            <td><strong>Variable Interpolation</strong></td>
+            <td>Simple key-value parsing (No variable expansion like <code>$BASE_URL/api</code>).</td>
+            <td>Supports variable expansion via companion modules like <code>dotenv-expand</code>.</td>
+          </tr>
+        </tbody>
+      </table>
     `
   },
   {
     id: "node-31",
-    category: "Node.js",
-    difficulty: "Intermediate",
-    tags: ["Modules","ESM","package.json"],
-    question: "Node.js-এ type: 'module' এবং .mjs vs .cjs ফাইল এক্সটেনশন ব্যবহারের সঠিক নিয়ম কী?",
+    category: "Modern Node.js Features & Deployment",
+    difficulty: "Advanced",
+    tags: ["Single Executable Applications", "SEA", "Binary Bundling", "Deployment"],
+    question: "What are Node.js Single Executable Applications (SEA), and how do you bundle a Node.js project into a single standalone binary executable?",
     answer: `
-      <p>Node.js দুটি মডিউল সিস্টেম সমর্থন করে — CommonJS (<code>require</code>) ও ES Module (<code>import</code>)। <code>package.json</code>-এর <code>"type"</code> ফিল্ড ও ফাইল এক্সটেনশন নির্ধারণ করে কোন ফাইল কোন সিস্টেমে চলবে।</p>
-      <table>
-        <tr><th>সেটিং</th><th>ফাইল টাইপ</th><th>ব্যবহৃত সিস্টেম</th></tr>
-        <tr><td>(ডিফল্ট, কিছু নেই)</td><td><code>.js</code></td><td>CommonJS</td></tr>
-        <tr><td><code>"type": "module"</code></td><td><code>.js</code></td><td>ES Module</td></tr>
-        <tr><td>যেকোনো</td><td><code>.mjs</code></td><td>সবসময় ES Module</td></tr>
-        <tr><td>যেকোনো</td><td><code>.cjs</code></td><td>সবসময় CommonJS</td></tr>
-      </table>
+      <p>Historically, deploying a Node.js application required installing a target Node.js runtime binary on the host environment alongside the project's source code and <code>node_modules</code> directory. <strong>Single Executable Applications (SEA)</strong> allow developers to bundle a JavaScript application directly into a single, standalone binary executable that runs on machines without Node.js installed.</p>
+
+      <h4>1. How SEA Works Under the Hood</h4>
+      <p>Rather than recompiling the C++ source code of Node.js from scratch, Node.js SEA works by injecting a pre-compiled, serialized V8 code snapshot or JavaScript bundle into a dedicated binary resource section (such as the <code>NODE_SEA_BLOB</code> section in ELF/PE/Mach-O binaries) of a standard pre-built Node.js executable.</p>
+
+      <h4>2. Step-by-Step SEA Build Process</h4>
+
+      <h5>Step 1: Create the Application Configuration (sea-config.json)</h5>
       <div class="code-box">
-        <div class="code-header"><span>json</span><button class="copy-btn">Copy</button></div>
-        <pre><code>// package.json
-{ "type": "module" }   // এখন সব .js ফাইল ES module হিসেবে পার্স হবে</code></pre>
-      </div>
-      <h4>মূল আচরণগত পার্থক্য</h4>
-      <ul>
-        <li><strong>Synchronous বনাম asynchronous লোডিং:</strong> CommonJS <code>require()</code> সিঙ্ক্রোনাস; ES module <code>import</code> asynchronous (যদিও top-level সিনট্যাক্স সিঙ্ক্রোনাস দেখায়, ভেতরে module graph resolve হওয়ার পর চলে)।</li>
-        <li><strong><code>__dirname</code>/<code>__filename</code> নেই ES module-এ:</strong> এগুলো CommonJS-নির্দিষ্ট। ES module-এ <code>import.meta.url</code> থেকে বের করতে হয়।</li>
-        <li><strong>Top-level await:</strong> শুধু ES module-এ কাজ করে — CommonJS-এ <code>await</code> একটি async function-এর ভেতরেই থাকতে হয়।</li>
-        <li><strong>Named export/import বেশি নমনীয়:</strong> ES module-এ static analysis (tree-shaking) সম্ভব; CommonJS-এ <code>module.exports</code> ডায়নামিক হতে পারে, যা bundler-এর জন্য বিশ্লেষণ করা কঠিন।</li>
-      </ul>
-      <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>// ES module-এ __dirname-এর বিকল্প
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);</code></pre>
-      </div>
-      <h4>দুটি সিস্টেম একসাথে ব্যবহার করা — লাইব্রেরি লেখকদের জন্য</h4>
-      <p>একটি npm প্যাকেজ যদি দুই ধরনের কনজিউমারকেই সমর্থন করতে চায় (CommonJS ও ESM ব্যবহারকারী), <code>package.json</code>-এর <code>exports</code> ফিল্ডে <strong>dual package</strong> সেটআপ করা হয়:</p>
-      <div class="code-box">
-        <div class="code-header"><span>json</span><button class="copy-btn">Copy</button></div>
+        <div class="code-header"><span>json</span></div>
         <pre><code>{
-  "name": "my-lib",
-  "type": "module",
-  "main": "./dist/index.cjs",       // CommonJS ব্যবহারকারীদের জন্য fallback
-  "module": "./dist/index.mjs",
-  "exports": {
-    ".": {
-      "import": "./dist/index.mjs",   // import করলে ESM সংস্করণ
-      "require": "./dist/index.cjs"   // require() করলে CJS সংস্করণ
-    }
-  }
+  "main": "dist/bundle.js",
+  "output": "sea-prep.blob",
+  "disableExperimentalSEAWarning": true,
+  "useSnapshot": false
 }</code></pre>
       </div>
-      <h4>বাস্তব নিয়ম</h4>
-      <p><strong>নতুন প্রজেক্টে <code>"type": "module"</code> ব্যবহার করুন</strong> — ES module ভবিষ্যতের স্ট্যান্ডার্ড, browser-এও সরাসরি চলে, এবং ইকোসিস্টেম দ্রুত সেদিকে সরে যাচ্ছে। <code>.mjs</code>/<code>.cjs</code> এক্সটেনশন ব্যবহার করুন কেবল যখন একই প্রজেক্টে দুই ধরনের ফাইল <em>মেশাতে</em> হবে (যেমন একটি লিগ্যাসি কনফিগ ফাইল যা এখনও <code>require</code>-নির্ভর টুলের জন্য CommonJS থাকতে হবে)।</p>
-      <h4>Follow-up প্রশ্ন</h4>
+
+      <h5>Step 2: Generate the Uncompressed Blob</h5>
+      <p>Run the native Node.js command to generate the binary blob file:</p>
+      <div class="code-box">
+        <div class="code-header"><span>bash</span></div>
+        <pre><code>node --experimental-sea-config sea-config.json</code></pre>
+      </div>
+
+      <h5>Step 3: Inject Blob into the Node.js Executable</h5>
+      <p>Copy the official Node.js binary and use system utilities (like <code>postject</code> on Linux/macOS or <code>signtool</code> on Windows) to embed the blob into the executable:</p>
+      <div class="code-box">
+        <div class="code-header"><span>bash</span></div>
+        <pre><code># 1. Copy the current node executable
+cp $(which node) my-app-binary
+
+# 2. Inject the blob into the target binary (Linux example using postject)
+npx postject my-app-binary NODE_SEA_BLOB sea-prep.blob \
+  --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc175b95a35130ddc8003e0</code></pre>
+      </div>
+
+      <h4>3. Key Benefits & Enterprise Use Cases</h4>
       <ul>
-        <li>CommonJS মডিউল থেকে ES module import করা যায় কি (এবং উল্টো)?</li>
-        <li><code>require()</code> দিয়ে ESM-only প্যাকেজ লোড করলে কী হয়?</li>
+        <li><strong>Zero Environment Dependencies:</strong> Eliminates runtime version mismatches (e.g., target machine running Node 18 vs Node 22).</li>
+        <li><strong>Code IP Protection:</strong> Source code is compiled/bundled into binary blobs, preventing plain-text inspection or modification on client environments.</li>
+        <li><strong>Distribution Efficiency:</strong> Ideal for distributing cross-platform CLI tools, edge computing runtimes, and desktop backend services.</li>
       </ul>
     `
   },
   {
     id: "node-32",
-    category: "Node.js",
-    difficulty: "Advanced",
-    tags: ["Security","REPL","eval"],
-    question: "Node.js-এ eval() এবং new Function() ব্যবহারের ভয়াবহ নিরাপত্তা ঝুঁকি কী?",
+    category: "Modern Node.js Features & Data Access",
+    difficulty: "Intermediate",
+    tags: ["node:sqlite", "Embedded Database", "Synchronous I/O", "Zero Dependencies"],
+    question: "How does the native node:sqlite module work, and when should you choose embedded SQLite over external drivers or ORMs?",
     answer: `
-      <p><code>eval()</code> ও <code>new Function()</code> রানটাইমে স্ট্রিং থেকে কোড তৈরি ও চালায় — এবং এটি ওয়েব অ্যাপ্লিকেশনের সবচেয়ে বিপজ্জনক দুর্বলতাগুলোর একটির দরজা খুলে দেয়: <strong>Remote Code Execution (RCE)</strong>।</p>
-      <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>// ❌ ভয়াবহ — ইউজারের ইনপুট সরাসরি কোড হিসেবে চলছে
-app.post('/calculate', (req, res) => {
-  const result = eval(req.body.expression);   // RCE!
-  res.json({ result });
-});
+      <p>Node.js includes a native, built-in <strong>SQLite module (<code>node:sqlite</code>)</strong>. This allows applications to execute light, reliable relational database queries without installing external native drivers (like <code>better-sqlite3</code> or <code>sqlite3</code>) or maintaining C++ compilation steps during <code>npm install</code>.</p>
 
-// আক্রমণকারী পাঠাতে পারে:
-// { "expression": "require('child_process').execSync('rm -rf /')" }
-// অথবা: "require('fs').readFileSync('/etc/passwd').toString()"
-// অথবা: "process.env" — সব সিক্রেট এনভায়রনমেন্ট ভ্যারিয়েবল ফাঁস</code></pre>
-      </div>
-      <h4>কেন এত বিপজ্জনক</h4>
-      <p><code>eval()</code> যে কোনো JavaScript চালাতে পারে — এবং Node.js-এ JavaScript-এর <code>require('child_process')</code>, <code>require('fs')</code>-এর মতো মডিউলের মাধ্যমে <strong>সম্পূর্ণ সিস্টেম অ্যাক্সেস</strong> আছে। ব্রাউজারের <code>eval()</code>-এর চেয়ে এটি অনেক বেশি ভয়াবহ, কারণ সেখানে অন্তত sandbox আছে (DOM, cookie সীমাবদ্ধ) — Node.js-এ কোনো sandbox নেই।</p>
-      <p><code>new Function()</code>-ও একই রকম বিপজ্জনক — এটি <code>eval</code>-এর একটি বিকল্প রূপ মাত্র, একই ঝুঁকি বহন করে।</p>
-      <h4>পরোক্ষ ইনজেকশনও সম্ভব</h4>
-      <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>// ❌ এটিও eval-এর মতোই বিপজ্জনক — setTimeout স্ট্রিং নিলে eval করে
-setTimeout(userInput, 1000);
+      <h4>1. Features of node:sqlite</h4>
+      <ul>
+        <li><strong>Zero Native Build Tooling:</strong> Eliminates <code>node-gyp</code>, Python, or C++ compiler dependencies during deployment.</li>
+        <li><strong>High-Performance Synchronous Execution:</strong> Because SQLite is an embedded database engine running in the same memory address space as Node.js, read queries execute synchronously without Event Loop serialization overhead.</li>
+        <li><strong>Built-in Prepared Statements & Transactions:</strong> Provides protective parameter binding to eliminate SQL Injection vulnerabilities out of the box.</li>
+      </ul>
 
-// ❌ কিছু template engine-এ ভুল কনফিগারেশনে একই সমস্যা
-// ❌ VM মডিউলও পুরোপুরি নিরাপদ sandbox দেয় না
-const vm = require('vm');
-vm.runInNewContext(userInput);   // এটিও escape করা সম্ভব বলে পরিচিত</code></pre>
+      <h4>2. Practical Usage Example</h4>
+
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>import { DatabaseSync } from 'node:sqlite';
+
+// Initialize an in-memory or file-backed database synchronously
+const db = new DatabaseSync(':memory:');
+
+// 1. Execute DDL statements
+db.exec(`
+  CREATE TABLE users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    email TEXT UNIQUE NOT NULL
+  )
+`);
+
+// 2. Prepared Statements for safe Insertion
+const insertStmt = db.prepare('INSERT INTO users (name, email) VALUES (?, ?)');
+insertStmt.run('Alice Developer', 'alice@example.com');
+insertStmt.run('Bob Engineer', 'bob@example.com');
+
+// 3. Querying Records
+const selectStmt = db.prepare('SELECT * FROM users WHERE email = ?');
+const user = selectStmt.get('alice@example.com');
+
+console.log('Retrieved User:', user);
+// Output: { id: 1, name: 'Alice Developer', email: 'alice@example.com' }</code></pre>
       </div>
-      <h4>বিকল্প — কখনও ইউজার ইনপুট থেকে কোড চালাবেন না</h4>
-      <ul>
-        <li><strong>গাণিতিক এক্সপ্রেশন মূল্যায়নে:</strong> <code>mathjs</code> বা <code>expr-eval</code>-এর মতো নিরাপদ পার্সার ব্যবহার করুন — এগুলো কোড চালায় না, শুধু গণিত পার্স করে।</li>
-        <li><strong>JSON পার্স করতে:</strong> <code>eval()</code> নয়, সবসময় <code>JSON.parse()</code>।</li>
-        <li><strong>ডায়নামিক টেমপ্লেটে:</strong> নিরাপদ টেমপ্লেট ইঞ্জিন (Handlebars, EJS with escaping) ব্যবহার করুন, নিজে string concatenation দিয়ে কোড বানাবেন না।</li>
-        <li><strong>প্লাগইন/স্ক্রিপ্টিং ফিচারের জন্য:</strong> সত্যিকারের sandbox দরকার হলে <code>isolated-vm</code>-এর মতো লাইব্রেরি বা সম্পূর্ণ আলাদা প্রসেস/কন্টেইনারে (কড়া রিসোর্স সীমাসহ) চালান — Node.js-এর নিজস্ব <code>vm</code> মডিউল যথেষ্ট নয়।</li>
-      </ul>
-      <h4>একটি সাধারণ ভুল ধারণা</h4>
-      <p>"আমি তো শুধু বিশ্বস্ত অ্যাডমিনদের জন্য এই ফিচার বানিয়েছি" — এই যুক্তি বিপজ্জনক। অ্যাডমিন অ্যাকাউন্ট XSS বা credential leak-এ আপস হতে পারে, এবং তখন <code>eval()</code>-এর মতো ফিচার আক্রমণকারীকে সরাসরি সার্ভার নিয়ন্ত্রণ দিয়ে দেয়। <strong>Trust boundary যতটা সম্ভব সংকীর্ণ রাখুন — কখনও কোড execution ইউজার-নিয়ন্ত্রিত করবেন না।</strong></p>
-      <h4>Follow-up প্রশ্ন</h4>
-      <ul>
-        <li>Prototype pollution আক্রমণ eval ছাড়াও কীভাবে ঘটতে পারে?</li>
-        <li><code>vm</code> মডিউল কীভাবে escape করা সম্ভব?</li>
-      </ul>
+
+      <h4>3. Production Use Cases vs External Databases (PostgreSQL/MySQL)</h4>
+      <table>
+        <thead>
+          <tr>
+            <th>Scenario</th>
+            <th>Use <code>node:sqlite</code></th>
+            <th>Use PostgreSQL / MySQL</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Application Architecture</strong></td>
+            <td>CLI tools, edge workers, embedded devices, local caches.</td>
+            <td>Scalable multi-instance microservices.</td>
+          </tr>
+          <tr>
+            <td><strong>Concurrency Model</strong></td>
+            <td>Single-writer model (ideal for heavy read, low write loads).</td>
+            <td>High concurrent write transactions across multiple nodes.</td>
+          </tr>
+          <tr>
+            <td><strong>Operational Complexity</strong></td>
+            <td>Zero database server administration (single file on disk).</td>
+            <td>Requires managed database clusters, connection pooling, and network setup.</td>
+          </tr>
+        </tbody>
+      </table>
     `
   },
   {
     id: "node-33",
-    category: "Node.js",
-    difficulty: "Intermediate",
-    tags: ["HTTP","http.Agent","KeepAlive"],
-    question: "http.Agent { keepAlive: true } ব্যাকএন্ড এপিআই কলের ল্যাটেন্সি কীভাবে কমায়?",
+    category: "Performance Tuning & Engine Internals",
+    difficulty: "Advanced",
+    tags: ["Compile Cache", "V8 Code Caching", "Cold Start Optimization", "Serverless"],
+    question: "How does module.enableCompileCache() work, and how does V8 Code Caching reduce cold-start latency?",
     answer: `
-      <p><code>http.Agent</code> Node.js-এ কানেকশন পুলিং সামলায়। ডিফল্টে <strong>keep-alive বন্ধ</strong> — প্রতিটি আউটগোয়িং রিকোয়েস্টে একটি নতুন TCP কানেকশন খোলে এবং কাজ শেষে বন্ধ করে দেয়। এটি মাইক্রোসার্ভিসে বা বাইরের API কলে সবচেয়ে সাধারণ, অথচ সহজে উপেক্ষিত পারফরম্যান্স সমস্যা।</p>
+      <p>When a Node.js application boots up, V8 must read, parse, and compile JavaScript source files into bytecode before execution can begin. For large applications with deep dependency trees (e.g., loading AWS SDK, TypeScript compilers, or large ORMs), parsing and bytecode compilation can consume 30% to 50% of the total cold-start time.</p>
+
+      <h4>1. How V8 Code Caching Operates</h4>
+      <p>When JavaScript code is loaded repeatedly across process restarts, V8 can serialize the generated compilation output into an on-disk **Code Cache Blob**. On subsequent boots, Node.js skips the expensive text parsing and AST generation phases, directly loading the cached V8 bytecode straight into memory.</p>
+
+      <h4>2. Enabling Programmatic Compile Cache in Node.js</h4>
+      <p>Instead of passing CLI flags, you can programmatically enable automatic compile caching at the very top of your entry point file:</p>
+
       <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>const http = require('http');
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>// Must be placed at the VERY FIRST line of the application entry point
+import { enableCompileCache } from 'node:module';
 
-const agent = new http.Agent({
-  keepAlive: true,
-  keepAliveMsecs: 30000,       // TCP keep-alive প্যাকেট পাঠানোর ব্যবধান
-  maxSockets: 50,              // প্রতি হোস্টে সর্বোচ্চ সমান্তরাল কানেকশন
-  maxFreeSockets: 10,          // idle অবস্থায় কতগুলো কানেকশন রাখা হবে
-  timeout: 60000
-});
+// Enable V8 bytecode caching on disk automatically
+enableCompileCache();
 
-// axios-এ
-const axios = require('axios');
-const client = axios.create({ httpAgent: agent, httpsAgent: httpsAgent });
-
-// fetch (undici)-তে — Node.js 18+ এ নেটিভ
-const { Agent, setGlobalDispatcher } = require('undici');
-setGlobalDispatcher(new Agent({ keepAliveTimeout: 30000, connections: 50 }));</code></pre>
+// Subsequent heavy library imports will now benefit from disk compile caching
+import express from 'express';
+import { PrismaClient } from '@prisma/client';
+import { AWS } from 'aws-sdk';</code></pre>
       </div>
-      <h4>কেন এটি latency কমায়</h4>
-      <p>প্রতিটি নতুন কানেকশনে TCP handshake (১ RTT) এবং HTTPS হলে TLS handshake (১-২ RTT আরও) লাগে। একটি বাইরের API-তে সেকেন্ডে ১০০ কল হলে, keep-alive ছাড়া প্রতিটি কল অতিরিক্ত ৫০-১৫০ms নিচ্ছে শুধু হ্যান্ডশেকের জন্য।</p>
-      <p><code>keepAlive: true</code> দিলে একটি কানেকশন পুনর্ব্যবহার হয় — হ্যান্ডশেক একবারই হয়, পরের সব রিকোয়েস্ট সরাসরি ডেটা পাঠায়। বাস্তবে এটি বাইরের API কলে <strong>৩০-৫০% latency সাশ্রয়</strong> করতে পারে।</p>
-      <h4>একটি লুকানো সমস্যা: port exhaustion</h4>
-      <p>Keep-alive ছাড়া প্রতিটি বন্ধ হওয়া কানেকশন কিছুক্ষণ (~৬০ সেকেন্ড) <code>TIME_WAIT</code> অবস্থায় থাকে। উচ্চ থ্রুপুটে এটি দ্রুত সব উপলব্ধ ephemeral পোর্ট (~২৮,০০০) নিঃশেষ করে দিতে পারে — তখন নতুন কোনো আউটগোয়িং কানেকশন খোলা যায় না। Keep-alive এই সমস্যা প্রায় সম্পূর্ণ দূর করে।</p>
-      <h4>ব্যবহারিক নিয়ম</h4>
+
+      <h4>3. Environmental Impact & Benchmarks</h4>
       <ul>
-        <li><strong>বাইরের সব API কলে একটি শেয়ার্ড, keep-alive সক্ষম agent ব্যবহার করুন</strong> — প্রতিটি কলে নতুন agent বানাবেন না, তাহলে পুলিংয়ের কোনো লাভই হবে না।</li>
-        <li><strong><code>maxSockets</code> ঠিক করুন</strong> — খুব কম হলে সমান্তরাল কল ব্লক হবে; খুব বেশি হলে দূরের সার্ভারে অপ্রয়োজনীয় চাপ পড়বে।</li>
-        <li><strong>Undici (Node 18+ নেটিভ fetch)</strong> ডিফল্টে keep-alive চালু রাখে — নতুন কোডে সরাসরি এটি ব্যবহার করাই সহজ।</li>
-      </ul>
-      <h4>Follow-up প্রশ্ন</h4>
-      <ul>
-        <li>TIME_WAIT অবস্থা কীভাবে port exhaustion তৈরি করে?</li>
-        <li>একাধিক ডোমেইনে কল করলে agent কীভাবে সামলাবেন?</li>
+        <li><strong>CLI & Microservice Boot Times:</strong> Reduces process cold-start latency by up to <strong>40% to 60%</strong> on secondary restarts.</li>
+        <li><strong>Serverless & FaaS Optimizations:</strong> Crucial for AWS Lambda or Cloud Functions, where reducing cold-start latency directly improves user experience and lowers invocation costs.</li>
+        <li><strong>Cache Invalidation:</strong> Node.js automatically invalidates and regenerates the compile cache whenever the file contents, Node.js runtime version, or V8 flags change.</li>
       </ul>
     `
   },
   {
     id: "node-34",
-    category: "Node.js",
-    difficulty: "Advanced",
-    tags: ["Testing","node:test","Mocking"],
-    question: "Node.js Native Test Runner (node:test) এবং Mocking API (node:test/reporters) কীভাবে কাজ করে?",
+    category: "Global Error Handling & Process Lifecycle",
+    difficulty: "Intermediate",
+    tags: ["uncaughtException", "unhandledRejection", "Process Crashes", "Error Recovery"],
+    question: "What is the difference between uncaughtException and unhandledRejection, and why should you restart the process after an uncaughtException?",
     answer: `
-      <p>Node 18+ এ কোনো থার্ডপার্টি Jest/Mocha ছাড়াই নেটিভ <code>node:test</code> ব্যবহার করে সুপারফাস্ট ইউনিট টেস্ট চালানো যায়। এতে বিল্ট-ইন Mocking সাপোর্ট আছে।</p>
-      <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>import test from 'node:test';
-import assert from 'node:assert';
-import fs from 'node:fs';
+      <p>Global error handling in Node.js prevents unexpected runtime exceptions from silently swallowing errors or leaving the process in an inconsistent, corrupted state.</p>
 
-test('Mocking fs.readFile', (t) => {
-  const mock = t.mock.method(fs, 'readFile', (path, cb) => cb(null, 'mocked data'));
-  fs.readFile('test.txt', (err, data) => {
-    assert.strictEqual(data, 'mocked data');
-    mock.mock.restore();
-  });
+      <h4>1. Key Differences</h4>
+      <ul>
+        <li><strong><code>unhandledRejection</code>:</strong> Emitted when an asynchronous Promise is rejected (e.g., database connection timeout, failed network fetch) and no <code>.catch()</code> block or <code>try/catch</code> block is attached to handle the rejection.</li>
+        <li><strong><code>uncaughtException</code>:</strong> Emitted when an unhandled synchronous exception bubbles all the way up the V8 Call Stack without hitting a <code>try/catch</code> block.</li>
+      </ul>
+
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>// 1. Unhandled Promise Rejection Example
+Promise.reject(new Error('Database Connection Failed!')); 
+// Triggers process.on('unhandledRejection')
+
+// 2. Uncaught Synchronous Exception Example
+setTimeout(() => {
+  throw new Error('Fatal null pointer in background job!'); 
+  // Triggers process.on('uncaughtException')
+}, 100);</code></pre>
+      </div>
+
+      <h4>2. Why You MUST Exit the Process After an uncaughtException</h4>
+      <p>A common beginner mistake is attempting to resume process execution inside an <code>uncaughtException</code> handler without terminating the process. <strong>This is extremely dangerous in production because:</strong></p>
+
+      <ul>
+        <li>By definition, an uncaught exception means the application entered an <strong>unpredicted state</strong>.</li>
+        <li>Memory structures, database connections, global singletons, or file descriptors may be left partially initialized or corrupted.</li>
+        <li>Resuming process execution can lead to subtle bugs, memory leaks, security bypasses, or data corruption on subsequent HTTP requests.</li>
+      </ul>
+
+      <h4>3. Production Graceful Fail-Fast Pattern</h4>
+
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>process.on('uncaughtException', (err, origin) => {
+  console.error(`[CRITICAL ERROR] Uncaught Exception: ${err.message}`);
+  console.error(`Stack: ${err.stack}`);
+  console.error(`Origin: ${origin}`);
+
+  // Perform emergency logging/telemetry flush
+  logger.fatal({ err, origin }, 'Process state corrupted. Forcing shutdown.');
+
+  // ALWAYS exit the process immediately so process managers (PM2/Kubernetes) can spawn a clean instance
+  process.exit(1); 
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Promise Rejection at:', promise, 'reason:', reason);
+  // Log telemetry metric
 });</code></pre>
       </div>
     `
   },
   {
     id: "node-35",
-    category: "Node.js",
-    difficulty: "Intermediate",
-    tags: ["FileSystem","fs/promises","fs.watch"],
-    question: "fs.watch vs fs.watchFile এবং fs/promises ব্যবহারের আধুনিক সুবিধা কী?",
+    category: "Microservice Resilience & Fault Tolerance",
+    difficulty: "Advanced",
+    tags: ["Circuit Breaker", "Resilience", "Cascading Failures", "Microservices"],
+    question: "How do you implement the Circuit Breaker Pattern in Node.js microservices to prevent cascading system outages?",
     answer: `
-      <p><code>fs.watch</code> ওএস নেটিভ ইভেন্ট লিসেনার ব্যবহার করায় <code>fs.watchFile</code> পোলিং মেথডের চেয়ে দ্রুত ও মেমোরি ফ্রেন্ডলি। <code>fs/promises</code> কলব্যাকের বদলে async/await সাপোর্ট দেয়, যা কোড ক্লিন রাখে।</p>
-      <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>const fs = require('fs/promises');
-const { watch } = require('fs');
+      <p>In distributed microservice architectures, if Service A makes synchronous HTTP calls to Service B, and Service B experiences database slow-downs, Service A will exhaust its HTTP connection sockets and memory waiting for responses. This causes <strong>Cascading Failures</strong> across the entire system. The <strong>Circuit Breaker Pattern</strong> isolates failing services instantly.</p>
 
-watch('./file.txt', (eventType, filename) => {
-  console.log(\`File \${filename} changed: \${eventType}\`);
+      <h4>1. The 3 States of a Circuit Breaker</h4>
+      <ul>
+        <li><strong>CLOSED (Normal):</strong> Requests flow freely to the downstream service. The circuit breaker monitors error rates.</li>
+        <li><strong>OPEN (Failing / Tripped):</strong> If the error rate crosses a threshold (e.g., 50% failures), the breaker trips to OPEN. All subsequent requests fail fast immediately <em>without making network calls</em>, preventing resource starvation.</li>
+        <li><strong>HALF-OPEN (Testing Recovery):</strong> After a cooldown timeout, the breaker allows a limited trial batch of requests through. If successful, it resets to CLOSED; if failures persist, it reverts to OPEN.</li>
+      </ul>
+
+      <h4>2. Implementation Example using Opossum Library</h4>
+
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>const CircuitBreaker = require('opossum');
+const axios = require('axios');
+
+// 1. Unreliable external API call function
+async function callUnreliablePaymentGateway(paymentData) {
+  const response = await axios.post('https://api.payments.com/charge', paymentData, { timeout: 2000 });
+  return response.data;
+}
+
+// 2. Circuit Breaker Options
+const options = {
+  timeout: 3000,             // Trip if request takes longer than 3s
+  errorThresholdPercentage: 50, // Trip if 50% of requests fail within volume threshold
+  resetTimeout: 10000        // Wait 10s in OPEN state before testing HALF-OPEN state
+};
+
+// 3. Wrap function inside Circuit Breaker
+const breaker = new CircuitBreaker(callUnreliablePaymentGateway, options);
+
+// Fallback behavior when circuit is OPEN
+breaker.fallback(() => {
+  return { status: 'DEGRADED', message: 'Payment gateway temporarily unavailable. Transaction queued.' };
 });
 
-async function readFile() {
-  const data = await fs.readFile('./file.txt', 'utf-8');
-  console.log(data);
-}</code></pre>
+// Event Monitoring
+breaker.on('open', () => console.warn('[CIRCUIT BREAKER] State changed to OPEN! Failing fast.'));
+breaker.on('halfOpen', () => console.log('[CIRCUIT BREAKER] State changed to HALF-OPEN. Testing gateway...'));
+breaker.on('close', () => console.log('[CIRCUIT BREAKER] State changed to CLOSED. Service healthy.'));
+
+// Express Route
+app.post('/checkout', async (req, res) => {
+  try {
+    const result = await breaker.fire(req.body);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});</code></pre>
       </div>
     `
   },
   {
     id: "node-36",
-    category: "Node.js",
+    category: "C++ Addons & Native Binding",
     difficulty: "Advanced",
-    tags: ["Diagnostics","perf_hooks","PerformanceObserver"],
-    question: "node:perf_hooks এবং PerformanceObserver দিয়ে এন্ডপয়েন্টের ল্যাটেন্সি বেন্চমার্ক কীভাবে মেজার করবেন?",
+    tags: ["Node-API", "N-API", "C++ Addons", "ABI Stability"],
+    question: "What is Node-API (N-API), how does Application Binary Interface (ABI) stability work, and when should you write a native C++ addon?",
     answer: `
-      <p><code>PerformanceObserver</code> দিয়ে মার্ক এবং মেজারগুলো কনসোলে বা লগিং সিস্টেমে রেকর্ড করা যায়।</p>
+      <p>Node.js allows developers to write native C/C++ modules and load them directly into JavaScript using standard <code>require()</code> or <code>import</code> syntax. <strong>Node-API (formerly N-API)</strong> is the official C API for building native addons.</p>
+
+      <h4>1. The Problem with Legacy Addons vs Node-API ABI Stability</h4>
+      <p>In legacy C++ addons (using raw V8 bindings or NAN), native modules were tightly bound to specific V8 internal headers. Whenever Node.js updated its V8 engine version, native addons broke, requiring full C++ recompilation (<code>node-gyp rebuild</code>).</p>
+
+      <p><strong>Node-API solves this via Application Binary Interface (ABI) Stability:</strong></p>
+      <ul>
+        <li>Node-API provides a stable C header interface that isolates native C++ code from internal V8 engine changes.</li>
+        <li>A native C++ module compiled for Node.js 16 using Node-API will run on Node.js 20 or Node.js 22 <strong>without re-compilation</strong>.</li>
+      </ul>
+
+      <h4>2. When to Write Native C++ Addons</h4>
+      <ul>
+        <li><strong>Performance Critical Algorithms:</strong> Complex matrix operations, video encoding/decoding, low-level signal processing.</li>
+        <li><strong>Interfacing with Existing C/C++ Libraries:</strong> Binding existing C/C++ enterprise libraries (e.g., custom hardware drivers, legacy encryption algorithms) to Node.js.</li>
+        <li><strong>Direct Hardware / Memory Access:</strong> Bypassing V8 heap garbage collection entirely to manage raw system memory directly.</li>
+      </ul>
+
+      <h4>3. C++ Addon Example using node-addon-api (C++ Wrapper)</h4>
+
       <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>const { performance, PerformanceObserver } = require('perf_hooks');
+        <div class="code-header"><span>cpp</span></div>
+        <pre><code>// addon.cc (Native C++ Code)
+#include <napi.h>
 
-const obs = new PerformanceObserver((list) => {
-  list.getEntries().forEach((entry) => console.log(entry.name, entry.duration));
-});
-obs.observe({ entryTypes: ['measure'] });
+// Fast C++ computation function
+Napi::Number Add(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
 
-performance.mark('A');
-// API Call or DB Query
-performance.mark('B');
-performance.measure('API Latency', 'A', 'B');</code></pre>
+  double arg0 = info[0].As<Napi::Number>().DoubleValue();
+  double arg1 = info[1].As<Napi::Number>().DoubleValue();
+
+  return Napi::Number::New(env, arg0 + arg1);
+}
+
+Napi::Object Init(Napi::Env env, Napi::Object exports) {
+  exports.Set(Napi::String::New(env, "addFast"), Napi::Function::New(env, Add));
+  return exports;
+}
+
+NODE_API_MODULE(addon, Init)</code></pre>
+      </div>
+
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>// index.js (Consuming native module in JavaScript)
+const nativeAddon = require('./build/Release/addon.node');
+
+console.log(nativeAddon.addFast(15.5, 24.5)); // Output: 40</code></pre>
       </div>
     `
   },
   {
     id: "node-37",
-    category: "Node.js",
+    category: "Database Engineering & Optimization",
     difficulty: "Intermediate",
-    tags: ["Crypto","crypto.randomBytes","UUID"],
-    question: "crypto.randomBytes() vs Math.random() — কেন সিকিউরিটিতে Cryptographically Secure Pseudo-Random (CSPRNG) জরুরি?",
+    tags: ["Connection Pooling", "PostgreSQL", "Transaction Leaks", "Database Resilience"],
+    question: "How do you manage Database Connection Pooling in Node.js, and how do you prevent connection starvation and query leaks?",
     answer: `
-      <p><strong>Math.random() কখনও নিরাপত্তা-সংক্রান্ত কাজে ব্যবহার করবেন না</strong> — এটি একটি সাধারণ (non-cryptographic) pseudo-random number generator, যার আউটপুট <em>অনুমানযোগ্য</em>।</p>
-      <h4>কেন Math.random() অনিরাপদ</h4>
-      <p>V8-এর <code>Math.random()</code> একটি নির্ধারক (deterministic) অ্যালগরিদম (xorshift128+) ব্যবহার করে। এর সীড ও অভ্যন্তরীণ অবস্থা পর্যাপ্ত আউটপুট দেখে <strong>পুনর্গঠন করা সম্ভব</strong> — গবেষকরা মাত্র কয়েকটি আউটপুট দেখেই পরবর্তী মান নির্ভুলভাবে অনুমান করে দেখিয়েছেন।</p>
-      <p>এর মানে যদি এটি দিয়ে পাসওয়ার্ড রিসেট টোকেন, সেশন আইডি, বা API কী তৈরি করা হয়, একজন আক্রমণকারী কয়েকটি টোকেন পর্যবেক্ষণ করে <strong>পরবর্তী টোকেন অনুমান করতে পারবেন</strong> — সম্পূর্ণ authentication ভেঙে যাবে।</p>
+      <p>Opening a new physical TCP database connection for every incoming HTTP request carries high latency (TCP handshake, TLS negotiation, authentication) and exhausts database memory. A <strong>Database Connection Pool</strong> maintains a warm pool of reusable physical database connections.</p>
+
+      <h4>1. Core Connection Pool Configurations</h4>
+      <ul>
+        <li><strong><code>max</code>:</strong> Maximum physical connections the pool can open (e.g., 20 connections per Node.js worker instance).</li>
+        <li><strong><code>idleTimeoutMillis</code>:</strong> Time an unused connection remains open before being closed to free database resources.</li>
+        <li><strong><code>connectionTimeoutMillis</code>:</strong> Maximum time an HTTP request will wait for an available pool connection before throwing a timeout error.</li>
+      </ul>
+
+      <h4>2. The Danger of Connection Leaks in Transactions</h4>
+      <p>A <strong>Connection Leak</strong> occurs when a developer checks out a database connection from the pool to run a transaction, but fails to release the connection back to the pool inside a <code>finally</code> block if an error occurs.</p>
+
       <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>const crypto = require('crypto');
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>const { Pool } = require('pg');
+const pool = new Pool({ max: 20, connectionTimeoutMillis: 2000 });
 
-// ❌ কখনও নয় — অনুমানযোগ্য
-const token = Math.random().toString(36).substring(2);
+// SAFE TRANSACTION PATTERN WITH AUTOMATIC RELEASE
+async function executeTransaction(accountFrom, accountTo, amount) {
+  // 1. Checkout single dedicated client connection from pool
+  const client = await pool.connect(); 
 
-// ✅ CSPRNG — অপারেটিং সিস্টেমের এনট্রপি সোর্স ব্যবহার করে
-const token = crypto.randomBytes(32).toString('hex');
+  try {
+    await client.query('BEGIN');
 
-// আধুনিক, সংক্ষিপ্ত সিনট্যাক্স (Node.js 14.17+)
-const uuid = crypto.randomUUID();
+    await client.query('UPDATE accounts SET balance = balance - $1 WHERE id = $2', [amount, accountFrom]);
+    await client.query('UPDATE accounts SET balance = balance + $1 WHERE id = $2', [amount, accountTo]);
 
-// একটি রেঞ্জের মধ্যে নিরাপদ র‍্যান্ডম সংখ্যা (OTP-এর জন্য)
-const otp = crypto.randomInt(100000, 999999);</code></pre>
+    await client.query('COMMIT');
+    return { success: true };
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    // 2. CRITICAL: Always release connection back to pool, even if query throws an error!
+    client.release(); 
+  }
+}</code></pre>
       </div>
-      <h4>CSPRNG কীভাবে ভিন্ন</h4>
-      <p><strong>Cryptographically Secure PRNG</strong> অপারেটিং সিস্টেমের <code>/dev/urandom</code> (Linux/macOS) বা <code>CryptGenRandom</code> (Windows)-এর এনট্রপি ব্যবহার করে — যা হার্ডওয়্যার শব্দ, ইন্টারাপ্ট টাইমিং ইত্যাদি প্রকৃত এলোমেলো উৎস থেকে সংগৃহীত। এর আউটপুট থেকে অভ্যন্তরীণ অবস্থা পুনর্গঠন করা গণনাগতভাবে অসম্ভব।</p>
-      <table>
-        <tr><th>দিক</th><th><code>Math.random()</code></th><th><code>crypto.randomBytes()</code></th></tr>
-        <tr><td>উৎস</td><td>নির্ধারক অ্যালগরিদম</td><td>OS এনট্রপি</td></tr>
-        <tr><td>অনুমানযোগ্যতা</td><td>সম্ভব</td><td>গণনাগতভাবে অসম্ভব</td></tr>
-        <tr><td>গতি</td><td>দ্রুত</td><td>সামান্য ধীর</td></tr>
-        <tr><td>উপযুক্ত</td><td>গেম, UI অ্যানিমেশন, স্যাম্পলিং</td><td>টোকেন, কী, সল্ট, সেশন আইডি</td></tr>
-      </table>
-      <h4>যেখানে অবশ্যই CSPRNG লাগবে</h4>
-      <ul>
-        <li>পাসওয়ার্ড রিসেট টোকেন, ইমেইল ভেরিফিকেশন লিংক</li>
-        <li>সেশন আইডি, API কী, JWT সিক্রেট</li>
-        <li>পাসওয়ার্ড হ্যাশিংয়ের সল্ট</li>
-        <li>এনক্রিপশন কী ও initialization vector (IV)</li>
-        <li>CSRF টোকেন</li>
-      </ul>
-      <p><strong>যেখানে <code>Math.random()</code> গ্রহণযোগ্য:</strong> শাফল অ্যানিমেশন, র‍্যান্ডম রঙ, A/B টেস্ট বাকেটিং (নিরাপত্তা-সংবেদনশীল নয়) — যেখানে ফলাফল অনুমানযোগ্য হলে কোনো ক্ষতি নেই।</p>
-      <h4>Follow-up প্রশ্ন</h4>
-      <ul>
-        <li><code>crypto.randomInt()</code> কীভাবে modulo bias এড়ায়?</li>
-        <li>UUID v4 কি নিরাপত্তা টোকেন হিসেবে যথেষ্ট?</li>
-      </ul>
+
+      <h4>3. Sizing Connection Pools for Microservices</h4>
+      <p>A common mistake is setting pool sizes too high (e.g., <code>max: 100</code> across 10 Kubernetes pod replicas = 1,000 active DB connections). PostgreSQL uses a separate OS process per connection, causing CPU context-switching overhead on the DB host.</p>
+
+      <p><strong>Formula:</strong> Keep pool size per Node instance small (e.g., 10-20), and use a lightweight connection proxy (like <code>PgBouncer</code>) in front of the database cluster to multiplex thousands of microservice clients down to a few hundred physical connections.</p>
     `
   },
   {
     id: "node-38",
-    category: "Node.js",
+    category: "Streams & Data Transformation",
     difficulty: "Advanced",
-    tags: ["Native","N-API","C++ Addons"],
-    question: "Node-API (N-API) এবং C++ Addons দিয়ে অতি উচ্চ পারফরম্যান্সের নেটিভ মডিউল কীভাবে তৈরি করা হয়?",
+    tags: ["Transform Stream", "_transform", "Object Mode Streams", "ETL Pipelines"],
+    question: "How do you implement a custom Transform Stream using _transform and _flush methods for ETL data processing pipelines?",
     answer: `
-      <p>অত্যন্ত ভারী গাণিতিক বা ইমেজ প্রসেসিংয়ের কাজ C/C++ এ লিখে <code>N-API</code> ইন্টারফেসের মাধ্যমে Node.js-এ ইন্টিগ্রেট করা হয়। এতে Node.js ভার্সন আপগ্রেডে কোড ব্রেক করে না (ABI Stability)। <code>node-addon-api</code> প্যাকেজ ব্যবহার করে সহজে C++ অ্যাডঅন লেখা যায়।</p>
+      <p>A <strong>Transform Stream</strong> is a Duplex stream (both Readable and Writable) where the output is dynamically computed from the input. It is ideal for building **Extract, Transform, Load (ETL)** data processing pipelines (e.g., parsing raw CSV lines, transforming records, and streaming transformed JSON to a database or file).</p>
+
+      <h4>1. Core Lifecycle Methods</h4>
+      <ul>
+        <li><strong><code>_transform(chunk, encoding, callback)</code>:</strong> Executed for every incoming chunk of data. Once processing is complete, pass the transformed data to <code>this.push(data)</code> and invoke <code>callback()</code> to signal readiness for the next chunk.</li>
+        <li><strong><code>_flush(callback)</code>:</strong> Executed once at the very end when the upstream Readable stream finishes emitting data. Used to emit final buffered calculations or closing structures.</li>
+      </ul>
+
+      <h4>2. Custom CSV-to-JSON Object Mode Transform Stream</h4>
+
       <div class="code-box">
-        <div class="code-header"><span>cpp</span><button class="copy-btn">Copy</button></div>
-        <pre><code>// addon.cc (C++ code)
-Napi::String Method(const Napi::CallbackInfo& info) {
-  return Napi::String::New(info.Env(), "Hello from C++");
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>const { Transform } = require('stream');
+
+class CsvToUserTransform extends Transform {
+  constructor(options) {
+    // Enable objectMode so stream handles JS objects instead of raw Buffer chunks
+    super({ ...options, objectMode: true });
+    this.processedCount = 0;
+  }
+
+  _transform(csvLine, encoding, callback) {
+    try {
+      const [id, name, email] = csvLine.split(',');
+
+      // Ignore header row
+      if (id !== 'id') {
+        const userObject = {
+          userId: parseInt(id, 10),
+          fullName: name.toUpperCase(),
+          emailAddress: email.trim(),
+          processedAt: new Date().toISOString()
+        };
+
+        this.processedCount++;
+        // Push transformed object downstream
+        this.push(userObject); 
+      }
+
+      callback(); // Signal stream readiness for next chunk
+    } catch (err) {
+      callback(err); // Pass error to break pipeline safely
+    }
+  }
+
+  _flush(callback) {
+    console.log(`[ETL PIPELINE] Completed processing total ${this.processedCount} records.`);
+    callback();
+  }
 }
-Napi::Object Init(Napi::Env env, Napi::Object exports) {
-  exports.Set(Napi::String::New(env, "hello"), Napi::Function::New(env, Method));
-  return exports;
-}</code></pre>
+
+// Usage inside pipeline
+const transformer = new CsvToUserTransform();
+transformer.on('data', (user) => console.log('Transformed Record:', user));
+
+transformer.write('id,name,email');
+transformer.write('101,john doe,john@example.com');
+transformer.end();</code></pre>
       </div>
     `
   },
   {
     id: "node-39",
-    category: "Node.js",
-    difficulty: "Intermediate",
-    tags: ["Globals","process.nextTick","setImmediate"],
-    question: "process.nextTick vs setImmediate vs setTimeout(fn, 0) এর এক্সিকিউশন সিকুয়েন্স প্র্যাকটিকাল প্রমাণ কী?",
+    category: "Multithreading & Zero-Copy Memory",
+    difficulty: "Advanced",
+    tags: ["SharedArrayBuffer", "Atomics", "Worker Threads", "Zero-Copy Memory"],
+    question: "How do SharedArrayBuffer and Atomics enable zero-copy concurrency across Worker Threads in Node.js?",
     answer: `
-      <p>Microtask এবং Macrotask এর উপর ভিত্তি করে এদের এক্সিকিউশন সিকুয়েন্স নির্ধারিত হয়।</p>
-      <ol>
-        <li><code>process.nextTick</code> (Microtask Phase এর শুরুতেই)</li>
-        <li><code>Promise.then</code> (Microtask Phase)</li>
-        <li><code>setTimeout 0</code> (Timers Phase)</li>
-        <li><code>setImmediate</code> (Check Phase)</li>
-      </ol>
-      <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>setImmediate(() => console.log('setImmediate'));
-setTimeout(() => console.log('setTimeout'), 0);
-Promise.resolve().then(() => console.log('Promise'));
-process.nextTick(() => console.log('nextTick'));
+      <p>By default, when data is transmitted between Worker Threads via <code>parentPort.postMessage(data)</code>, Node.js uses the V8 Structured Clone algorithm. This **copies** the underlying memory payload, which incurs CPU time and memory overhead when sharing large datasets (e.g., 500MB image or vector arrays).</p>
 
-// Output:
-// nextTick -> Promise -> setTimeout -> setImmediate</code></pre>
+      <h4>1. Zero-Copy Operations via SharedArrayBuffer</h4>
+      <p>A <strong><code>SharedArrayBuffer</code></strong> represents a shared chunk of raw binary memory allocated in C++ space outside the V8 Garbage Collection heap. Both the Main Thread and Worker Threads point directly to the **exact same physical memory address space**. Mutating an index in Worker Thread 1 updates the value instantly for Worker Thread 2 without memory copying.</p>
+
+      <h4>2. Race Conditions & The Atomics API</h4>
+      <p>Because multiple threads are reading and writing to the same memory space concurrently, multi-threaded **race conditions** can corrupt data. The native <strong><code>Atomics</code></strong> object provides thread-safe atomic operations (uninterruptible read-write operations) and thread synchronization mechanisms.</p>
+
+      <h4>3. High-Performance Shared Memory Example</h4>
+
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>// MAIN THREAD
+const { Worker } = require('worker_threads');
+
+// Allocate 1024 bytes of shared memory
+const sharedBuffer = new SharedArrayBuffer(1024);
+// Wrap in a TypedArray view (e.g., 32-bit integers)
+const sharedArray = new Int32Array(sharedBuffer);
+
+// Initialize index 0 to value 100
+sharedArray[0] = 100;
+
+const worker = new Worker('./worker.js', { workerData: { sharedBuffer } });
+
+// Thread synchronization: wait for worker to notify us at index 0
+console.log('Main thread waiting for worker update...');
+Atomics.wait(sharedArray, 0, 100); // Thread pauses efficiently until Atomics.notify occurs
+console.log('Main thread notified! Updated Value at Index 0:', sharedArray[0]);</code></pre>
+      </div>
+
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>// WORKER THREAD (worker.js)
+const { workerData } = require('worker_threads');
+const sharedArray = new Int32Array(workerData.sharedBuffer);
+
+setTimeout(() => {
+  // Atomically add 50 to index 0 safely across threads
+  Atomics.add(sharedArray, 0, 50); // Value becomes 150
+  
+  // Notify waiting main thread
+  Atomics.notify(sharedArray, 0, 1);
+}, 1000);</code></pre>
       </div>
     `
   },
   {
     id: "node-40",
-    category: "Node.js",
+    category: "System Design & Distributed Rate Limiting",
     difficulty: "Advanced",
-    tags: ["Security","Policy","Permission Model"],
-    question: "Node.js Experimental Permission Model (--experimental-permission) দিয়ে ফাইল সিস্টেম এক্সেস কীভাবে লক ডাউন করবেন?",
+    tags: ["Rate Limiting", "Sliding Window", "Redis Lua Scripts", "API Security"],
+    question: "How do you implement a distributed Sliding Window Rate Limiter using Node.js and Redis Atomic Lua Scripts?",
     answer: `
-      <p>Node.js 20+ এ <strong>Permission Model</strong> (এখনও experimental) একটি নতুন নিরাপত্তা স্তর যোগ করে — অ্যাপ্লিকেশন কী কী রিসোর্সে অ্যাক্সেস পাবে তা <em>startup-এই</em> সীমাবদ্ধ করা যায়।</p>
-      <div class="code-box">
-        <div class="code-header"><span>bash</span><button class="copy-btn">Copy</button></div>
-        <pre><code># সম্পূর্ণ ফাইল সিস্টেম অ্যাক্সেস বন্ধ, শুধু নির্দিষ্ট পাথে অনুমতি
-node --experimental-permission \\
-     --allow-fs-read=/app/data \\
-     --allow-fs-write=/app/logs \\
-     server.js
+      <p>A **Rate Limiter** protects Node.js microservices from denial-of-service (DoS) attacks, brute-force login attempts, and resource exhaustion. Simple in-memory rate limiters (like <code>express-rate-limit</code> in default memory mode) fail in clustered environments because worker processes do not share rate-limit counters.</p>
 
-# চাইল্ড প্রসেস ও ওয়ার্কার থ্রেড নিষিদ্ধ
-node --experimental-permission --allow-child-process=false server.js
+      <h4>1. Why Fixed Window Counter Algorithms Fail</h4>
+      <p>In a **Fixed Window** algorithm (e.g., allow 100 requests per 1-minute window starting at 12:00), an attacker can issue 100 requests at 12:00:59 and another 100 requests at 12:01:01. This allows **200 requests within a 2-second window**, bursting server capacity.</p>
 
-# নেটওয়ার্ক অ্যাক্সেস নিয়ন্ত্রণ (Node 22+)
-node --experimental-permission --allow-net server.js</code></pre>
-      </div>
-      <h4>যে সমস্যাটি সমাধান করে</h4>
-      <p>ঐতিহ্যগতভাবে একটি Node.js প্রসেসের <strong>সম্পূর্ণ ও নিঃশর্ত সিস্টেম অ্যাক্সেস</strong> থাকে — যেকোনো ফাইল পড়তে/লিখতে পারে, যেকোনো নেটওয়ার্ক কল করতে পারে, চাইল্ড প্রসেস চালাতে পারে। একটি dependency-তে (আপনার নয়, তৃতীয়-পক্ষের নির্ভরতায়) দুর্বলতা থাকলে — সেটি আপনার সার্ভারের প্রতিটি ফাইল পড়তে বা মুছতে পারে, যা <em>supply chain attack</em>-এর মূল ঝুঁকি।</p>
-      <p>Permission Model অ্যাপ্লিকেশনের <strong>blast radius সীমিত করে</strong> — একটি আপস হওয়া dependency শুধু স্পষ্টভাবে অনুমোদিত রিসোর্সেই পৌঁছাতে পারবে।</p>
-      <h4>রানটাইমে পরীক্ষা করা</h4>
+      <h4>2. The Sliding Window Log Algorithm</h4>
+      <p>The **Sliding Window Log** algorithm maintains a Redis **Sorted Set (ZSET)** for each user IP, storing exact millisecond timestamps of incoming requests. It removes timestamps older than the window boundary and counts remaining entries dynamically.</p>
+
+      <h4>3. Redis Atomic Lua Script Implementation</h4>
+      <p>Executing multiple Redis commands sequentially from Node.js introduces network round-trips and race conditions. A **Redis Lua Script** executes atomically on the Redis server in a single step.</p>
+
       <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>if (process.permission) {
-  console.log(process.permission.has('fs.read', '/app/data'));   // true
-  console.log(process.permission.has('fs.write', '/etc'));       // false
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>const Redis = require('ioredis');
+const redis = new Redis();
+
+// Redis Lua Script for Atomic Sliding Window Rate Limiting
+const slidingWindowLuaScript = `
+  local key = KEYS[1]
+  local now = tonumber(ARGV[1])
+  local window = tonumber(ARGV[2])
+  local limit = tonumber(ARGV[3])
+  local clearBefore = now - window
+
+  -- 1. Remove timestamps older than current sliding window
+  redis.call('ZREMRANGEBYSCORE', key, 0, clearBefore)
+
+  -- 2. Count current active requests in window
+  local currentRequests = redis.call('ZCARD', key)
+
+  if currentRequests < limit then
+    -- 3. Add current request timestamp
+    redis.call('ZADD', key, now, now)
+    -- Set TTL on key to auto-clean unused IP records
+    redis.call('PEXPIRE', key, window)
+    return {1, limit - currentRequests - 1} -- Allowed (1), Remaining quota
+  else
+    return {0, 0} -- Blocked (0)
+  end
+`;
+
+// Define custom Redis command
+redis.defineCommand('rateLimitSlidingWindow', {
+  numberOfKeys: 1,
+  lua: slidingWindowLuaScript
+});
+
+// Express Middleware
+async function slidingWindowMiddleware(req, res, next) {
+  const userIp = req.ip;
+  const key = `ratelimit:${userIp}`;
+  const now = Date.now();
+  const windowMs = 60000; // 1 minute window
+  const maxLimit = 100;    // Max 100 requests per minute
+
+  const [allowed, remaining] = await redis.rateLimitSlidingWindow(key, now, windowMs, maxLimit);
+
+  res.setHeader('X-RateLimit-Limit', maxLimit);
+  res.setHeader('X-RateLimit-Remaining', remaining);
+
+  if (allowed === 1) {
+    next();
+  } else {
+    res.status(429).json({ error: 'Too Many Requests. Sliding window rate limit exceeded.' });
+  }
 }</code></pre>
       </div>
-      <h4>বর্তমান সীমাবদ্ধতা — কেন এটি এখনও experimental</h4>
-      <ul>
-        <li><strong>কোনো "sandbox" নয়:</strong> এটি একটি অতিরিক্ত সুরক্ষা স্তর, কিন্তু নিখুঁত isolation দেয় না — এখনও কিছু bypass সম্ভব বলে জানা গেছে।</li>
-        <li><strong>Native addon-এর উপর প্রয়োগ হয় না সম্পূর্ণভাবে</strong> — C++ addon যদি সরাসরি সিস্টেম কল করে, permission model তা আটকাতে পারে না।</li>
-        <li><strong>অনেক লাইব্রেরি এখনও এর সাথে সামঞ্জস্যপূর্ণ নয়</strong> — অনুমতির বাইরে ফাইল অ্যাক্সেসের চেষ্টা করলে সেই লাইব্রেরি ভেঙে পড়বে।</li>
-        <li><strong>Node.js নিজেই ভবিষ্যতে API বদলাতে পারে</strong> — এটি এখনও একটি স্থিতিশীল, ব্যাকওয়ার্ড-কম্প্যাটিবল ফিচার নয়।</li>
-      </ul>
-      <p><strong>ব্যবহারিক পরামর্শ:</strong> এখনই প্রোডাকশনে একমাত্র নিরাপত্তা ব্যবস্থা হিসেবে নির্ভর করবেন না। এটিকে defense-in-depth-এর একটি অতিরিক্ত স্তর হিসেবে দেখুন — মূল সুরক্ষা এখনও container isolation (Docker), least-privilege OS ইউজার, ও নিয়মিত dependency audit-এর উপরই থাকা উচিত।</p>
-      <h4>Follow-up প্রশ্ন</h4>
-      <ul>
-        <li>Container isolation ও Permission Model-এর মধ্যে পার্থক্য কী?</li>
-        <li>কোন ধরনের অ্যাপ্লিকেশনে এটি সবচেয়ে বেশি উপকারী?</li>
-      </ul>
     `
   },
   {
     id: "node-41",
-    category: "Node.js",
-    difficulty: "Intermediate",
-    tags: ["Process","child_process.fork","IPC"],
-    question: "child_process.fork() এবং Inter-Process Communication (process.send) কীভাবে ব্যাকগ্রাউন্ড ভারী কাজ প্রসেস করে?",
+    category: "Framework Architecture & Internals",
+    difficulty: "Advanced",
+    tags: ["Express vs Fastify", "Radix Tree", "JIT Compilation", "JSON Serialization"],
+    question: "How do Fastify internals differ from Express.js architectural patterns, and why is Fastify significantly faster?",
     answer: `
-      <p>মেইন ইভেন্ট লুপ ব্লক না করে আলাদা Node.js V8 প্রসেস স্পন করতে <code>fork()</code> ব্যবহৃত হয়। এটি মূলত একটি বিল্ট-ইন IPC চ্যানেল সহ <code>child_process.spawn</code>।</p>
-      <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>// parent.js
-const forked = require('child_process').fork('./child.js');
-forked.send({ data: 'Start processing' });
-forked.on('message', (msg) => console.log('Result from child:', msg));
+      <p>While <strong>Express.js</strong> has been the traditional industry standard for Node.js web frameworks, <strong>Fastify</strong> was engineered specifically to minimize CPU, memory, and Event Loop overhead under high concurrency. Their architectural differences span routing, middleware execution, and JSON serialization.</p>
 
-// child.js
-process.on('message', (msg) => {
-  const result = doHeavyTask();
-  process.send(result);
-});</code></pre>
+      <h4>1. Routing Algorithm: Linear Middleware Array vs Radix Tree Router</h4>
+      <ul>
+        <li><strong>Express.js:</strong> Uses a linear array of layer objects. Incoming requests traverse registered middleware and route paths sequentially ($O(N)$ time complexity). As route definitions scale to hundreds of endpoints, routing lookup latency accumulates.</li>
+        <li><strong>Fastify:</strong> Builds a <strong>Radix Tree (Prefix Tree)</strong> data structure (via <code>find-my-way</code>) at application startup ($O(L)$ time complexity, where $L$ is path length). Route resolution is independent of total registered route counts.</li>
+      </ul>
+
+      <h4>2. Serialization: Dynamic Reflection vs Ahead-of-Time Compiled JSON</h4>
+      <ul>
+        <li><strong>Express.js:</strong> Uses <code>JSON.stringify()</code> at runtime. V8 must dynamically reflect on object properties, iterate key-value types, and escape strings on every single HTTP response.</li>
+        <li><strong>Fastify:</strong> Enforces JSON Schema definitions (via <code>fast-json-stringify</code>) to compile optimized serialization functions Ahead-Of-Time (AOT). Knowing property names and types in advance allows V8 to generate machine code that writes formatted JSON byte strings directly without object reflection.</li>
+      </ul>
+
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>import Fastify from 'fastify';
+
+const fastify = Fastify({ logger: true });
+
+// Schema definition enables Fastify's AOT JSON Serialization engine
+const responseSchema = {
+  schema: {
+    response: {
+      200: {
+        type: 'object',
+        properties: {
+          id: { type: 'integer' },
+          username: { type: 'string' },
+          role: { type: 'string' }
+        }
+      }
+    }
+  }
+};
+
+fastify.get('/user/:id', responseSchema, async (request, reply) => {
+  // Fastify serializes this object using pre-compiled bytecode—bypassing JSON.stringify()
+  return { id: 101, username: 'dev_lead', role: 'admin' };
+});
+
+await fastify.listen({ port: 3000 });</code></pre>
       </div>
+
+      <h4>3. Architecture Comparison Summary</h4>
+      <table>
+        <thead>
+          <tr>
+            <th>Dimension</th>
+            <th>Express.js</th>
+            <th>Fastify</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Routing Algorithm</strong></td>
+            <td>Linear Layer Traversal ($O(N)$)</td>
+            <td>Radix Tree Prefix Search ($O(L)$)</td>
+          </tr>
+          <tr>
+            <td><strong>JSON Output</strong></td>
+            <td>Runtime Reflection via <code>JSON.stringify()</code></td>
+            <td>JSON Schema AOT Compiled Bytecode</td>
+          </tr>
+          <tr>
+            <td><strong>Asynchronous Model</strong></td>
+            <td>Callback / Middleware Chain (Needs <code>express-async-errors</code> in Express v4)</td>
+            <td>Native <code>async/await</code> Pipeline & Encapsulated Plugins</td>
+          </tr>
+        </tbody>
+      </table>
     `
   },
   {
     id: "node-42",
-    category: "Node.js",
+    category: "Observability & Distributed Tracing",
     difficulty: "Advanced",
-    tags: ["Security","HTTPS","TLS"],
-    question: "tls.createServer() এবং ALPN (Application-Layer Protocol Negotiation) কনফিগারেশন কী?",
+    tags: ["OpenTelemetry", "Distributed Tracing", "Trace Context", "Microservices"],
+    question: "How do you implement OpenTelemetry Distributed Tracing in Node.js microservices to track asynchronous request flow across network boundaries?",
     answer: `
-      <p>SSL/TLS হ্যান্ডশেক করার সময় ক্লায়েন্ট ও সার্ভারের মধ্যে প্রোটোকল (যেমন- HTTP/1.1 নাকি HTTP/2) নেগোশিয়েট করার প্রক্রিয়াকে ALPN বলে।</p>
+      <p>In distributed microservices, a single user request can traverse a cascade of HTTP APIs, message queues, and databases. <strong>Distributed Tracing</strong> assigns a globally unique <code>Trace ID</code> to a request at entry, propagating it across asynchronous and network boundaries using W3C Trace Context headers (<code>traceparent</code>).</p>
+
+      <h4>1. Core Concepts: Traces, Spans, and Context Propagation</h4>
+      <ul>
+        <li><strong>Trace:</strong> The complete end-to-end journey of a single transaction across microservices.</li>
+        <li><strong>Span:</strong> A single named, timed block of execution (e.g., executing an HTTP GET or database query).</li>
+        <li><strong>Context Propagation:</strong> Extracting incoming HTTP headers (<code>traceparent: 00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01</code>) and passing them to outgoing calls.</li>
+      </ul>
+
+      <h4>2. Zero-Code Auto-Instrumentation Entry Script (tracing.js)</h4>
+      <p>OpenTelemetry leverages <code>AsyncLocalStorage</code> under the hood to propagate trace contexts across asynchronous callback chains automatically.</p>
+
       <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>const tls = require('tls');
-const options = {
-  ALPNProtocols: ['h2', 'http/1.1'],
-  key: fs.readFileSync('key.pem'),
-  cert: fs.readFileSync('cert.pem')
-};
-const server = tls.createServer(options, (socket) => {
-  console.log('Negotiated Protocol:', socket.alpnProtocol);
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>// tracing.js - MUST BE LOADED BEFORE ANY OTHER LIBRARY IMPORTS!
+import { NodeSDK } from '@opentelemetry/sdk-node';
+import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-grpc';
+
+const sdk = new NodeSDK({
+  serviceName: 'order-processing-service',
+  traceExporter: new OTLPTraceExporter({
+    url: 'grpc://otel-collector.internal:4317' // Send traces to OpenTelemetry Collector
+  }),
+  // Auto-instruments http, express, pg, redis, and amqplib without code changes!
+  instrumentations: [getNodeAutoInstrumentations()]
+});
+
+sdk.start();
+
+// Handle graceful shutdown of exporter
+process.on('SIGTERM', () => {
+  sdk.shutdown()
+    .then(() => console.log('Tracing SDK terminated'))
+    .finally(() => process.exit(0));
 });</code></pre>
+      </div>
+
+      <h4>3. Execution Startup Syntax</h4>
+      <p>Use Node.js's <code>--import</code> or <code>--require</code> CLI flag to guarantee the tracing agent loads before any target application libraries execute:</p>
+
+      <div class="code-box">
+        <div class="code-header"><span>bash</span></div>
+        <pre><code># Guarantees monkey-patching and diagnostic channel listeners attach before Express loads
+node --import ./tracing.js server.js</code></pre>
       </div>
     `
   },
   {
     id: "node-43",
-    category: "Node.js",
-    difficulty: "Intermediate",
-    tags: ["Console","console.time","console.trace"],
-    question: "console.time(), console.timeEnd(), এবং console.trace()-এর কাজের সুবিধা কী?",
+    category: "Security & Input Sanitization",
+    difficulty: "Advanced",
+    tags: ["Prototype Pollution", "Object.prototype", "Security Hardening", "CVE Prevention"],
+    question: "What is Prototype Pollution in JavaScript/Node.js, how does it lead to Remote Code Execution (RCE), and how do you protect application state?",
     answer: `
-      <p>Node.js-এর কনসোল API শুধু <code>console.log</code>-এর বেশি কিছু দেয় — এই তিনটি মেথড দ্রুত ডিবাগিংয়ে সরাসরি কার্যকর, বিশেষ করে জটিল টুলিং সেটআপ ছাড়াই।</p>
-      <h4><code>console.time()</code> / <code>console.timeEnd()</code></h4>
-      <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>console.time('db-query');
-const results = await db.query('SELECT * FROM orders WHERE status = $1', ['pending']);
-console.timeEnd('db-query');
-// → db-query: 45.234ms
+      <p><strong>Prototype Pollution</strong> is a vulnerability specific to JavaScript's prototype-based inheritance model. It occurs when an attacker manipulates recursive object merging or path assignment functions to modify the base <code>Object.prototype</code> object, injecting properties that bubble up to all JavaScript objects runtime-wide.</p>
 
-// একাধিক টাইমার একসাথে চালানো যায় — লেবেল দিয়ে আলাদা
-console.time('total-request');
-console.time('auth-check');
-await verifyToken(token);
-console.timeEnd('auth-check');       // → auth-check: 12ms
-await processRequest();
-console.timeEnd('total-request');     // → total-request: 89ms
+      <h4>1. How Prototype Pollution Works</h4>
+      <p>If an API accepts dynamic JSON payloads and blindly performs recursive deep-merge operations without checking keys like <code>__proto__</code> or <code>constructor.prototype</code>:</p>
 
-// মাঝপথে সময় দেখতে (টাইমার থামায় না)
-console.time('batch');
-for (const item of items) {
-  process(item);
-  console.timeLog('batch', \`\${item.id} সম্পন্ন\`);
-}
-console.timeEnd('batch');</code></pre>
-      </div>
-      <p>এটি <code>Date.now()</code> দিয়ে ম্যানুয়াল হিসাব করার চেয়ে দ্রুত ও পরিষ্কার — দুটি লাইন, কোনো ভ্যারিয়েবল ব্যবস্থাপনা লাগে না।</p>
-      <h4><code>console.trace()</code></h4>
       <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>function validateOrder(order) {
-  if (!order.userId) {
-    console.trace('userId অনুপস্থিত — কল স্ট্যাক:');
-    // Trace: userId অনুপস্থিত — কল স্ট্যাক:
-    //     at validateOrder (/app/orders.js:15:13)
-    //     at processOrder (/app/orders.js:42:5)
-    //     at /app/routes/checkout.js:23:18
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>// VULNERABLE RECURSIVE MERGE FUNCTION
+function unsafeMerge(target, source) {
+  for (let key in source) {
+    if (typeof target[key] === 'object' && typeof source[key] === 'object') {
+      unsafeMerge(target[key], source[key]);
+    } else {
+      target[key] = source[key];
+    }
   }
-}</code></pre>
+  return target;
+}
+
+// Malicious payload sent by an attacker via JSON
+const attackerPayload = JSON.parse('{"__proto__": {"isAdmin": true}}');
+
+const userAccount = {};
+unsafeMerge(userAccount, attackerPayload);
+
+// CONSEQUENCE: The global Object.prototype is polluted!
+const newEmptyUser = {};
+console.log(newEmptyUser.isAdmin); // Returns true! All objects inherit this property!</code></pre>
       </div>
-      <p><strong>এটি কখন <code>console.log</code>-এর চেয়ে ভালো:</strong> একটি ফাংশন <em>কোথা থেকে</em> ভুল ডেটা নিয়ে ডাকা হচ্ছে তা বোঝা কঠিন হলে (বিশেষত একটি ফাংশন বহু জায়গা থেকে কল হয়), <code>console.trace()</code> সরাসরি সম্পূর্ণ কল চেইন দেখিয়ে দেয় — কোনো ম্যানুয়াল <code>new Error().stack</code> লেখার দরকার নেই।</p>
-      <h4>প্রোডাকশনে ব্যবহারের সীমা</h4>
-      <p>এই মেথডগুলো <strong>দ্রুত স্থানীয় ডিবাগিংয়ে চমৎকার</strong>, কিন্তু প্রোডাকশন মনিটরিংয়ের জন্য উপযুক্ত নয়:</p>
-      <ul>
-        <li><strong><code>console.time</code>/<code>timeEnd</code>:</strong> কেবল কনসোলে প্রিন্ট করে — কোনো মেট্রিক সিস্টেমে যায় না, তাই দীর্ঘমেয়াদি ট্রেন্ড দেখা যায় না। প্রোডাকশনে <code>perf_hooks</code> বা APM টুল ব্যবহার করুন, যা ডেটা সংরক্ষণ ও aggregate করতে পারে।</li>
-        <li><strong><code>console.trace</code>:</strong> প্রতিবার সম্পূর্ণ স্ট্যাক ট্রেস তৈরি করা কিছুটা ব্যয়বহুল — উচ্চ-থ্রুপুট কোড পাথে (যেমন প্রতিটি রিকোয়েস্টে) রেখে দিলে পারফরম্যান্সে প্রভাব পড়তে পারে। ডিবাগিং শেষে সরিয়ে ফেলুন।</li>
-      </ul>
-      <p><strong>ব্যবহারিক নিয়ম:</strong> স্থানীয় ডেভেলপমেন্ট ও দ্রুত সমস্যা নির্ণয়ে এই টুলগুলো ব্যবহার করুন। প্রোডাকশনে স্থায়ী instrumentation-এর জন্য structured logging (pino) ও APM/OpenTelemetry ব্যবহার করুন, যা ডেটা সংরক্ষণ করে এবং ড্যাশবোর্ড/alert তৈরি করতে দেয়।</p>
-      <h4>Follow-up প্রশ্ন</h4>
-      <ul>
-        <li><code>console.table()</code> কখন কাজে লাগে?</li>
-        <li>প্রোডাকশনে <code>console.log</code> সম্পূর্ণ বাদ দেওয়া উচিত কি?</li>
-      </ul>
+
+      <h4>2. How Prototype Pollution Escalates to Remote Code Execution (RCE)</h4>
+      <p>If a third-party library or core Node.js feature executes an internal option check like <code>if (options.shell) exec(cmd)</code>, and an attacker pollutes <code>Object.prototype.shell = "/bin/sh"</code>, every executed <code>child_process</code> call will spawn inside a shell, allowing arbitrary host command injection.</p>
+
+      <h4>3. Remediation & Hardening Strategies</h4>
+
+      <h5>Strategy A: Create Objects with Null Prototype</h5>
+      <p>For dictionary lookup objects, create objects that do not inherit from <code>Object.prototype</code>:</p>
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>const safeDict = Object.create(null); // No prototype chain! Cannot be polluted.</code></pre>
+      </div>
+
+      <h5>Strategy B: Freeze Object Prototype in Production</h5>
+      <p>Prevent any modification to object prototypes runtime-wide at process startup:</p>
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>Object.freeze(Object.prototype); // Throws error if code attempts to pollute __proto__</code></pre>
+      </div>
+
+      <h5>Strategy C: Use Modern Map Data Structures</h5>
+      <p>Use <code>Map</code> or <code>Set</code> for dynamic key-value storage instead of plain JavaScript objects.</p>
     `
   },
   {
     id: "node-44",
-    category: "Node.js",
+    category: "Real-Time Communications & WebSockets",
     difficulty: "Advanced",
-    tags: ["Cluster","Sticky Sessions","Socket.io"],
-    question: "Node.js Cluster Mode-এ Sticky Sessions (socket.io-sticky) কেন বাধ্যতামূলক?",
+    tags: ["Server-Sent Events", "SSE", "WebSockets vs SSE", "HTTP Streaming"],
+    question: "When should you choose Server-Sent Events (SSE) over WebSockets in Node.js, and how do you build a resilient SSE streaming endpoint?",
     answer: `
-      <p>WebSocket (Socket.io) এর HTTP হ্যান্ডশেক শুরু হওয়ার পর আপগ্রেড হয়। ক্লাস্টার মোডে লোড ব্যালেন্সার রাউন্ড-রবিনে রিকোয়েস্ট ভাগ করে, ফলে হ্যান্ডশেক এক প্রসেসে এবং আপগ্রেড অন্য প্রসেসে চলে গেলে সকেট এরর দেয়।</p>
-      <p>Sticky Sessions ইউজারের IP অনুযায়ী একই Worker Process-এ রিকুয়েস্ট ফিক্স রাখে।</p>
-      <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>const cluster = require('cluster');
-const sticky = require('sticky-session');
+      <p>While <strong>WebSockets</strong> provide full bi-directional, full-duplex communication over a custom TCP protocol, <strong>Server-Sent Events (SSE)</strong> provide an ultra-lightweight, unidirectional (server-to-client) text streaming protocol operating entirely over standard HTTP/HTTPS.</p>
 
-if (cluster.isMaster) {
-  sticky.listen(server, 3000); // Sticky load balancer
-} else {
-  // Worker process handling WebSocket
-}</code></pre>
+      <h4>1. Architectural Comparison: SSE vs WebSockets</h4>
+      <table>
+        <thead>
+          <tr>
+            <th>Dimension</th>
+            <th>Server-Sent Events (SSE)</th>
+            <th>WebSockets</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Communication Direction</strong></td>
+            <td>Unidirectional (Server $\rightarrow$ Client)</td>
+            <td>Bi-directional (Server $\leftrightarrow$ Client)</td>
+          </tr>
+          <tr>
+            <td><strong>Transport Protocol</strong></td>
+            <td>Standard HTTP/HTTPS (Text <code>text/event-stream</code>)</td>
+            <td>Custom WS/WSS Protocol (Binary & Text)</td>
+          </tr>
+          <tr>
+            <td><strong>Auto-Reconnection</strong></td>
+            <td><strong>Built-in:</strong> Browser handles reconnection natively via <code>Last-Event-ID</code> header.</td>
+            <td>Must be manually implemented in application logic.</td>
+          </tr>
+          <tr>
+            <td><strong>Infrastructure Overhead</strong></td>
+            <td>Extremely low (Passes through proxies, firewalls, HTTP/2 multiplexing).</td>
+            <td>High (Requires WebSocket upgrade support, custom state routing).</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>2. Ideal Use Cases for SSE</h4>
+      <p>Use SSE when clients only need real-time updates from the server without sending high-frequency client messages back (e.g., Live Stock Tickers, AI LLM Token Streaming, Order Tracking Dashboards, System Monitoring Feeds).</p>
+
+      <h4>3. Production Resilient SSE Express Endpoint</h4>
+
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>app.get('/events/stream', (req, res) => {
+  // 1. Mandatory SSE HTTP Response Headers
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache, no-transform',
+    'Connection': 'keep-alive',
+    'X-Accel-Buffering': 'no' // Disables Nginx buffering for immediate frame delivery
+  });
+
+  // 2. Extract Last-Event-ID if browser reconnected
+  const lastEventId = req.headers['last-event-id'];
+  if (lastEventId) {
+    console.log(`Client reconnected. Resuming events from ID: ${lastEventId}`);
+    // Query missed events from cache/DB and catch up client...
+  }
+
+  // Helper function to format SSE frame
+  const sendEvent = (id, eventType, data) => {
+    res.write(`id: ${id}\n`);
+    res.write(`event: ${eventType}\n`);
+    res.write(`data: ${JSON.stringify(data)}\n\n`); // Double newline ends SSE frame
+  };
+
+  let eventId = Number(lastEventId || 0);
+
+  const intervalId = setInterval(() => {
+    eventId++;
+    sendEvent(eventId, 'order_status_update', { orderId: 404, status: 'PROCESSING' });
+  }, 3000);
+
+  // 3. Clean up resources when client disconnects
+  req.on('close', () => {
+    clearInterval(intervalId);
+    res.end();
+  });
+});</code></pre>
       </div>
     `
   },
   {
     id: "node-45",
-    category: "Node.js",
-    difficulty: "Intermediate",
-    tags: ["Environment","NODE_ENV","Optimization"],
-    question: "NODE_ENV=production দিলে Node.js অ্যান্ড এক্সপ্রেস অভ্যন্তরীণভাবে কী কী অপটিমাইজেশন অন করে?",
+    category: "Diagnostics & Garbage Collection Hooks",
+    difficulty: "Advanced",
+    tags: ["perf_hooks", "GC Tracing", "Memory Allocation", "Garbage Collection"],
+    question: "How do you trace V8 Garbage Collection events programmatically using perf_hooks PerformanceObserver to identify GC pauses?",
     answer: `
-      <p><code>NODE_ENV=production</code> নিজে থেকে Node.js-এর আচরণ বদলায় না — এটি শুধু একটি environment variable যা <strong>লাইব্রেরিগুলো নিজে চেক করে</strong> এবং সেই অনুযায়ী অপ্টিমাইজেশন চালু করে।</p>
-      <h4>Express-এ যা বদলায়</h4>
-      <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>// Express ভেতরে করে (সরলীকৃত):
-if (process.env.NODE_ENV === 'production') {
-  app.enable('view cache');      // Template compile করে ক্যাশে রাখা
-  app.set('trust proxy', ...);   // (আপনাকে এটি নিজেই সেট করতে হয়)
-}</code></pre>
-      </div>
-      <ul>
-        <li><strong>View caching চালু:</strong> ডেভেলপমেন্টে প্রতিটি রিকোয়েস্টে template ফাইল থেকে পড়ে কম্পাইল হয় (যাতে পরিবর্তন সাথে সাথে দেখা যায়)। Production-এ একবার কম্পাইল হয়ে মেমরিতে ক্যাশে থাকে।</li>
-        <li><strong>Verbose error page বন্ধ:</strong> ডেভেলপমেন্টে স্ট্যাক ট্রেসসহ বিস্তারিত এরর পেজ দেখায় — production-এ এটি চালু থাকলে সংবেদনশীল তথ্য (ফাইল পাথ, কোড) ফাঁস হতে পারে।</li>
-      </ul>
-      <h4>Node.js core-এ যা বদলায়</h4>
-      <p>খুবই কম, কিন্তু গুরুত্বপূর্ণ — কিছু লাইব্রেরি (যেমন <code>debug</code>) <code>NODE_ENV</code> চেক করে ভার্বোস লগিং বন্ধ রাখে। V8 নিজে <code>NODE_ENV</code> দেখে না — এটি একটি অ্যাপ্লিকেশন-স্তরের কনভেনশন, Node.js-এর বিল্ট-ইন ফিচার নয়।</p>
-      <h4>একটি গুরুত্বপূর্ণ ভুল ধারণা</h4>
-      <p><strong>"<code>NODE_ENV=production</code> সেট করলেই সব প্রোডাকশন-রেডি হয়ে যায়" — এটি ভুল।</strong> এটি একটি একক ফ্ল্যাগ যা লাইব্রেরির আচরণ বদলায়, কিন্তু প্রকৃত প্রোডাকশন প্রস্তুতির জন্য আরও অনেক কিছু আপনাকে নিজে করতে হয়:</p>
-      <ul>
-        <li><strong>Logging level:</strong> debug লগ বন্ধ করে structured JSON লগে যাওয়া (নিজে কনফিগার করতে হয়)।</li>
-        <li><strong>Error handling:</strong> uncaught exception ও unhandled rejection-এর জন্য সঠিক হ্যান্ডলার।</li>
-        <li><strong>Security headers, rate limiting, CORS নীতি</strong> — এসব <code>NODE_ENV</code> সেট করলে আপনাআপনি হয় না।</li>
-        <li><strong>Process manager (PM2, Kubernetes)</strong> দিয়ে ক্র্যাশে স্বয়ংক্রিয় রিস্টার্ট।</li>
-      </ul>
-      <h4><code>npm install</code>-এ প্রভাব</h4>
-      <div class="code-box">
-        <div class="code-header"><span>bash</span><button class="copy-btn">Copy</button></div>
-        <pre><code>NODE_ENV=production npm install
-# devDependencies ইনস্টল হবে না — ইমেজ ছোট থাকে
-# ⚠️ কিন্তু build-এর আগে এটি সেট করলে TypeScript/webpack-এর মতো
-#    devDependency-নির্ভর বিল্ড টুলও অনুপস্থিত থাকবে — বিল্ড ব্যর্থ হবে
+      <p>When V8 performs Old Generation Garbage Collection (Mark-Sweep-Compact), it may pause execution on the main JavaScript thread (a **Stop-The-World GC Pause**). In high-throughput, low-latency microservices, GC pauses lasting hundreds of milliseconds manifest as unexplained latency spikes. Tracing GC events allows engineers to tune memory allocations.</p>
 
-# Docker-এ সঠিক ক্রম:
-# 1. npm ci (সব dependency সহ) → 2. npm run build → 3. npm prune --production</code></pre>
-      </div>
-      <h4>Follow-up প্রশ্ন</h4>
+      <h4>1. Identifying GC Performance Entry Constants</h4>
+      <p>Using <code>node:perf_hooks</code>, we can observe specific GC flags exposed by V8:</p>
       <ul>
-        <li>একাধিক পরিবেশ (staging, QA) থাকলে শুধু <code>NODE_ENV</code> দিয়ে যথেষ্ট কি?</li>
-        <li><code>NODE_ENV</code> কখনও runtime লজিকে (if-else) ব্যবহার করা উচিত কি?</li>
+        <li><code>performance.constants.NODE_PERFORMANCE_GC_MINOR</code>: Scavenge cycles (Young Generation collection—typically extremely fast, < 2ms).</li>
+        <li><code>performance.constants.NODE_PERFORMANCE_GC_MAJOR</code>: Mark-Sweep-Compact cycles (Old Generation collection—potentially slow).</li>
+      </ul>
+
+      <h4>2. Tracing GC Pauses Programmatically</h4>
+
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>import { PerformanceObserver, constants } from 'node:perf_hooks';
+
+// Setup GC Performance Observer
+const gcObserver = new PerformanceObserver((list) => {
+  const entries = list.getEntries();
+
+  for (const entry of entries) {
+    // Determine GC type
+    let gcType = 'UNKNOWN';
+    if (entry.detail?.kind === constants.NODE_PERFORMANCE_GC_MINOR) {
+      gcType = 'MINOR (Scavenge)';
+    } else if (entry.detail?.kind === constants.NODE_PERFORMANCE_GC_MAJOR) {
+      gcType = 'MAJOR (Mark-Sweep-Compact)';
+    }
+
+    const durationMs = entry.duration.toFixed(2);
+
+    // Alert on long Major GC pauses that block the Event Loop
+    if (entry.detail?.kind === constants.NODE_PERFORMANCE_GC_MAJOR && entry.duration > 50) {
+      console.warn(`[WARNING] Long GC Pause Detected! Type: ${gcType} | Duration: ${durationMs} ms`);
+    } else {
+      console.log(`[GC Metric] Type: ${gcType} | Duration: ${durationMs} ms`);
+    }
+  }
+});
+
+// Observe garbage collection events
+gcObserver.observe({ entryTypes: ['gc'] });</code></pre>
+      </div>
+
+      <h4>3. Resolving Excessive GC Major Pauses</h4>
+      <ul>
+        <li>Reduce object churn by reusing objects or using **TypedArrays / Buffers** for transient binary data.</li>
+        <li>Avoid huge in-memory JSON parsings; stream large datasets instead.</li>
+        <li>Scale V8 heap limits using <code>--max-old-space-size</code> or horizontally scale worker instances to reduce Old Space pressure.</li>
       </ul>
     `
   },
   {
     id: "node-46",
-    category: "Node.js",
+    category: "System Design & Distributed Lock",
     difficulty: "Advanced",
-    tags: ["Diagnostics","Diagnostic Channel","diagnostics_channel"],
-    question: "node:diagnostics_channel দিয়ে ইন-মেমোরি পারফরম্যান্স মেট্রিক্স ট্র্যাকিং কীভাবে করবেন?",
+    tags: ["Redlock", "Distributed Locks", "Redis", "Race Conditions"],
+    question: "How do you implement a Distributed Lock using Redis (Redlock algorithm) to prevent race conditions in clustered Node.js microservices?",
     answer: `
-      <p>এটি অ্যাপ্লিকেশনের বা থার্ডপার্টি মডিউলের অভ্যন্তরীণ ইভেন্ট সাবস্ক্রাইব করে পারফরম্যান্স টেলিমেট্রি ডাটা প্রমোট করতে সাহায্য করে, কোড পরিবর্তন ছাড়াই।</p>
+      <p>When multiple instances of a Node.js microservice run concurrently, standard in-memory mutexes (like local variable locks) cannot prevent race conditions. If two worker instances attempt to process the exact same payment, update inventory, or execute a scheduled cron job simultaneously, a **Distributed Lock** is required across process boundaries.</p>
+
+      <h4>1. The Redlock Algorithm Concept</h4>
+      <p>The **Redlock algorithm** (developed by Antirez, creator of Redis) acquires an atomic lock across independent Redis nodes using a random string key, a TTL (Time-To-Live), and a strict lock acquisition consensus timeout.</p>
+
+      <h4>2. Implementation using ioredis-redlock</h4>
+
       <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>const diagnostics_channel = require('diagnostics_channel');
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>import Redis from 'ioredis';
+import Redlock from 'redlock';
 
-const channel = diagnostics_channel.channel('my-app:request:start');
+const redisClient1 = new Redis({ host: 'redis-node-1.internal' });
+const redisClient2 = new Redis({ host: 'redis-node-2.internal' });
 
-// Subscriber
-diagnostics_channel.subscribe('my-app:request:start', (message) => {
-  console.log('Request started with ID:', message.requestId);
+// Initialize Redlock across Redis nodes
+const redlock = new Redlock([redisClient1, redisClient2], {
+  driftFactor: 0.01, // Multiplying factor for clock drift
+  retryCount: 3,     // Number of times to retry acquiring lock before throwing error
+  retryDelay: 200,   // Delay in ms between retries
+  retryJitter: 200   // Random jitter in ms to avoid lock contention collisions
 });
 
-// Publisher
-channel.publish({ requestId: 123 });</code></pre>
+async function processExclusiveTask(orderId) {
+  const resourceKey = `locks:order:process:${orderId}`;
+  const ttl = 5000; // Lock auto-expires after 5 seconds to avoid deadlock if worker crashes
+
+  let lock;
+  try {
+    // 1. Acquire Distributed Lock
+    lock = await redlock.acquire([resourceKey], ttl);
+    console.log(`Acquired lock for Order: ${orderId}. Executing critical section...`);
+
+    // --- CRITICAL SECTION BEGIN ---
+    await executeDatabasePayment(orderId);
+    // --- CRITICAL SECTION END ---
+
+  } catch (err) {
+    console.warn(`Could not acquire lock for Order: ${orderId}. Task already being executed by another worker.`);
+  } finally {
+    // 2. Safely release lock using atomic script verification
+    if (lock) {
+      await lock.release();
+      console.log(`Released lock for Order: ${orderId}`);
+    }
+  }
+}</code></pre>
       </div>
+
+      <h4>3. Key Edge Cases to Handle</h4>
+      <ul>
+        <li><strong>Auto-Expiration vs Long Execution:</strong> If the processing task takes longer than the TTL (5000ms), the lock auto-expires, allowing a second worker to enter the critical section. Mitigate this by using a background timer to extend the lock TTL automatically while execution is active.</li>
+      </ul>
     `
   },
   {
     id: "node-47",
-    category: "Node.js",
-    difficulty: "Intermediate",
-    tags: ["Stream","Backpressure","highWaterMark"],
-    question: "Stream highWaterMark Parameter (Default 64KB) টিউন করার কৌশল কী?",
+    category: "Networking & Protocol Layer",
+    difficulty: "Advanced",
+    tags: ["HTTP/2", "Multiplexing", "Server Push", "gRPC"],
+    question: "How does HTTP/2 Multiplexing differ from HTTP/1.1 Pipelining, and how do you implement a native HTTP/2 server in Node.js?",
     answer: `
-      <p><code>highWaterMark</code> Node.js Stream-এর <strong>internal buffer সীমা</strong> — এটি ঠিক করে কতটুকু ডেটা মেমরিতে জমতে দেওয়া হবে backpressure ট্রিগার হওয়ার আগে।</p>
+      <p>HTTP/2 completely revises the transport network layer between clients and server microservices, solving long-standing performance bottlenecks inherent in HTTP/1.1.</p>
+
+      <h4>1. Architectural Differences</h4>
+      <ul>
+        <li><strong>HTTP/1.1 Head-of-Line (HoL) Blocking:</strong> A TCP connection can process only one HTTP request at a time. If Request 1 is slow, Request 2 and Request 3 are blocked behind it on that connection.</li>
+        <li><strong>HTTP/2 Binary Framing & Multiplexing:</strong> Breaks HTTP requests/responses down into binary frames (Data, Headers) and interleaves them concurrently over a **single shared TCP connection**. Multiple requests and responses transmit in parallel without HoL blocking.</li>
+      </ul>
+
+      <h4>2. Implementing Native HTTP/2 Server in Node.js</h4>
+
       <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>// Readable stream — bytes হিসেবে (ডিফল্ট 64KB, object mode-এ 16 objects)
-const readStream = fs.createReadStream('large.log', {
-  highWaterMark: 1024 * 1024   // 1 MB চাঙ্কে পড়বে
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>import http2 from 'node:http2';
+import fs from 'node:fs';
+
+// HTTP/2 requires TLS encryption (ALPN negotiation negotiates 'h2')
+const server = http2.createSecureServer({
+  key: fs.readFileSync('server-key.pem'),
+  cert: fs.readFileSync('server-cert.pem')
 });
 
-// Object mode-এ সংখ্যাটি বাইট নয়, অবজেক্ট সংখ্যা বোঝায়
-const objStream = new Readable({
-  objectMode: true,
-  highWaterMark: 100           // ১০০টি অবজেক্ট বাফারে জমতে পারে
+server.on('stream', (stream, headers) => {
+  const path = headers[':path'];
+  const method = headers[':method'];
+
+  console.log(`Incoming HTTP/2 Stream: ${method} ${path}`);
+
+  if (path === '/api/data') {
+    // Respond over multiplexed stream
+    stream.respond({
+      'content-type': 'application/json; charset=utf-8',
+      ':status': 200
+    });
+    
+    stream.end(JSON.stringify({ message: 'Served via multiplexed HTTP/2 binary frame' }));
+  } else {
+    stream.respond({ ':status': 404 });
+    stream.end('Not Found');
+  }
 });
 
-// write() এর রিটার্ন ভ্যালু দেখেই backpressure বোঝা যায়
-const canContinue = writeStream.write(chunk);
-if (!canContinue) {
-  await new Promise(resolve => writeStream.once('drain', resolve));
-}</code></pre>
+server.listen(8443, () => console.log('HTTP/2 Secure Server running on port 8443'));</code></pre>
       </div>
-      <h4>এটি "সর্বোচ্চ সীমা" নয় — একটি সংকেত থ্রেশহোল্ড</h4>
-      <p>একটি সাধারণ ভুল ধারণা: <code>highWaterMark</code> ডেটা <em>আটকে দেয় না</em>। এটি কেবল সেই বিন্দু নির্ধারণ করে যেখানে <code>write()</code> <code>false</code> ফেরত দেয় — অর্থাৎ "লেখক থামো, আমি এখনও পার্শ্ববর্তী সব প্রসেস করিনি"। বাফার তার চেয়ে বেশি বাড়তে পারে যদি লেখক এই সংকেত উপেক্ষা করে লিখতে থাকে।</p>
-      <h4>ছোট রাখলে বনাম বড় রাখলে</h4>
-      <table>
-        <tr><th>দিক</th><th>ছোট highWaterMark</th><th>বড় highWaterMark</th></tr>
-        <tr><td>মেমরি ব্যবহার</td><td>কম</td><td>বেশি</td></tr>
-        <tr><td>থ্রুপুট</td><td>কম (বেশি ইভেন্ট ওভারহেড)</td><td>বেশি (কম সিস্টেম কল)</td></tr>
-        <tr><td>Backpressure সাড়া</td><td>দ্রুত (তাড়াতাড়ি সতর্ক করে)</td><td>ধীর</td></tr>
-        <tr><td>উপযুক্ত</td><td>মেমরি-সীমিত পরিবেশ, বহু সমান্তরাল স্ট্রিম</td><td>বড় ফাইল, নেটওয়ার্ক-বাউন্ড কাজ</td></tr>
-      </table>
-      <h4>কখন টিউন করবেন</h4>
-      <ul>
-        <li><strong>বহু সমান্তরাল স্ট্রিম</strong> (যেমন হাজারো ফাইল আপলোড একসাথে) — ডিফল্ট ৬৪ KB × ১০০০ = ৬৪ MB শুধু বাফারেই। ছোট করে দিন।</li>
-        <li><strong>একটি বিশাল ফাইল সিরিয়ালি প্রসেস করা</strong> — বড় highWaterMark মানে কম <code>data</code> ইভেন্ট, কম ওভারহেড, বেশি থ্রুপুট।</li>
-        <li><strong>ধীর ডাউনস্ট্রিম কনজিউমার</strong> — ছোট রাখলে আপস্ট্রিম দ্রুত সতর্ক হয়ে গতি কমাবে, মেমরি চাপ কম হবে।</li>
-      </ul>
-      <p><strong>ব্যবহারিক নিয়ম:</strong> ডিফল্ট ৬৪ KB বেশিরভাগ ব্যবহারে ভালো ভারসাম্য। শুধু প্রোফাইল করে দেখার পরে (মেমরি চাপ বা থ্রুপুট সমস্যা প্রমাণিত হলে) এটি বদলান — অনুমান করে নয়।</p>
-      <h4>Follow-up প্রশ্ন</h4>
-      <ul>
-        <li>Backpressure না সামলালে কী ঘটতে পারে?</li>
-        <li><code>pipeline()</code> কীভাবে backpressure স্বয়ংক্রিয়ভাবে সামলায়?</li>
-      </ul>
+
+      <h4>3. Why gRPC Relies on HTTP/2</h4>
+      <p>Modern microservice frameworks (like <strong>gRPC</strong>) use Node.js HTTP/2 under the hood to stream Protocol Buffer binaries bidirectionally with extremely low latency and tiny network payload overhead.</p>
     `
   },
   {
     id: "node-48",
-    category: "Node.js",
+    category: "Concurrency & Event Loop Mechanics",
     difficulty: "Advanced",
-    tags: ["WebSockets","ws","Heartbeat"],
-    question: "ws library দিয়ে WebSockets Ping/Pong Heartbeat Mechanism এবং Dead Socket Cleanup কীভাবে করবেন?",
+    tags: ["unref()", "ref()", "Event Loop Lifecycles", "Libuv Handles"],
+    question: "What do timer.unref() and timer.ref() do under the hood, and how do they control Node.js Event Loop process termination?",
     answer: `
-      <p>ক্লায়েন্ট হঠাৎ বন্ধ হয়ে গেলে সার্ভার তা টের নাও পেতে পারে (Half-open connection)। এই মরা সকেটগুলো (Dead sockets) ক্লিন করার জন্য নির্দিষ্ট সময় পর পর (যেমন- ৩০ সেকেন্ড) সার্ভার <code>ping</code> পাঠায়। সকেট থেকে <code>pong</code> না পাঠালে সেটিকে <code>terminate()</code> করা হয়।</p>
-      <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>function heartbeat() { this.isAlive = true; }
-wss.on('connection', (ws) => {
-  ws.isAlive = true;
-  ws.on('pong', heartbeat);
-});
+      <p>Node.js process termination is governed by a simple rule: **The Node.js process continues running as long as there is at least one active Libuv handle or request keeping the Event Loop alive.**</p>
 
-const interval = setInterval(() => {
-  wss.clients.forEach((ws) => {
-    if (!ws.isAlive) return ws.terminate();
-    ws.isAlive = false;
-    ws.ping();
-  });
-}, 30000);</code></pre>
+      <h4>1. Active Handles vs Unref'd Handles</h4>
+      <p>When you create a timer (<code>setInterval</code>), an HTTP server, or a network socket, Libuv registers an active **handle**. This handle increments Libuv's internal active handle reference counter ($Count > 0$). When the Call Stack clears, Node.js checks this counter. If $Count > 0$, the process stays alive.</p>
+
+      <ul>
+        <li><strong><code>timer.unref()</code>:</strong> Decrements Libuv's active handle reference count for that specific timer. The timer continues to run and fire callbacks, but **it will not prevent the Node.js process from exiting** if it is the only active handle remaining.</li>
+        <li><strong><code>timer.ref()</code>:</strong> Restores the timer to active status, guaranteeing the Event Loop stays open until the timer is explicitly cleared.</li>
+      </ul>
+
+      <h4>2. Practical Production Use Cases</h4>
+
+      <h5>Use Case 1: Background Cleanup Timers in Libraries</h5>
+      <p>If an internal SDK or database library creates a background cleanup interval (e.g., clearing expired cache items every 60 seconds), using a standard <code>setInterval()</code> keeps the application process open forever—even if the main web server closes. Calling <code>.unref()</code> allows the process to exit cleanly when main operations finish:</p>
+
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>class InternalCacheSDK {
+  constructor() {
+    this.cache = new Map();
+
+    // Background cleanup timer
+    this.cleanupTimer = setInterval(() => {
+      this.cache.clear();
+    }, 60000);
+
+    // CRITICAL: Unref timer so it does NOT block Node.js process from exiting cleanly!
+    this.cleanupTimer.unref();
+  }
+}</code></pre>
+      </div>
+
+      <h5>Use Case 2: Graceful Shutdown Safety Watchdogs</h5>
+      <p>When executing a graceful shutdown, set a force-kill timeout and call <code>.unref()</code> so that if all sockets close gracefully early, the force-kill timer does not delay process exit:</p>
+
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>function initiateShutdown() {
+  const forceKillTimeout = setTimeout(() => {
+    console.error('Shutdown timed out. Forcing exit.');
+    process.exit(1);
+  }, 10000);
+
+  // If server closes before 10s, process exits immediately without waiting for this timer
+  forceKillTimeout.unref(); 
+
+  server.close();
+}</code></pre>
       </div>
     `
   },
   {
     id: "node-49",
-    category: "Node.js",
+    category: "Architecture & Code Design Patterns",
     difficulty: "Intermediate",
-    tags: ["Utils","util.promisify","Custom Promisify"],
-    question: "util.promisify() এবং custom promisify symbol (util.promisify.custom) কীভাবে ব্যবহার করবেন?",
+    tags: ["EventEmitter", "Memory Leaks", "Observer Pattern", "MaxListeners"],
+    question: "How do you prevent EventEmitter Memory Leaks, and what is the internal consequence of MaxListenersExceededWarning?",
     answer: `
-      <p>পুরোনো কলব্যাক-ভিত্তিক মেথডকে (<code>(err, data) => {}</code>) মডার্ন <code>async/await</code> মেথডে রূপান্তর করতে <code>util.promisify()</code> ব্যবহৃত হয়।</p>
-      <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>const util = require('util');
-const fs = require('fs');
-const readFile = util.promisify(fs.readFile);
+      <p>Node.js core modules (like HTTP requests, WebSockets, Streams, and Child Processes) inherit from the <code>EventEmitter</code> class. The <code>EventEmitter</code> implements the **Observer Pattern**, allowing publishers to emit named events to attached listener functions.</p>
 
-async function readData() {
-  const data = await readFile('file.txt', 'utf-8');
-  console.log(data);
-}</code></pre>
+      <h4>1. The MaxListenersExceededWarning Mechanism</h4>
+      <p>By default, an <code>EventEmitter</code> instance allows a maximum of **10 listeners** to be attached to any single event name. If an 11th listener is added, Node.js prints a warning to <code>stderr</code>:</p>
+
+      <div class="code-box">
+        <div class="code-header"><span>text</span></div>
+        <pre><code>(node:1234) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 
+11 userRegistered listeners added to [MyEmitter]. Use emitter.setMaxListeners() to increase limit.</code></pre>
       </div>
-      <p>যদি কলব্যাক সিগনেচার স্ট্যান্ডার্ড না হয়, তখন <code>util.promisify.custom</code> সিম্বল দিয়ে কাস্টম প্রমিজ রিটার্ন করানো যায়।</p>
+
+      <p><strong>Crucial Distinction:</strong> This warning is **NOT a hard throw or error**. The 11th listener is still successfully attached and executed. The warning exists purely as a diagnostic safety check to alert developers to a memory leak.</p>
+
+      <h4>2. How EventEmitter Memory Leaks Occur</h4>
+      <p>If an HTTP request handler attaches an anonymous arrow function listener to a global singleton event emitter on every incoming request, but never removes it when the request ends:</p>
+
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>const { EventEmitter } = require('events');
+const globalMetrics = new EventEmitter();
+
+app.get('/data', (req, res) => {
+  // MEMORY LEAK: Attaches a new closure listener on EVERY request!
+  // The closure retains references to 'req' and 'res', preventing Garbage Collection!
+  globalMetrics.on('metric_tick', () => {
+    console.log(`Processing for request: ${req.url}`);
+  });
+
+  res.send('OK');
+});</code></pre>
+      </div>
+
+      <h4>3. Safe EventEmitter Cleanup Patterns</h4>
+
+      <h5>Pattern A: Use once() for Single-Fire Events</h5>
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>// Auto-removes listener immediately after firing once
+globalMetrics.once('metric_tick', () => { ... });</code></pre>
+      </div>
+
+      <h5>Pattern B: Explicit Clean Removal on Connection Disconnect</h5>
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>app.get('/data', (req, res) => {
+  const onMetricTick = () => console.log(`Processing: ${req.url}`);
+
+  globalMetrics.on('metric_tick', onMetricTick);
+
+  // Cleanly detach listener when socket closes
+  req.on('close', () => {
+    globalMetrics.off('metric_tick', onMetricTick);
+  });
+
+  res.send('OK');
+});</code></pre>
+      </div>
     `
   },
   {
     id: "node-50",
-    category: "Node.js",
+    category: "Asynchronous Mechanics & V8 Optimization",
     difficulty: "Advanced",
-    tags: ["Architecture","Event Driven","Decoupling"],
-    question: "Node.js-এ Event-Driven Microservices Layer Architecture কীভাবে সংগঠিত করবেন?",
+    tags: ["Async/Await", "Promise Internals", "V8 Optimization", "Unhandled Rejections"],
+    question: "How does V8 optimize Async/Await under the hood compared to raw Promise chains, and why is top-level await safe in ES Modules?",
     answer: `
-      <p>মাইক্রোসার্ভিসগুলোর মধ্যে সরাসরি HTTP কল (টাইট কাপলিং) এড়িয়ে NATS, RabbitMQ বা Kafka-এর মতো Message Broker ব্যবহার করে অ্যাসিনক্রোনাস ইভেন্ট পাবলিশ/সাবস্ক্রাইব করা হয়।</p>
-      <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>// Order Service (Publisher)
-eventBus.publish('order.created', { orderId: 123 });
+      <p>When <code>async/await</code> was first introduced in ES2017, it was syntactic sugar built on top of Promises and Generators. However, V8 engineers redesigned the underlying runtime implementation (the <em>Zero-Cost Async Stack Traces</em> initiative) to make <code>async/await</code> significantly faster and more memory-efficient than chaining raw Promises (<code>.then()</code>).</p>
 
-// Notification Service (Subscriber)
-eventBus.subscribe('order.created', (orderData) => {
-  sendEmail(orderData);
-});</code></pre>
+      <h4>1. V8 Engine Optimization: Zero-Cost Async Stack Traces</h4>
+      <ul>
+        <li><strong>Raw Promise Chains:</strong> Every <code>.then()</code> call creates and allocates a new explicit Promise object in the V8 Heap, along with closure callback allocations.</li>
+        <li><strong>Async/Await Engine Inlining:</strong> V8 optimizes <code>async</code> functions by creating a single lightweight continuation state machine. When V8 hits an <code>await</code> keyword, it suspends execution, yields control to the Event Loop, and resumes when the awaited promise fulfills—**without creating intermediate Promise wrapper objects**.</li>
+        <li><strong>Preserved Stack Traces:</strong> Because V8 tracks execution via internal continuation pointers, <code>async/await</code> preserves clean, unbroken stack traces across asynchronous boundaries during error throwing, whereas raw <code>.then()</code> chains often lose outer stack frames.</li>
+      </ul>
+
+      <h4>2. Top-Level Await in ES Modules (ESM)</h4>
+      <p>Historically, in CommonJS (<code>require</code>), using <code>await</code> outside of an <code>async</code> function resulted in a <code>SyntaxError</code>. Developers had to wrap code inside IIFEs (Immediately Invoked Function Expressions):</p>
+
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>// Legacy CommonJS IIFE Wrapper Pattern
+(async () => {
+  await db.connect();
+})();</code></pre>
       </div>
-      <p>এতে সিস্টেম সম্পূর্ণ ডিকাপলড (Decoupled) থাকে এবং একটি সার্ভিস ডাউন হলেও অন্যগুলো কাজ চালিয়ে যেতে পারে।</p>
+
+      <p>In ES Modules (<code>"type": "module"</code> in <code>package.json</code> or <code>.mjs</code> files), <strong>Top-Level Await</strong> is natively supported. When an ES module uses top-level <code>await</code>, its execution is treated as an asynchronous dependency execution step:</p>
+
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span></div>
+        <pre><code>// app.js (ES Module)
+import { db } from './db.js';
+
+// Top-level await pauses module graph execution until connection completes
+await db.connect(); 
+
+export const appState = { status: 'READY' };</code></pre>
+      </div>
+
+      <p><strong>Safety Guarantee:</strong> An importing module will wait for the imported module's top-level <code>await</code> promises to resolve before executing its own body, ensuring dependent singletons (like DB connections) are fully initialized before usage.</p>
     `
   }
+
 ];
