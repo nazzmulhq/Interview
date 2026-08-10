@@ -23,11 +23,8 @@ document.addEventListener("DOMContentLoaded", () => {
   if (typeof expressjsQuestions !== 'undefined') allQuestions.push(...expressjsQuestions);
   if (typeof nestjsQuestions !== 'undefined') allQuestions.push(...nestjsQuestions);
   if (typeof databaseQuestions !== 'undefined') allQuestions.push(...databaseQuestions);
-  if (typeof mongodbQuestions !== 'undefined') allQuestions.push(...mongodbQuestions);
   if (typeof systemDesignInfraQuestions !== 'undefined') allQuestions.push(...systemDesignInfraQuestions);
-  if (typeof seniorFrontendQuestions !== 'undefined') allQuestions.push(...seniorFrontendQuestions.map(q => ({...q, category: `Frontend - ${q.category}`})));
   if (typeof seniorFullstackQuestions !== 'undefined') allQuestions.push(...seniorFullstackQuestions.map(q => ({...q, category: `Full-Stack - ${q.category}`})));
-  if (typeof seniorBackendQuestions !== 'undefined') allQuestions.push(...seniorBackendQuestions.map(q => ({...q, category: `Backend - ${q.category}`})));
 
   // Initialize UI & Sidebar Sublists
   initTheme();
@@ -127,11 +124,8 @@ function renderSidebarCategories() {
     { name: "Express.js", label: "🚂 Express.js" },
     { name: "NestJS", label: "🦁 NestJS" },
     { name: "Database", label: "🛢️ Database (SQL)" },
-    { name: "MongoDB", label: "🍃 MongoDB" },
     { name: "React.js", label: "⚛️ React.js" },
     { name: "Next.js", label: "▲ Next.js" },
-    { name: "Frontend", label: "🎨 Frontend" },
-    { name: "Backend", label: "⚙️ Backend" },
     { name: "Full-Stack", label: "🌐 Full-Stack" },
     { name: "System Design", label: "🏗️ System Design" }
   ];
@@ -145,8 +139,6 @@ function renderSidebarCategories() {
       if (cat.name === "Database") {
         return q.category === "Database" || q.category.startsWith("Database");
       }
-      if (cat.name === "Frontend") return q.category.startsWith("Frontend");
-      if (cat.name === "Backend") return q.category.startsWith("Backend");
       if (cat.name === "Full-Stack") return q.category.startsWith("Full-Stack");
       return q.category === cat.name;
     });
@@ -264,10 +256,6 @@ function renderQuestions() {
     if (currentCategory !== "All") {
       if (currentCategory === "Database") {
         if (q.category !== "Database" && !q.category.startsWith("Database")) return false;
-      } else if (currentCategory === "Frontend") {
-        if (!q.category.startsWith("Frontend")) return false;
-      } else if (currentCategory === "Backend") {
-        if (!q.category.startsWith("Backend")) return false;
       } else if (currentCategory === "Full-Stack") {
         if (!q.category.startsWith("Full-Stack")) return false;
       } else if (q.category !== currentCategory) {
