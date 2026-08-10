@@ -3,7 +3,7 @@ const databaseQuestions = [
     id: "db-1",
     category: "Database",
     difficulty: "Intermediate",
-    tags: ["ACID", "Transactions", "Fundamentals"],
+    tags: ["ACID","Transactions","Fundamentals"],
     question: "Relational Database-এর ACID Properties (Atomicity, Consistency, Isolation, Durability) বিস্তারিত ব্যাখ্যা করুন।",
     answer: `
       <p>ডাটাবেজ ট্রানজেকশনের বিশ্বস্ততা ও নির্ভরযোগ্যতা বজায় রাখার জন্য <strong>ACID</strong> নীতি অনুসরণ করা হয়:</p>
@@ -15,11 +15,11 @@ const databaseQuestions = [
       </ul>
     `
   },
-    {
+  {
     id: "db-2",
     category: "Database",
     difficulty: "Advanced",
-    tags: ["Indexing", "B-Tree", "Performance"],
+    tags: ["Indexing","B-Tree","Performance"],
     question: "Database Indexing কী? B-Tree Index কীভাবে কাজ করে এবং কী কী ধরনের Index থাকে?",
     answer: `
       <p><strong>Index</strong> হলো ডাটাবেজ টেবিলের একটি বিশেষ ডেটা স্ট্রাকচার (প্রধানত <strong>B-Tree / B+Tree</strong>) যা ফুল টেবিল স্ক্যান (Full Table Scan) না করে খুব দ্রুত নির্দিষ্ট রো (Row) খুঁজে বের করতে সাহায্য করে।</p>
@@ -39,7 +39,7 @@ const databaseQuestions = [
     id: "db-3",
     category: "Database",
     difficulty: "Intermediate",
-    tags: ["Joins", "SQL", "Queries"],
+    tags: ["Joins","SQL","Queries"],
     question: "SQL Joins-এর বিভিন্ন ধরন (INNER, LEFT, RIGHT, FULL OUTER, CROSS, SELF) উদাহরণসহ বুঝিয়ে বলুন।",
     answer: `
       <p>একাধিক টেবিলের মধ্যে সম্পর্কের ওপর ভিত্তি করে ডাটা একত্রিত করতে JOIN ব্যবহৃত হয়।</p>
@@ -53,11 +53,11 @@ const databaseQuestions = [
       </ul>
     `
   },
-   {
+  {
     id: "db-4",
     category: "Database",
     difficulty: "Advanced",
-    tags: ["Isolation Levels", "Concurrency Anomalies", "MVCC"],
+    tags: ["Isolation Levels","Concurrency Anomalies","MVCC"],
     question: "Database Transaction Isolation Levels কী কী? Dirty Read, Non-repeatable Read এবং Phantom Read কী?",
     answer: `
       <p>কনকারেন্ট ট্রানজেকশন (একই সময়ে একাধিক ট্রানজেকশন চলা) থাকলে ডাটার অসঙ্গতি (Anomalies) তৈরি হতে পারে। এই সমস্যাগুলো নিয়ন্ত্রণ করার জন্য ANSI/ISO SQL-এ ৪টি <strong>Isolation Level</strong> সংজ্ঞায়িত আছে।</p>
@@ -93,7 +93,7 @@ Serializable      |     No     |          No         |      No</code></pre>
     id: "db-5",
     category: "Database",
     difficulty: "Advanced",
-    tags: ["Window Functions", "SQL"],
+    tags: ["Window Functions","SQL"],
     question: "SQL Window Functions কী? ROW_NUMBER(), RANK(), DENSE_RANK() এবং NTILE()-এর পার্থক্য কী?",
     answer: `
       <p><strong>Window Function</strong> কোনো সারির গ্রুপিংকে ভেঙে ১টি মাত্র রো-তে রূপান্তর না করে (GROUP BY-এর মতো না করে), প্রতিটি রো-এর সাথে তার নির্দিষ্ট উইন্ডো বা গ্রুপের সাপেক্ষে গণনা করার সুযোগ দেয়। (<code>OVER(PARTITION BY ... ORDER BY ...)</code>)।</p>
@@ -115,7 +115,7 @@ FROM employees;</code></pre>
     id: "db-6",
     category: "Database",
     difficulty: "Intermediate",
-    tags: ["Normalization", "1NF 2NF 3NF BCNF"],
+    tags: ["Normalization","1NF 2NF 3NF BCNF"],
     question: "Database Normalization কী? 1NF, 2NF, 3NF এবং BCNF-এর নিয়মগুলো বুঝিয়ে বলুন।",
     answer: `
       <p><strong>Normalization</strong> হলো ডাটাবেজ টেবিল ডিজাইনের একটি রিফাইনমেন্ট প্রসেস যা ডাটা রিডানডেন্সি (অপ্রয়োজনীয় পুনরাবৃত্তি) কমায় এবং ডাটা ইনটিগ্রিটি বজায় রাখে।</p>
@@ -128,11 +128,11 @@ FROM employees;</code></pre>
       </ul>
     `
   },
-   {
+  {
     id: "db-7",
     category: "Database",
     difficulty: "Advanced",
-    tags: ["Query Optimization", "EXPLAIN ANALYZE"],
+    tags: ["Query Optimization","EXPLAIN ANALYZE"],
     question: "Slow SQL Query কীভাবে অপ্টিমাইজ করবেন? EXPLAIN বা EXPLAIN ANALYZE দিয়ে কীভাবে Index verify করবেন?",
     answer: `
       <p>SQL Performance Tuning-এর জন্য ধীরগতির কুয়েরি চিহ্নিত ও সমাধান করার ধাপসমূহ:</p>
@@ -157,7 +157,7 @@ FROM employees;</code></pre>
     id: "db-8",
     category: "Database",
     difficulty: "Advanced",
-    tags: ["Locking", "Deadlocks", "Optimistic Pessimistic"],
+    tags: ["Locking","Deadlocks","Optimistic Pessimistic"],
     question: "Pessimistic Locking এবং Optimistic Locking-এর পার্থক্য কী? Deadlock কী এবং কীভাবে এড়ানো যায়?",
     answer: `
       <p>কনকারেন্ট ডাটা মডিফিকেশনের সময় ডাটা রেস কন্ডিশন ঠেকাতে ২ ধরনের লকিং ব্যবহৃত হয়:</p>
@@ -174,7 +174,7 @@ FROM employees;</code></pre>
     id: "db-9",
     category: "Database",
     difficulty: "Intermediate",
-    tags: ["Connection Pooling", "Performance"],
+    tags: ["Connection Pooling","Performance"],
     question: "Database Connection Pooling কী এবং ব্যাকএন্ডে এটি কেন অত্যন্ত গুরুত্বপূর্ণ?",
     answer: `
       <p>ডাটাবেজ কানেকশন তৈরি করা (TCP Handshake, Authentication, Session initialization) বেশ ব্যয়বহুল (Costly) অপারেশন।</p>
@@ -190,13 +190,25 @@ FROM employees;</code></pre>
     id: "db-10",
     category: "Database",
     difficulty: "Advanced",
-    tags: ["Sharding", "Partitioning", "Scalability"],
-    question: "Database Partitioning এবং Database Sharding-এর মধ্যে পার্থক্য কী?",
+    tags: ["Database","Replication","Consistency","Senior"],
+    question: "Read Replica Lag থাকা অবস্থায় Read-Your-Own-Writes Consistency সমস্যা কীভাবে সমাধান করবেন?",
     answer: `
-      <p>উভয়ই বিশাল সাইজের ডাটাবেজ স্কেল করার কৌশল, কিন্তু প্রয়োগের জায়গায় তফাৎ রয়েছে:</p>
+      <p>Master-এ write করার সাথে সাথে যদি একই ইউজার read replica থেকে read করে, replication lag-এর কারণে তার নিজের সদ্য করা পরিবর্তনই দেখতে না পারার সমস্যা হয় — একে <strong>Read-Your-Own-Writes</strong> সমস্যা বলে।</p>
+      <div class="code-box">
+        <div class="code-header"><span>text</span><button class="copy-btn">Copy</button></div>
+        <pre><code>ইউজার প্রোফাইল আপডেট করলেন → Master-এ লেখা হলো
+তাৎক্ষণিক প্রোফাইল পেজ রিফ্রেশ → Read Replica থেকে পড়া হলো (এখনও sync হয়নি)
+→ ইউজার দেখেন পুরনো ডেটা — বিভ্রান্তিকর অভিজ্ঞতা</code></pre>
+      </div>
+      <h4>সমাধান কৌশল</h4>
       <ul>
-        <li><strong>Vertical & Horizontal Partitioning:</strong> এটি একটি একক ডাটাবেজ সার্ভারের (Single Database Instance) ভেতরে বড় টেবিলকে ছোট ছোট সাব-টেবিলে ভাগ করে রাখা (যেমন: Range Partitioning by Year)।</li>
-        <li><strong>Sharding (Horizontal Scaling):</strong> এটি বড় ডাটাবেজকে একাধিক <strong>স্বাধীন ফিজিক্যাল সার্ভারে (Multiple DB Nodes)</strong> বিভক্ত করার টেকনিক। এখানে একটি <code>Shard Key</code> অনুযায়ী ডাটা আলাদা আলাদা সার্ভারে ডিস্ট্রিবিউট হয়।</li>
+        <li><strong>Session-Sticky Read:</strong> একটি write-এর পরবর্তী কিছু সময় (কয়েক সেকেন্ড) সেই ইউজারের জন্য read-ও master থেকে করানো, তারপর replica-তে ফিরে যাওয়া।</li>
+        <li><strong>Read-Your-Writes Token:</strong> write অপারেশনের replication position (LSN/offset) ক্লায়েন্টকে ফেরত দেওয়া; পরের read রিকোয়েস্টে সেই position পার হওয়া replica খুঁজে বের করে পড়া (MongoDB causal consistency এই প্যাটার্নে কাজ করে)।</li>
+        <li><strong>Optimistic UI:</strong> ব্যাকএন্ড থেকে আবার fetch না করে, ফ্রন্টএন্ডে যে ডেটা লেখা হয়েছে সেটিই সাথে সাথে UI-তে দেখানো — replica lag আড়াল হয়ে যায়।</li>
+      </ul>
+      <h4>Follow-up প্রশ্ন</h4>
+      <ul>
+        <li>Eventual Consistency ও Read-Your-Own-Writes Consistency-এর মধ্যে সম্পর্ক কী?</li>
       </ul>
     `
   },
@@ -312,16 +324,51 @@ const users = await User.findAll({ include: [{ model: Post }] });</code></pre>
     tags: ["DevOps","Migrations","Schema"],
     question: "Database Migration Management (Knex/Prisma/Flyway) কী?",
     answer: `
-      <p>ডাটাবেজ স্কিমা পরিবর্তনগুলোকে ভার্সন কন্ট্রোল (Git) এর মাধ্যমে ম্যানেজ করার প্রক্রিয়াকে <strong>Database Migration</strong> বলে। টিমের সবার লোকাল ডাটাবেজ এবং প্রোডাকশন ডাটাবেজ একই স্টেটে রাখতে এটি ব্যবহৃত হয়।</p>
-      <p>প্রতিটি মাইগ্রেশন ফাইলে দুটি অংশ থাকে:</p>
-      <ul>
-        <li><strong>Up (Upgrade):</strong> নতুন টেবিল বা কলাম যোগ করার কোড।</li>
-        <li><strong>Down (Rollback):</strong> কোনো সমস্যা হলে আগের অবস্থায় ফিরে যাওয়ার কোড।</li>
-      </ul>
+      <p><strong>Database Migration</strong> হলো ডাটাবেজ স্কিমার পরিবর্তন (টেবিল তৈরি, কলাম যোগ, ইনডেক্স তৈরি) কোড আকারে, ভার্সন-নিয়ন্ত্রিতভাবে ও পুনরাবৃত্তিযোগ্যভাবে ম্যানেজ করার পদ্ধতি — যাতে সব environment (dev/staging/prod) একই স্কিমা state-এ থাকে।</p>
+      <h4>কেন raw SQL script যথেষ্ট নয়</h4>
+      <p>ম্যানুয়ালি প্রোডাকশন ডাটাবেজে SQL চালালে ট্র্যাক করা কঠিন হয়ে যায় — কোন পরিবর্তন কখন হয়েছে, কোন environment-এ প্রয়োগ হয়েছে, এবং টিমের অন্য মেম্বাররা কীভাবে সেই স্কিমা তাদের লোকাল মেশিনে পুনরুৎপাদন করবে। Migration টুল এই সমস্যা সমাধান করে ভার্সন-নাম্বারযুক্ত ফাইল ও একটি ট্র্যাকিং টেবিলের মাধ্যমে।</p>
       <div class="code-box">
-        <div class="code-header"><span>bash</span><button class="copy-btn">Copy</button></div>
-        <pre><code>npx prisma migrate dev --name add_user_table</code></pre>
+        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
+        <pre><code>// Knex migration উদাহরণ
+exports.up = function(knex) {
+  return knex.schema.createTable('orders', (table) => {
+    table.increments('id').primary();
+    table.integer('user_id').references('users.id');
+    table.decimal('total', 10, 2).notNullable();
+    table.timestamps(true, true);
+  });
+};
+
+exports.down = function(knex) {
+  return knex.schema.dropTable('orders');   // ← rollback পথ, বাধ্যতামূলক
+};
+
+// Prisma schema-first পদ্ধতি
+model Order {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  total     Decimal  @db.Decimal(10, 2)
+  createdAt DateTime @default(now())
+}
+// prisma migrate dev → schema.prisma ডিফ করে migration SQL স্বয়ংক্রিয়ভাবে তৈরি করে</code></pre>
       </div>
+      <h4>কীভাবে কাজ করে — ট্র্যাকিং টেবিল</h4>
+      <p>প্রতিটি migration টুল একটি বিশেষ টেবিল রাখে (Knex-এ <code>knex_migrations</code>, Flyway-এ <code>flyway_schema_history</code>) যেখানে কোন migration ইতিমধ্যে প্রয়োগ হয়েছে তা রেকর্ড থাকে। <code>migrate up</code> চালালে টুল এই টেবিল দেখে বাকি থাকা migration ক্রমানুসারে প্রয়োগ করে — একই migration দুইবার চলে না।</p>
+      <h4>Up/Down (Rollback) কেন গুরুত্বপূর্ণ</h4>
+      <p>প্রতিটি migration-এর একটি <code>up</code> (পরিবর্তন প্রয়োগ) ও <code>down</code> (পরিবর্তন বাতিল) থাকা উচিত। প্রোডাকশনে একটি migration সমস্যা তৈরি করলে <code>down</code> চালিয়ে দ্রুত আগের অবস্থায় ফেরা যায় — নতুন কোড ডিপ্লয় করার অপেক্ষা না করেই।</p>
+      <h4>Zero-Downtime Migration — সিনিয়র-স্তরের বিবেচনা</h4>
+      <p>প্রোডাকশনে একটি বড় টেবিলে <code>ALTER TABLE ADD COLUMN NOT NULL</code> সরাসরি চালালে পুরো টেবিল <strong>লক</strong> হয়ে যেতে পারে (PostgreSQL-এ পুরনো ভার্সনে, বা ডিফল্ট ভ্যালু গণনা করতে হলে)। সিনিয়র-স্তরের অভ্যাস:</p>
+      <ol>
+        <li>প্রথমে কলাম <code>NULL</code>-যোগ্য হিসেবে যোগ করুন (দ্রুত, লক-মুক্ত)।</li>
+        <li>ব্যাকফিল স্ক্রিপ্ট দিয়ে ব্যাচে ব্যাচে পুরনো রো আপডেট করুন (একসাথে নয়, টেবিল লক এড়াতে)।</li>
+        <li>ব্যাকফিল শেষ হলে <code>NOT NULL</code> constraint যোগ করুন।</li>
+      </ol>
+      <p>এভাবে schema পরিবর্তন ও কোড ডিপ্লয়মেন্ট আলাদা ধাপে হয় — কোনো ডাউনটাইম ছাড়াই।</p>
+      <h4>Follow-up প্রশ্ন</h4>
+      <ul>
+        <li>একই migration যদি দুই ডেভেলপার আলাদাভাবে লিখে ফেলেন (migration conflict), কীভাবে সমাধান করবেন?</li>
+        <li>Prisma-এর schema-first পদ্ধতি ও Knex-এর imperative পদ্ধতির ট্রেড-অফ কী?</li>
+      </ul>
     `
   },
   {
@@ -351,15 +398,26 @@ SELECT * FROM EmployeeHierarchy;</code></pre>
     id: "db-19",
     category: "Database",
     difficulty: "Advanced",
-    tags: ["Transactions", "Isolation Levels", "MVCC"],
-    question: "ACID Transactions: 4 Isolation Levels (Read Uncommitted, Read Committed, Repeatable Read, Serializable) এবং Dirty Read, Non-Repeatable Read, Phantom Read কী?",
+    tags: ["Database","Backup","Disaster Recovery","Senior"],
+    question: "Database Backup Strategy: Full vs Incremental vs Differential এবং Point-in-Time Recovery (PITR) কী?",
     answer: `
-      <p>কনকারেন্সি কন্ট্রোলের জন্য ৪টি আইসোলেশন লেভেল ব্যবহৃত হয়:</p>
+      <p>প্রোডাকশন ডাটাবেজে সঠিক backup strategy ছাড়া একটি accidental <code>DROP TABLE</code> বা র‍্যানসমওয়্যার আক্রমণ ব্যবসা ধ্বংস করে দিতে পারে — backup শুধু "কপি রাখা" নয়, একটি নির্ভরযোগ্য recovery পরিকল্পনা।</p>
+      <table>
+        <tr><th>ধরন</th><th>কী কপি হয়</th><th>Restore সময়</th></tr>
+        <tr><td><strong>Full Backup</strong></td><td>পুরো ডাটাবেজ</td><td>দ্রুত (একটি ফাইল থেকে)</td></tr>
+        <tr><td><strong>Incremental</strong></td><td>শেষ backup-এর পর যা বদলেছে</td><td>ধীর (last full + সব incremental চেইন)</td></tr>
+        <tr><td><strong>Differential</strong></td><td>শেষ <em>full</em> backup-এর পর যা বদলেছে</td><td>মাঝামাঝি (last full + শেষ differential)</td></tr>
+      </table>
+      <h4>Point-in-Time Recovery (PITR)</h4>
+      <p>শুধু daily backup যথেষ্ট নয় — একটি ভুল <code>UPDATE</code> সকাল ১০টায় হলে, রাতের backup সেই ভুলও ধরে রাখবে। PITR-এ WAL/binlog আর্কাইভ রাখা হয়, যাতে "গতকালের backup + WAL replay করে ঠিক ৯:৫৯ মিনিটের অবস্থায়" ফিরে যাওয়া যায় — ভুলের ঠিক আগ মুহূর্তে।</p>
+      <h4>সিনিয়র-স্তরের বিবেচনা</h4>
       <ul>
-        <li><strong>Read Uncommitted:</strong> সবচেয়ে কম আইসোলেটেড। অন্য ট্রানজেকশনের কমিট না হওয়া ডেটা পড়া যায় (<em>Dirty Read</em> ঘটে)।</li>
-        <li><strong>Read Committed:</strong> কেবল কমিট হওয়া ডেটা পড়া যায়। তবে একই ট্রানজেকশনে দুইবার পড়লে ভিন্ন ভ্যালু আসতে পারে (<em>Non-Repeatable Read</em> ঘটে)।</li>
-        <li><strong>Repeatable Read:</strong> ট্রানজেকশন শুরু হওয়ার পর একই ডাটা পরিবর্তিত হতে দেওয়া হয় না। তবে নতুন রো ইনসার্ট হলে তা দেখা যেতে পারে (<em>Phantom Read</em>)।</li>
-        <li><strong>Serializable:</strong> সর্বোচ্চ আইসোলেটেড। ট্রানজেকশনগুলো একে অপরের সাথে সম্পূর্ণ আলাদাভাবে সিকুয়েনশিয়ালি রান হয়। কোনো এনোমালি ঘটে না, তবে পারফরম্যান্স স্লো হয়।</li>
+        <li><strong>Backup টেস্ট করা আবশ্যক</strong> — restore আসলেই কাজ করে কিনা নিয়মিত যাচাই না করলে, দরকারের সময় backup কাজ না করার ঝুঁকি থাকে।</li>
+        <li><strong>3-2-1 নিয়ম:</strong> ৩টি কপি, ২টি ভিন্ন মিডিয়ায়, ১টি অফসাইট (অন্য region/datacenter)।</li>
+      </ul>
+      <h4>Follow-up প্রশ্ন</h4>
+      <ul>
+        <li>RPO (Recovery Point Objective) ও RTO (Recovery Time Objective)-এর পার্থক্য কী এবং backup strategy কীভাবে এই দুটি লক্ষ্যে প্রভাব ফেলে?</li>
       </ul>
     `
   },
@@ -367,7 +425,7 @@ SELECT * FROM EmployeeHierarchy;</code></pre>
     id: "db-20",
     category: "Database",
     difficulty: "Advanced",
-    tags: ["Indexing", "B-Tree vs Hash", "Composite Index"],
+    tags: ["Indexing","B-Tree vs Hash","Composite Index"],
     question: "B-Tree Indexing Mechanism, Composite Indexing, Leftmost Prefix Rule এবং Index Scan vs Index Seek কী?",
     answer: `
       <p><strong>B-Tree Index:</strong> এটি গাছের মতো স্ট্রাকচার যা ডাটাকে সর্টেড রাখে। এতে ডেটা খোঁজার সময় <code>O(log N)</code> লাগে।</p>
@@ -382,7 +440,7 @@ SELECT * FROM EmployeeHierarchy;</code></pre>
     id: "db-21",
     category: "Database",
     difficulty: "Advanced",
-    tags: ["Performance", "EXPLAIN ANALYZE", "Query Plan"],
+    tags: ["Performance","EXPLAIN ANALYZE","Query Plan"],
     question: "EXPLAIN ANALYZE দিয়ে SQL Query Execution Plan এবং Performance Bottlenecks কীভাবে চিহ্নিত করবেন?",
     answer: `
       <p>কোয়েরির আগে <code>EXPLAIN ANALYZE</code> লিখলে ডাটাবেজ ইঞ্জিন আসল ডাটা না এনে কেবল এক্সিকিউশন প্ল্যান দেখায়। এটি পারফরম্যান্স বটলনেক খুঁজতে সাহায্য করে।</p>
@@ -401,7 +459,7 @@ SELECT * FROM EmployeeHierarchy;</code></pre>
     id: "db-22",
     category: "Database",
     difficulty: "Advanced",
-    tags: ["Optimization", "Sharding", "Partitioning"],
+    tags: ["Optimization","Sharding","Partitioning"],
     question: "Database Partitioning (Range, List, Hash) vs Database Sharding-এর মধ্যে মৌলিক পার্থক্য কী?",
     answer: `
       <p>বড় টেবিল ম্যানেজ করার জন্য এই দুটি টেকনিক ব্যবহৃত হয়।</p>
@@ -415,7 +473,7 @@ SELECT * FROM EmployeeHierarchy;</code></pre>
     id: "db-23",
     category: "Database",
     difficulty: "Advanced",
-    tags: ["PostgreSQL", "JSONB", "GIN Index"],
+    tags: ["PostgreSQL","JSONB","GIN Index"],
     question: "PostgreSQL JSON vs JSONB, GIN Indexing, এবং Expression Indexing কীভাবে সার্চ গতি বাড়ায়?",
     answer: `
       <p>PostgreSQL NoSQL-এর মতো JSON ডেটা সাপোর্ট করে।</p>
@@ -436,14 +494,32 @@ SELECT * FROM users WHERE data_column @> '{"role": "admin"}';</code></pre>
     id: "db-24",
     category: "Database",
     difficulty: "Intermediate",
-    tags: ["Window Functions", "OVER", "ROW_NUMBER"],
-    question: "SQL Window Functions (ROW_NUMBER(), RANK(), DENSE_RANK(), LAG(), LEAD()) কীভাবে কাজ করে?",
+    tags: ["Database","SQL","Query Optimization","Senior"],
+    question: "SQL-এ Subquery vs JOIN vs CTE — পারফরম্যান্সের দিক থেকে কখন কোনটি বেছে নেবেন?",
     answer: `
-      <p>Window Function একটি কুয়েরির রেজাল্ট সেটকে গ্রুপ করে (যেমন- <code>OVER(PARTITION BY ...)</code>), কিন্তু <code>GROUP BY</code>-এর মতো রো (Row) কমিয়ে ফেলে না। প্রতিটি রো-এর সাথেই অ্যাগ্রিগেটেড বা র‍্যাঙ্ক ভ্যালু যুক্ত করে।</p>
+      <p>একই ফলাফল প্রায়ই তিনভাবে পাওয়া যায় — Subquery, JOIN, বা CTE দিয়ে — কিন্তু পারফরম্যান্স ও পঠনযোগ্যতায় পার্থক্য থাকতে পারে, যদিও আধুনিক query planner (PostgreSQL 12+) অনেক ক্ষেত্রে এদের সমান optimize করে ফেলে।</p>
+      <div class="code-box">
+        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
+        <pre><code>-- Subquery — correlated হলে প্রতি রো-তে re-execute হতে পারে (ধীর)
+SELECT * FROM orders o
+WHERE o.total > (SELECT AVG(total) FROM orders WHERE user_id = o.user_id);
+
+-- JOIN — সাধারণত query planner সবচেয়ে ভালো অপ্টিমাইজ করতে পারে
+SELECT o.* FROM orders o
+JOIN user_avg ua ON ua.user_id = o.user_id
+WHERE o.total > ua.avg_total;
+
+-- CTE — পঠনযোগ্যতা ভালো, PostgreSQL 12+ এ auto-inlined (আলাদা কোনো খরচ নেই)
+WITH user_avg AS (SELECT user_id, AVG(total) as avg_total FROM orders GROUP BY user_id)
+SELECT o.* FROM orders o JOIN user_avg ua ON ua.user_id = o.user_id WHERE o.total > ua.avg_total;</code></pre>
+      </div>
+      <h4>মূল পার্থক্য — Correlated Subquery-এর ঝুঁকি</h4>
+      <p><strong>Correlated subquery</strong> (যেখানে ভেতরের কোয়েরি বাইরের প্রতিটি রো-এর উপর নির্ভর করে) প্রতিটি বাইরের রো-এর জন্য আলাদাভাবে চলতে পারে — N রো থাকলে N বার execute হওয়ার ঝুঁকি। JOIN-এ পুরো ডেটাসেট একবারে প্রসেস হয়, সাধারণত দ্রুততর।</p>
+      <h4>সিনিয়র-স্তরের নির্দেশনা</h4>
+      <p>সন্দেহ থাকলে সবসময় <code>EXPLAIN ANALYZE</code> দিয়ে যাচাই করুন — আধুনিক PostgreSQL planner CTE ও subquery-কে প্রায়ই JOIN-এর সমতুল্য প্ল্যানে রূপান্তর করে ফেলে। পঠনযোগ্যতা ও রক্ষণাবেক্ষণযোগ্যতা প্রায়ই পারফরম্যান্সের চেয়ে বেশি গুরুত্বপূর্ণ বিবেচনা — যতক্ষণ না প্রোফাইলিং প্রকৃত bottleneck দেখায়।</p>
+      <h4>Follow-up প্রশ্ন</h4>
       <ul>
-        <li><strong>ROW_NUMBER():</strong> প্রতি গ্রুপের প্রতিটি রো-কে ১, ২, ৩ করে নাম্বার দেয়।</li>
-        <li><strong>RANK() / DENSE_RANK():</strong> নির্দিষ্ট কলামের ভ্যালুর ওপর ভিত্তি করে র‍্যাঙ্ক দেয়।</li>
-        <li><strong>LAG() / LEAD():</strong> বর্তমান রো-এর সাথে পরবর্তী বা পূর্ববর্তী রো-এর ডেটা তুলনা করতে সাহায্য করে।</li>
+        <li>PostgreSQL 12-এর আগে CTE কেন "optimization fence" ছিল এবং এখন কী বদলেছে?</li>
       </ul>
     `
   },
@@ -451,7 +527,7 @@ SELECT * FROM users WHERE data_column @> '{"role": "admin"}';</code></pre>
     id: "db-25",
     category: "Database",
     difficulty: "Advanced",
-    tags: ["Concurrency", "Pessimistic Locking", "Optimistic Locking"],
+    tags: ["Concurrency","Pessimistic Locking","Optimistic Locking"],
     question: "Pessimistic Locking (SELECT ... FOR UPDATE) vs Optimistic Locking (Version Column) কখন কোনটা ব্যবহার করবেন?",
     answer: `
       <p>কনকারেন্ট আপডেট ঠেকাতে এই দুটি লকিং মেকানিজম ব্যবহৃত হয়।</p>
@@ -465,7 +541,7 @@ SELECT * FROM users WHERE data_column @> '{"role": "admin"}';</code></pre>
     id: "db-26",
     category: "Database",
     difficulty: "Intermediate",
-    tags: ["CTE", "WITH RECURSIVE", "Hierarchical"],
+    tags: ["CTE","WITH RECURSIVE","Hierarchical"],
     question: "Common Table Expressions (CTE) এবং WITH RECURSIVE দিয়ে অসীম নেস্টেড ক্যাটাগরি ট্রি (Tree Structure) কীভাবে কোয়েরি করবেন?",
     answer: `
       <p>ক্যাটাগরি বা অর্গানাইজেশনাল হায়ারার্কি যেখানে প্যারেন্ট-চাইল্ড রিলেশন থাকে, সেখানে <code>WITH RECURSIVE</code> ব্যবহৃত হয়। এটি বেস কেস (Root) খুঁজে বের করে এবং তারপর রিকার্সিভলি চাইল্ড নোডগুলোকে যুক্ত করে।</p>
@@ -487,36 +563,95 @@ SELECT * FROM CategoryTree;</code></pre>
     id: "db-27",
     category: "Database",
     difficulty: "Advanced",
-    tags: ["Connection Pooling", "PgBouncer", "Idle Sockets"],
+    tags: ["Connection Pooling","PgBouncer","Idle Sockets"],
     question: "Database Connection Pooling (PgBouncer / HikariCP) এবং Max Connections Tuning কেন জরুরি?",
     answer: `
-      <p>প্রতিটি নতুন ডাটাবেজ কানেকশন তৈরি করতে কয়েক মেগাবাইট RAM এবং CPU প্রসেস খরচ হয়। হাজার হাজার রিকোয়েস্ট একসাথে এলে ডাটাবেজ ক্র্যাশ করতে পারে।</p>
-      <p><strong>Connection Pooling (PgBouncer/HikariCP):</strong> এটি আগে থেকেই কিছু কানেকশন তৈরি করে রাখে এবং রিকোয়েস্ট আসলে সেগুলো রির্ইউজ করে। রিকোয়েস্ট শেষ হলে কানেকশন বন্ধ না করে পুলে ফেরত দেয়। এতে ডাটাবেজ ডাউন হওয়া আটকায় এবং রেসপন্স টাইম দ্রুত হয়।</p>
+      <p><strong>Connection Pooling</strong> মানে প্রতিটি ডাটাবেজ কোয়েরির জন্য নতুন সংযোগ তৈরি না করে, আগে থেকে তৈরি করা একগুচ্ছ সংযোগ পুনর্ব্যবহার করা — কারণ একটি TCP সংযোগ + PostgreSQL প্রসেস ফর্ক করা ব্যয়বহুল (কয়েক মিলিসেকেন্ড থেকে কয়েক সেকেন্ড পর্যন্ত)।</p>
+      <h4>সমস্যাটি — PostgreSQL-এর প্রসেস-পার-কানেকশন মডেল</h4>
+      <p>PostgreSQL প্রতিটি ক্লায়েন্ট সংযোগের জন্য একটি <strong>আলাদা OS প্রসেস</strong> ফর্ক করে (থ্রেড নয়)। প্রতিটি প্রসেসের নিজস্ব মেমরি ওভারহেড (~৫-১০ MB) থাকে। হাজার হাজার concurrent ইউজার থাকলে সরাসরি হাজার হাজার সংযোগ খুললে সার্ভার মেমরি শেষ হয়ে যায় এবং <code>max_connections</code> (ডিফল্ট প্রায় ১০০) সীমা দ্রুত পার হয়ে যায়।</p>
+      <div class="code-box">
+        <div class="code-header"><span>text</span><button class="copy-btn">Copy</button></div>
+        <pre><code>App সার্ভার (১০০ ইনস্ট্যান্স, প্রতিটি ২০ কানেকশন)
+  → সরাসরি PostgreSQL-এ কানেক্ট করলে: ২,০০০ কানেকশন দরকার
+  → PostgreSQL max_connections = ১০০ → ওভারফ্লো, ক্র্যাশের ঝুঁকি
+
+App সার্ভার → PgBouncer (transaction mode) → PostgreSQL
+  → PgBouncer ২,০০০ ক্লায়েন্ট কানেকশন গ্রহণ করে
+  → মাত্র ২০-৫০টি প্রকৃত PostgreSQL কানেকশন পুনর্ব্যবহার করে</code></pre>
+      </div>
+      <h4>PgBouncer — তিনটি pooling mode</h4>
+      <table>
+        <tr><th>Mode</th><th>আচরণ</th><th>ব্যবহার</th></tr>
+        <tr><td><strong>Session</strong></td><td>ক্লায়েন্ট ডিসকানেক্ট না করা পর্যন্ত একই DB কানেকশন ধরে রাখে</td><td>prepared statement/session variable দরকার হলে</td></tr>
+        <tr><td><strong>Transaction</strong></td><td>শুধু একটি transaction চলাকালীন DB কানেকশন বরাদ্দ, শেষ হলেই ফেরত</td><td>সবচেয়ে সাধারণ, সর্বোচ্চ efficiency</td></tr>
+        <tr><td><strong>Statement</strong></td><td>প্রতিটি স্টেটমেন্টের পর কানেকশন ফেরত</td><td>খুব কম ব্যবহৃত, transaction ভাঙে</td></tr>
+      </table>
+      <p><strong>Transaction mode</strong>-এ সতর্কতা: session-level ফিচার (prepared statement, <code>SET</code> ভ্যারিয়েবল, advisory lock) কাজ নাও করতে পারে, কারণ পরের কোয়েরি একই ফিজিক্যাল কানেকশনে যাবে তার নিশ্চয়তা নেই।</p>
+      <h4>Application-স্তরের Pool (Node.js উদাহরণ)</h4>
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
+        <pre><code>const { Pool } = require('pg');
+const pool = new Pool({
+  max: 20,                      // প্রতি অ্যাপ ইনস্ট্যান্সে সর্বোচ্চ কানেকশন
+  idleTimeoutMillis: 30000,     // অলস কানেকশন কতক্ষণ পর বন্ধ হবে
+  connectionTimeoutMillis: 5000 // pool পূর্ণ হলে কতক্ষণ অপেক্ষা করবে
+});</code></pre>
+      </div>
+      <h4>Max Connections হিসাব — সিনিয়র-স্তরের বিবেচনা</h4>
+      <p>একটি সাধারণ ভুল: প্রতিটি অ্যাপ ইনস্ট্যান্সে বড় pool সাইজ (যেমন ১০০) সেট করা। বাস্তবে <strong>অ্যাপ ইনস্ট্যান্স সংখ্যা × pool size ≤ DB-এর max_connections</strong> — নাহলে হরাইজন্টাল স্কেলিং (আরও ইনস্ট্যান্স যোগ করা) DB সংযোগ সীমা ভেঙে দেয়। PgBouncer এই সমস্যা কাঠামোগতভাবে সমাধান করে — অ্যাপের কানেকশন সংখ্যা DB-এর কানেকশন সংখ্যা থেকে decouple করে দেয়।</p>
+      <h4>Follow-up প্রশ্ন</h4>
+      <ul>
+        <li>Transaction mode-এ prepared statement কেন সমস্যা করতে পারে, এবং কীভাবে এড়াবেন?</li>
+        <li>PgBouncer নিজেই একটি single point of failure হয়ে যেতে পারে — কীভাবে HA করবেন?</li>
+      </ul>
     `
   },
   {
     id: "db-28",
     category: "Database",
     difficulty: "Intermediate",
-    tags: ["ORM", "N+1 Problem", "Eager Loading"],
-    question: "ORM (Prisma / TypeORM / Sequelize)-এ N+1 Query Problem কী এবং Eager Loading / JOIN দিয়ে এটি কীভাবে সমাধান করবেন?",
+    tags: ["Database","Connection Pool","Production","Senior"],
+    question: "Database Connection Leak প্রোডাকশনে কীভাবে শনাক্ত ও প্রতিরোধ করবেন?",
     answer: `
-      <p>১টি প্রধান তালিকা আনার জন্য ১টি কুয়েরি চালানো হয়, কিন্তু সেই তালিকার প্রতিটি আইটেমের রিলেটেড ডাটা আনার জন্য আলাদা N-সংখ্যক কুয়েরি চালানোই হলো <strong>N+1 Problem</strong>। এটি অ্যাপ্লিকেশনকে অনেক স্লো করে দেয়।</p>
-      <p>এটি সমাধান করতে Eager Loading বা <code>JOIN</code> ব্যবহার করা হয়, যাতে ১টি কুয়েরিতেই মূল ও রিলেটেড সব ডাটা চলে আসে।</p>
+      <p><strong>Connection Leak</strong> ঘটে যখন কোড একটি ডাটাবেজ কানেকশন pool থেকে ধার নেয় কিন্তু কখনও ফেরত দেয় না — ধীরে ধীরে pool খালি হয়ে যায়, নতুন রিকোয়েস্ট কানেকশন পায় না, পুরো অ্যাপ্লিকেশন থমকে যায়।</p>
       <div class="code-box">
         <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>// Prisma Example
-const users = await prisma.user.findMany({
-  include: { posts: true } // Solves N+1 using JOIN
-});</code></pre>
+        <pre><code>// ❌ leak — এরর হলে connection.release() কখনও চলে না
+async function getUser(id) {
+  const conn = await pool.getConnection();
+  const [rows] = await conn.query('SELECT * FROM users WHERE id = ?', [id]);
+  conn.release();   // এই লাইনের আগে এরর থ্রো হলে কানেকশন চিরকাল আটকে থাকে
+  return rows[0];
+}
+
+// ✅ try/finally দিয়ে গ্যারান্টিড release
+async function getUser(id) {
+  const conn = await pool.getConnection();
+  try {
+    const [rows] = await conn.query('SELECT * FROM users WHERE id = ?', [id]);
+    return rows[0];
+  } finally {
+    conn.release();   // এরর হোক বা না হোক, সবসময় চলবে
+  }
+}</code></pre>
       </div>
+      <h4>শনাক্তকরণ — প্রোডাকশন মনিটরিং</h4>
+      <ul>
+        <li><strong>Pool মেট্রিক্স মনিটর করুন:</strong> active connections ক্রমাগত বাড়তে থাকা কিন্তু কখনও না কমা — এটি leak-এর স্পষ্ট চিহ্ন।</li>
+        <li><strong>PostgreSQL-এ <code>pg_stat_activity</code></strong> দিয়ে দেখুন কোন কানেকশন দীর্ঘক্ষণ idle-in-transaction অবস্থায় আছে।</li>
+        <li><strong>Connection timeout সেট করুন</strong> — একটি কানেকশন নির্দিষ্ট সময়ের বেশি ব্যবহৃত হলে বাধ্যতামূলক close/log করা।</li>
+      </ul>
+      <h4>Follow-up প্রশ্ন</h4>
+      <ul>
+        <li>ORM (Prisma/TypeORM) ব্যবহার করলে connection leak-এর ঝুঁকি ম্যানুয়াল query-এর তুলনায় কীভাবে কম বা বেশি হয়?</li>
+      </ul>
     `
   },
   {
     id: "db-29",
     category: "Database",
     difficulty: "Advanced",
-    tags: ["PostgreSQL", "WAL", "Checkpoints"],
+    tags: ["PostgreSQL","WAL","Checkpoints"],
     question: "Write-Ahead Logging (WAL) এবং PostgreSQL Checkpoints কীভাবে ক্র্যাশ রিকভারি নিশ্চিত করে?",
     answer: `
       <p>PostgreSQL ডাটাবেজ আসল ডেটা ফাইলে লেখার আগে সকল পরিবর্তন <strong>WAL File</strong>-এ ডিস্কে স্থায়ীভাবে সংরক্ষণ করে। </p>
@@ -528,7 +663,7 @@ const users = await prisma.user.findMany({
     id: "db-30",
     category: "Database",
     difficulty: "Intermediate",
-    tags: ["Schema", "Migrations", "Zero Downtime"],
+    tags: ["Schema","Migrations","Zero Downtime"],
     question: "Database Migrations (Zero Downtime Schema Migration Pattern) কীভাবে পরিচালনা করবেন?",
     answer: `
       <p>প্রোডাকশনে চলমান সিস্টেমে ডাটাবেজ স্কিমা পরিবর্তন করতে হলে ডাউনটাইম এড়াতে <strong>Zero Downtime Migration</strong> প্যাটার্ন ব্যবহৃত হয়। এটি সাধারণত ৩টি ফেজে সম্পন্ন হয়:</p>
@@ -543,7 +678,7 @@ const users = await prisma.user.findMany({
     id: "db-31",
     category: "Database",
     difficulty: "Advanced",
-    tags: ["Architecture", "CAP Theorem", "PACELC"],
+    tags: ["Architecture","CAP Theorem","PACELC"],
     question: "CAP Theorem (Consistency, Availability, Partition Tolerance) এবং PACELC Theorem-এর আধুনিক ব্যাখ্যা কী?",
     answer: `
       <p><strong>CAP Theorem</strong> বলে ডিস্ট্রিবিউটেড ডাটাবেজে নেটওয়ার্ক পার্টিশন (P) হলে আপনাকে Consistency (C) অথবা Availability (A) এর যেকোনো একটি বেছে নিতে হবে।</p>
@@ -559,7 +694,7 @@ const users = await prisma.user.findMany({
     id: "db-32",
     category: "Database",
     difficulty: "Intermediate",
-    tags: ["Replication", "Master-Slave", "Logical"],
+    tags: ["Replication","Master-Slave","Logical"],
     question: "Master-Slave Replication (Physical Streaming vs Logical Replication) এবং Replication Lag কী?",
     answer: `
       <p>ডাটাবেজ রিপ্লিকেশন দুই ধরনের হয়:</p>
@@ -574,7 +709,7 @@ const users = await prisma.user.findMany({
     id: "db-33",
     category: "Database",
     difficulty: "Advanced",
-    tags: ["Foreign Keys", "CASCADE", "Triggers"],
+    tags: ["Foreign Keys","CASCADE","Triggers"],
     question: "ON DELETE CASCADE, ON DELETE SET NULL, এবং Foreign Key Constraint Triggers-এর সঠিক ব্যবহার কী?",
     answer: `
       <p>Foreign Key কনস্ট্রেইন্ট প্যারেন্ট-চাইল্ড রিলেশন ম্যানেজ করে। প্যারেন্ট ডিলিট হলে চাইল্ড কী হবে তা এই রুলগুলো নির্ধারণ করে:</p>
@@ -589,7 +724,7 @@ const users = await prisma.user.findMany({
     id: "db-34",
     category: "Database",
     difficulty: "Intermediate",
-    tags: ["Normalization", "3NF", "Denormalization"],
+    tags: ["Normalization","3NF","Denormalization"],
     question: "Database Normalization (1NF, 2NF, 3NF, BCNF) vs Denormalization — পারফরম্যান্স ও ডেটা ইন্টিগ্রিটি ব্যালেন্স কীভাবে করবেন?",
     answer: `
       <p><strong>Normalization:</strong> এটি ডুপ্লিকেট ডেটা মুছে ফেলে ডেটা ইন্টিগ্রিটি নিশ্চিত করে। ডাটা আপডেট করা সহজ ও ফাস্ট (কম জায়গায় আপডেট করতে হয়)। কিন্তু ডেটা পড়ার সময় অনেক টেবিল <code>JOIN</code> করতে হয়, তাই রিড পারফরম্যান্স কস্টলি হয়।</p>
@@ -601,7 +736,7 @@ const users = await prisma.user.findMany({
     id: "db-35",
     category: "Database",
     difficulty: "Advanced",
-    tags: ["PostgreSQL", "VACUUM", "Bloat"],
+    tags: ["PostgreSQL","VACUUM","Bloat"],
     question: "PostgreSQL MVCC Bloat এবং Autovacuum / VACUUM FULL কীভাবে মেমোরি ফিনিক্স করে?",
     answer: `
       <p>PostgreSQL-এ MVCC (Multi-Version Concurrency Control) থাকায়, কোনো রো <code>UPDATE</code> বা <code>DELETE</code> করলে সাথে সাথে পুরোনো ডাটা মুছে যায় না। এটি ফাইল সিস্টেমে 'Dead Tuples' হিসেবে থেকে যায়, যাকে <strong>Bloat</strong> বলে।</p>
@@ -615,13 +750,31 @@ const users = await prisma.user.findMany({
     id: "db-36",
     category: "Database",
     difficulty: "Intermediate",
-    tags: ["Triggers", "UDF", "Stored Procedures"],
-    question: "Stored Procedures vs User-Defined Functions (UDF) vs Database Triggers-এর কাজের পার্থক্য কী?",
+    tags: ["Database","Microservices","Architecture","Senior"],
+    question: "একাধিক মাইক্রোসার্ভিস একই Database Schema শেয়ার করা কেন Anti-pattern — Database-per-Service কীভাবে সমাধান দেয়?",
     answer: `
+      <p>একাধিক মাইক্রোসার্ভিস একই ডাটাবেজ/স্কিমা শেয়ার করা একটি সাধারণ কিন্তু বিপজ্জনক অ্যান্টি-প্যাটার্ন — এটি মাইক্রোসার্ভিসের মূল উদ্দেশ্যকেই (স্বাধীন ডিপ্লয়মেন্ট, স্বাধীন স্কেলিং) নষ্ট করে দেয়।</p>
+      <h4>সমস্যা — Shared Database</h4>
+      <div class="code-box">
+        <div class="code-header"><span>text</span><button class="copy-btn">Copy</button></div>
+        <pre><code>Order Service ─┐
+Inventory Service ─┼──→ একই MySQL ডাটাবেজ (shared_db.orders টেবিল)
+Shipping Service ─┘
+
+সমস্যা: Inventory Service যদি orders টেবিলে একটি কলাম বদলায়,
+Order Service ও Shipping Service নিঃশব্দে ভেঙে যেতে পারে —
+কোনো API contract নেই, শুধু ডাটাবেজ স্কিমার উপর অন্ধ নির্ভরতা</code></pre>
+      </div>
       <ul>
-        <li><strong>Stored Procedure:</strong> এটি ম্যানুয়ালি <code>CALL</code> করে চালাতে হয়। এর ভেতরে ট্রানজেকশন পরিচালনা (COMMIT/ROLLBACK) করা যায় এবং একাধিক টেবিলে ডেটা মডিফিকেশন করা যায়।</li>
-        <li><strong>UDF (Function):</strong> এটি <code>SELECT</code> স্টেটমেন্টের ভেতর ব্যবহৃত হয়। এটি ভ্যালু বা টেবিল রিটার্ন করে, কিন্তু ডাটাবেজের স্টেট পরিবর্তন করতে পারে না।</li>
-        <li><strong>Trigger:</strong> এটি কোনো ইভেন্টের (INSERT/UPDATE/DELETE) ওপর স্বয়ংক্রিয়ভাবে ফায়ার হয়। এটি সাধারণত Audit Log বা ডেটা ভ্যালিডেশনের কাজে ব্যবহৃত হয়।</li>
+        <li><strong>Tight Coupling:</strong> একটি সার্ভিসের স্কিমা পরিবর্তন অন্য সব সার্ভিসকে ভাঙতে পারে — স্বাধীন ডিপ্লয়মেন্ট অসম্ভব হয়ে যায়।</li>
+        <li><strong>অস্পষ্ট মালিকানা:</strong> কোন সার্ভিস কোন ডেটার "সত্যিকারের মালিক" তা স্পষ্ট থাকে না — একাধিক সার্ভিস একই টেবিলে লেখে বিজনেস নিয়ম লঙ্ঘন করতে পারে।</li>
+        <li><strong>স্কেলিং বাধা:</strong> একটি সার্ভিস বেশি লোড পেলেও পুরো শেয়ার্ড ডাটাবেজ স্কেল করতে হয়।</li>
+      </ul>
+      <h4>সমাধান — Database-per-Service</h4>
+      <p>প্রতিটি মাইক্রোসার্ভিসের নিজস্ব ডাটাবেজ থাকে, যা শুধু সেই সার্ভিসই সরাসরি অ্যাক্সেস করে। অন্য সার্ভিসের ডেটা দরকার হলে সরাসরি SQL query নয়, বরং সেই সার্ভিসের <strong>API কল করে বা ইভেন্ট শুনে</strong> ডেটা নিতে হয়। এতে প্রতিটি সার্ভিস স্বাধীনভাবে নিজের স্কিমা বদলাতে, স্কেল করতে ও ডিপ্লয় করতে পারে।</p>
+      <h4>Follow-up প্রশ্ন</h4>
+      <ul>
+        <li>Database-per-Service ব্যবহার করলে ক্রস-সার্ভিস JOIN-এর প্রয়োজন কীভাবে মেটাবেন (API composition বা CQRS read model)?</li>
       </ul>
     `
   },
@@ -629,7 +782,7 @@ const users = await prisma.user.findMany({
     id: "db-37",
     category: "Database",
     difficulty: "Advanced",
-    tags: ["Indexing", "Partial Index", "Covering Index"],
+    tags: ["Indexing","Partial Index","Covering Index"],
     question: "Partial Index and Covering Index (INCLUDE Clause) কীভাবে কোয়েরি অপটিমাইজ করে?",
     answer: `
       <p>স্টোরেজ ও মেমোরি সেভ করে পারফরম্যান্স বাড়াতে এই দুটি স্পেশাল ইনডেক্স ব্যবহৃত হয়।</p>
@@ -643,40 +796,120 @@ const users = await prisma.user.findMany({
     id: "db-38",
     category: "Database",
     difficulty: "Intermediate",
-    tags: ["PostgreSQL", "pflow", "Listen/Notify"],
+    tags: ["PostgreSQL","pflow","Listen/Notify"],
     question: "PostgreSQL LISTEN / NOTIFY দিয়ে রিয়েল-টাইম ডাটাবেজ চেঞ্জ নোটিফিকেশন কীভাবে ট্র্যাকিং করবেন?",
     answer: `
-      <p>PostgreSQL-এ <code>LISTEN/NOTIFY</code> হলো বিল্ট-ইন Pub/Sub মেকানিজম। কোনো এক্সটার্নাল মেসেজ ব্রোকার (যেমন- Redis) ছাড়াই রিয়েল-টাইম ইভেন্ট ট্র্যাক করা যায়।</p>
-      <ul>
-        <li>ব্যাকএন্ড অ্যাপ <code>LISTEN channel_name;</code> চালিয়ে সকেট ওপেন রাখে।</li>
-        <li>ডাটাবেজে কোনো ট্রিগার বা স্টোরড প্রসিডিউর থেকে <code>NOTIFY channel_name, 'payload'</code> চালালে, সাথে সাথে ব্যাকএন্ড অ্যাপ সেই মেসেজ রিসিভ করে।</li>
-      </ul>
+      <p><strong>LISTEN/NOTIFY</strong> PostgreSQL-এর বিল্ট-ইন pub-sub মেকানিজম — ক্লায়েন্ট একটি চ্যানেলে <code>LISTEN</code> করে, এবং যেকোনো ট্রানজ্যাকশন সেই চ্যানেলে <code>NOTIFY</code> পাঠালে সব listening ক্লায়েন্ট তাৎক্ষণিক নোটিফিকেশন পায় — পোলিং ছাড়াই।</p>
       <div class="code-box">
         <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
-        <pre><code>NOTIFY order_created, '{"order_id": 12345}';</code></pre>
+        <pre><code>-- ক্লায়েন্ট ১: একটি চ্যানেল সাবস্ক্রাইব করছে
+LISTEN order_updates;
+
+-- ট্রিগার ফাংশন দিয়ে স্বয়ংক্রিয় NOTIFY (সাধারণ প্যাটার্ন)
+CREATE OR REPLACE FUNCTION notify_order_change() RETURNS trigger AS $$
+BEGIN
+  PERFORM pg_notify('order_updates', json_build_object(
+    'id', NEW.id, 'status', NEW.status
+  )::text);
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER order_status_trigger
+AFTER UPDATE OF status ON orders
+FOR EACH ROW EXECUTE FUNCTION notify_order_change();</code></pre>
       </div>
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
+        <pre><code>// Node.js ক্লায়েন্ট — নোটিফিকেশন গ্রহণ
+const { Client } = require('pg');
+const client = new Client();
+await client.connect();
+await client.query('LISTEN order_updates');
+client.on('notification', (msg) => {
+  const data = JSON.parse(msg.payload);
+  broadcastToWebSocket(data);   // ফ্রন্টএন্ডে রিয়েল-টাইম পুশ
+});</code></pre>
+      </div>
+      <h4>কীভাবে কাজ করে — ভেতরের প্রক্রিয়া</h4>
+      <p><code>NOTIFY</code> যখন ট্রানজ্যাকশনের ভেতরে কল হয়, নোটিফিকেশন সাথে সাথে পাঠানো হয় না — <strong>ট্রানজ্যাকশন কমিট হওয়া পর্যন্ত queue হয়ে থাকে</strong>, তারপর একবারে delivered হয়। এটি গুরুত্বপূর্ণ: rollback হলে সেই নোটিফিকেশন কখনও পাঠানো হয় না — ডেটা ও নোটিফিকেশনের মধ্যে সামঞ্জস্য নিশ্চিত থাকে।</p>
+      <h4>সীমাবদ্ধতা — কেন এটি সবসময় যথেষ্ট নয়</h4>
+      <ul>
+        <li><strong>Payload সীমা ৮০০০ বাইট</strong> — বড় ডেটা পাঠানো যায় না, শুধু ID/সংক্ষিপ্ত মেটাডেটা পাঠিয়ে ক্লায়েন্টকে পূর্ণ ডেটা আলাদাভাবে fetch করতে হয়।</li>
+        <li><strong>কোনো persistence নেই</strong> — ক্লায়েন্ট যদি disconnected থাকে (নেটওয়ার্ক সমস্যা, ক্র্যাশ), সেই সময়ের নোটিফিকেশন চিরতরে হারিয়ে যায়। Kafka/RabbitMQ-এর মতো durable queue নয়।</li>
+        <li><strong>প্রতিটি listening কানেকশন একটি নিবেদিত DB কানেকশন দখল করে থাকে</strong> — হাজার হাজার concurrent listener থাকলে এটি connection pool-এর উপর চাপ ফেলে; PgBouncer-এর transaction mode-এ LISTEN নির্ভরযোগ্যভাবে কাজ করে না (session mode দরকার)।</li>
+        <li><strong>Fan-out সীমিত</strong> — একটি একক PostgreSQL ইনস্ট্যান্সের মধ্যেই কাজ করে, একাধিক ডাটাসেন্টার/রিজিয়নে ছড়ানো সিস্টেমে কাজ করে না।</li>
+      </ul>
+      <h4>কখন ব্যবহার করবেন, কখন Kafka/Redis Pub-Sub</h4>
+      <p>ছোট থেকে মাঝারি স্কেলে (কয়েকশ concurrent listener, non-critical রিয়েল-টাইম ফিচার যেমন dashboard আপডেট) LISTEN/NOTIFY চমৎকার — অতিরিক্ত infrastructure ছাড়াই কাজ করে, ডেটা ও ইভেন্ট একই ট্রানজ্যাকশনে atomic থাকে। কিন্তু <strong>মেসেজ হারানো সহনীয় নয়</strong> এমন ক্ষেত্রে (payment, order processing) বা <strong>বিশাল স্কেলে</strong> Kafka/RabbitMQ-এর মতো durable message broker প্রয়োজন।</p>
+      <h4>Follow-up প্রশ্ন</h4>
+      <ul>
+        <li>LISTEN/NOTIFY দিয়ে outbox pattern কীভাবে বাস্তবায়ন করা যায়?</li>
+        <li>একাধিক অ্যাপ সার্ভার একই চ্যানেল LISTEN করলে সবাই কি একই নোটিফিকেশন পায়?</li>
+      </ul>
     `
   },
   {
     id: "db-39",
     category: "Database",
     difficulty: "Advanced",
-    tags: ["Optimization", "Bulk Insert", "COPY"],
+    tags: ["Optimization","Bulk Insert","COPY"],
     question: "PostgreSQL COPY Command vs Bulk INSERT — ১ লাখ রেকর্ড ১ সেকেন্ডে আপলোডের উপায় কী?",
     answer: `
-      <p>স্বাভাবিক <code>INSERT</code> কমান্ড প্রতিটি রো-এর জন্য আলাদা পার্সিং ও ট্রানজেকশন ওভারহেড তৈরি করে, ফলে ১ লাখ রেকর্ড ঢোকাতে অনেক সময় লাগে। </p>
-      <p>PostgreSQL-এর <strong>COPY</strong> কমান্ড ডাটাবেজের বাইনারি স্ট্রিম দিয়ে সরাসরি ডিস্কে বাল্ক ইনসার্ট সম্পন্ন করে। এটি INSERT-এর চেয়ে ১০-১০০ গুণ দ্রুত।</p>
+      <p>বড় পরিমাণে ডেটা লোড করার সময় সাধারণ <code>INSERT</code> স্টেটমেন্ট ও <code>COPY</code> কমান্ডের performance-এর পার্থক্য বিশাল — সঠিক পদ্ধতি বেছে নেওয়া bulk import-এর গতি ১০-১০০ গুণ বাড়াতে পারে।</p>
+      <h4>কেন individual INSERT ধীর</h4>
       <div class="code-box">
         <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
-        <pre><code>COPY users (name, email) FROM '/path/to/data.csv' WITH CSV HEADER;</code></pre>
+        <pre><code>-- ❌ ধীর: প্রতিটি INSERT আলাদা রাউন্ড-ট্রিপ + আলাদা ট্রানজ্যাকশন ওভারহেড
+INSERT INTO events (user_id, action, ts) VALUES (1, 'click', now());
+INSERT INTO events (user_id, action, ts) VALUES (2, 'click', now());
+-- ১ লাখ বার repeat করলে: ১ লাখ নেটওয়ার্ক রাউন্ড-ট্রিপ + ১ লাখ WAL flush</code></pre>
       </div>
+      <p>প্রতিটি individual <code>INSERT</code>-এ: (১) নেটওয়ার্ক রাউন্ড-ট্রিপ ল্যাটেন্সি, (২) parser/planner ওভারহেড, (৩) প্রতিটির জন্য আলাদা WAL (Write-Ahead Log) entry ও ডিস্ক ফ্ল্যাশ — এই তিনটি খরচ প্রতিটি রো-তে যোগ হয়।</p>
+      <h4>COPY — বাল্ক লোডের জন্য ডিজাইন করা</h4>
+      <div class="code-box">
+        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
+        <pre><code>-- ✅ দ্রুত: একটি single স্ট্রিমে সব ডেটা, minimal per-row overhead
+COPY events (user_id, action, ts) FROM '/data/events.csv' WITH (FORMAT csv, HEADER true);
+
+-- অথবা STDIN দিয়ে (অ্যাপ্লিকেশন থেকে স্ট্রিম করার সময়)
+COPY events (user_id, action, ts) FROM STDIN WITH (FORMAT csv);</code></pre>
+      </div>
+      <p><code>COPY</code> একটি বিশেষ বাইনারি প্রোটোকল ব্যবহার করে যা: (১) parser/planner প্রতি-রো বাইপাস করে, (২) একটি একক স্ট্রিমে সব ডেটা পাঠায় — নেটওয়ার্ক রাউন্ড-ট্রিপ একবারই, (৩) WAL-এ ব্যাচে লেখে। এই কারণে ১ লাখ রেকর্ড কয়েক সেকেন্ডে লোড হতে পারে, যেখানে individual INSERT-এ মিনিট লেগে যেতে পারে।</p>
+      <h4>Node.js থেকে COPY ব্যবহার (pg-copy-streams)</h4>
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
+        <pre><code>const { from } = require('pg-copy-streams');
+const stream = client.query(from('COPY events (user_id, action, ts) FROM STDIN WITH (FORMAT csv)'));
+fs.createReadStream('events.csv').pipe(stream);</code></pre>
+      </div>
+      <h4>Multi-row INSERT — যখন COPY সম্ভব নয়</h4>
+      <p>যদি প্রতিটি রো-তে অ্যাপ্লিকেশন-স্তরের লজিক (validation, transformation) দরকার হয় এবং সরাসরি CSV স্ট্রিম করা সম্ভব না, তাহলে <strong>multi-row INSERT</strong> মাঝামাঝি সমাধান:</p>
+      <div class="code-box">
+        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
+        <pre><code>-- একটি স্টেটমেন্টে অনেক রো — round-trip খরচ কমে যায়
+INSERT INTO events (user_id, action, ts) VALUES
+  (1, 'click', now()), (2, 'click', now()), (3, 'view', now()), ...
+  -- সাধারণত ১০০-১০০০ রো প্রতি ব্যাচে ভালো ফলাফল দেয়</code></pre>
+      </div>
+      <h4>Bulk লোডের সময় ইনডেক্স ও কনস্ট্রেইন্ট বিবেচনা — সিনিয়র-স্তরের অপ্টিমাইজেশন</h4>
+      <ul>
+        <li><strong>বড় লোডের আগে ইনডেক্স ড্রপ করে পরে পুনরায় তৈরি করুন:</strong> প্রতিটি রো ইনসার্টে সব ইনডেক্স আপডেট হয় — একটি খালি টেবিলে বাল্ক ডেটা লোড করার পর একবারে ইনডেক্স তৈরি করা প্রায়ই দ্রুততর।</li>
+        <li><strong>Foreign key constraint সাময়িকভাবে <code>DEFERRED</code> করুন</strong> — প্রতিটি রো-তে চেক করার বদলে পুরো ট্রানজ্যাকশন শেষে একবারে যাচাই হয়।</li>
+        <li><strong>একটি একক ট্রানজ্যাকশনে করুন</strong> — প্রতিটি রো আলাদা ট্রানজ্যাকশন হলে commit overhead বহুগুণ বেড়ে যায়।</li>
+      </ul>
+      <h4>Follow-up প্রশ্ন</h4>
+      <ul>
+        <li>COPY চলাকালীন যদি একটি রো ভুল ফরম্যাটে থাকে, পুরো অপারেশন কী হয়?</li>
+        <li>খুব বড় ডেটাসেটে (১ কোটি+ রো) COPY-কেও কীভাবে আরও অপ্টিমাইজ করবেন (parallel COPY, unlogged table)?</li>
+      </ul>
     `
   },
   {
     id: "db-40",
     category: "Database",
     difficulty: "Intermediate",
-    tags: ["Types", "UUID vs AutoIncrement", "Performance"],
+    tags: ["Types","UUID vs AutoIncrement","Performance"],
     question: "Primary Keys: Auto-increment INT vs UUID v4 vs UUID v7 (Time-ordered) — বি-ট্রি ইনডেক্স পারফরম্যান্স তুলনা কী?",
     answer: `
       <p>Primary Key নির্বাচনের ওপর ডাটাবেজের ইনডেক্সিং পারফরম্যান্স অনেক বেশি নির্ভর করে।</p>
@@ -691,7 +924,7 @@ const users = await prisma.user.findMany({
     id: "db-41",
     category: "Database",
     difficulty: "Advanced",
-    tags: ["Joins", "Nested Loop", "Hash Join"],
+    tags: ["Joins","Nested Loop","Hash Join"],
     question: "Database Join Algorithms: Nested Loop Join vs Hash Join vs Merge Join কীভাবে কাজ করে?",
     answer: `
       <p>ডাটাবেজ ইঞ্জিন ডাটার সাইজ ও ইনডেক্সের ওপর ভিত্তি করে জয়েন অ্যালগরিদম বেছে নেয়।</p>
@@ -706,7 +939,7 @@ const users = await prisma.user.findMany({
     id: "db-42",
     category: "Database",
     difficulty: "Intermediate",
-    tags: ["PostgreSQL", "pg_stat_activity", "Slow Queries"],
+    tags: ["PostgreSQL","pg_stat_activity","Slow Queries"],
     question: "PostgreSQL pg_stat_activity এবং pg_stat_statements দিয়ে স্লো কোয়েরি ও ডেডলক কীভাবে চিহ্নিত করবেন?",
     answer: `
       <p>প্রোডাকশন সার্ভারে ঝুলন্ত (Hanging) বা স্লো কোয়েরি খুঁজে বের করতে এই দুটি ভিউ ব্যবহৃত হয়।</p>
@@ -720,18 +953,66 @@ const users = await prisma.user.findMany({
     id: "db-43",
     category: "Database",
     difficulty: "Advanced",
-    tags: ["PostgreSQL", "Tablespace", "Storage"],
+    tags: ["PostgreSQL","Tablespace","Storage"],
     question: "PostgreSQL Tablespaces দিয়ে আলাদা ফিজিক্যাল ডিস্কে (NVMe SSD vs HDD) টেবিল স্টোর কীভাবে করবেন?",
     answer: `
-      <p><strong>Tablespace</strong> হলো PostgreSQL-এর এমন একটি ফিচার, যার মাধ্যমে ডাটাবেজ টেবিল বা ইনডেক্সকে ডিফল্ট ডিরেক্টরির বদলে আলাদা কোনো ফিজিক্যাল ডিস্কে স্টোর করার সুযোগ দেওয়া হয়।</p>
-      <p>উদাহরণস্বরূপ, হট পারফরম্যান্স টেবিলগুলো দ্রুতগতির NVMe SSD-তে থাকা Tablespace-এ রাখা যায়। আর পুরোনো হিস্ট্রি বা আর্কাইভ ডাটা ধীরগতির সস্তা HDD-তে তৈরি Tablespace-এ ডাইভার্ট করা যায়। এতে কস্ট এবং পারফরম্যান্স দুটোই ব্যালেন্স হয়।</p>
+      <p><strong>Tablespace</strong> PostgreSQL-এ একটি নির্দিষ্ট ফাইল সিস্টেম লোকেশনের নাম — এটি আপনাকে নির্দিষ্ট করতে দেয় কোন টেবিল/ইনডেক্স কোন ফিজিক্যাল ডিস্কে সংরক্ষিত হবে, যা I/O পারফরম্যান্স অপ্টিমাইজ করতে ব্যবহৃত হয়।</p>
+      <div class="code-box">
+        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
+        <pre><code>-- একটি tablespace তৈরি — দ্রুত NVMe SSD-তে
+CREATE TABLESPACE fast_ssd LOCATION '/mnt/nvme_ssd/pgdata';
+
+-- একটি ধীর, সস্তা HDD-তে — কম-অ্যাক্সেস আর্কাইভ ডেটার জন্য
+CREATE TABLESPACE archive_hdd LOCATION '/mnt/hdd_array/pgdata';
+
+-- হট টেবিল (ঘন ঘন query হয়) দ্রুত ডিস্কে
+CREATE TABLE active_orders (...) TABLESPACE fast_ssd;
+
+-- পুরনো, কম-ব্যবহৃত ডেটা সস্তা ডিস্কে
+CREATE TABLE archived_orders_2023 (...) TABLESPACE archive_hdd;
+
+-- ইনডেক্সও আলাদা tablespace-এ রাখা যায় (টেবিল থেকে ভিন্ন ডিস্কে)
+CREATE INDEX idx_orders_user ON active_orders(user_id) TABLESPACE fast_ssd;</code></pre>
+      </div>
+      <h4>কেন এটি গুরুত্বপূর্ণ — I/O bottleneck সমাধান</h4>
+      <p>বড় প্রোডাকশন ডাটাবেজে সব ডেটা সমান গুরুত্বপূর্ণ বা সমান ঘন ঘন অ্যাক্সেস হয় না — সাম্প্রতিক অর্ডার প্রতিনিয়ত query হয়, কিন্তু ৩ বছরের পুরনো অর্ডার কালেভদ্রে দরকার হয়। সব ডেটা একই (ব্যয়বহুল, উচ্চ-পারফরম্যান্স) ডিস্কে রাখা অপ্রয়োজনীয় খরচ। Tablespace দিয়ে:</p>
+      <ul>
+        <li><strong>হট ডেটা (frequently accessed) → NVMe SSD</strong> — কম ল্যাটেন্সি, উচ্চ IOPS দরকার।</li>
+        <li><strong>কোল্ড/আর্কাইভ ডেটা → HDD বা সস্তা storage</strong> — কম খরচ, পারফরম্যান্স তেমন গুরুত্বপূর্ণ না।</li>
+        <li><strong>ইনডেক্স ও টেবিল আলাদা ডিস্কে</strong> — উভয়ই একইসাথে অ্যাক্সেস হয় (index scan + heap fetch), আলাদা ফিজিক্যাল ডিস্কে থাকলে I/O প্যারালাল হতে পারে (traditional spinning disk-এ বেশি প্রাসঙ্গিক, SSD-তে কম গুরুত্বপূর্ণ)।</li>
+      </ul>
+      <h4>Partitioning-এর সাথে সংমিশ্রণ — বাস্তব প্রোডাকশন প্যাটার্ন</h4>
+      <div class="code-box">
+        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
+        <pre><code>-- Time-based partition + tablespace tiering
+CREATE TABLE orders (id bigint, created_at date, ...) PARTITION BY RANGE (created_at);
+
+CREATE TABLE orders_2026 PARTITION OF orders
+  FOR VALUES FROM ('2026-01-01') TO ('2027-01-01') TABLESPACE fast_ssd;
+
+CREATE TABLE orders_2023 PARTITION OF orders
+  FOR VALUES FROM ('2023-01-01') TO ('2024-01-01') TABLESPACE archive_hdd;
+-- সাম্প্রতিক পার্টিশন দ্রুত ডিস্কে, পুরনো পার্টিশন সস্তা ডিস্কে —
+-- একই লজিক্যাল টেবিল, ভিন্ন ফিজিক্যাল স্টোরেজ tier</code></pre>
+      </div>
+      <h4>ব্যবহারিক সতর্কতা</h4>
+      <ul>
+        <li><strong>Cloud managed PostgreSQL-এ (RDS, Cloud SQL) tablespace সীমিতভাবে সমর্থিত</strong> — আন্ডারলাইং স্টোরেজ ম্যানেজড, তাই এই ফিচার সাধারণত self-hosted বা ব্যাপক কাস্টম infrastructure-এই বেশি প্রাসঙ্গিক।</li>
+        <li><strong>ভুল tablespace সাইজিং</strong> ডিস্ক পূর্ণ হয়ে যাওয়ার ঝুঁকি তৈরি করে — মনিটরিং ছাড়া ব্যবহার করা বিপজ্জনক।</li>
+        <li>আধুনিক NVMe SSD-এর যুগে, ইনডেক্স-বনাম-টেবিল আলাদা ডিস্কে রাখার সুবিধা কমে গেছে (traditional HDD-তে যতটা গুরুত্বপূর্ণ ছিল) — মূল ব্যবহার এখন hot/cold data tiering-এর জন্য।</li>
+      </ul>
+      <h4>Follow-up প্রশ্ন</h4>
+      <ul>
+        <li>Table partitioning ছাড়া শুধু tablespace দিয়ে hot/cold ডেটা আলাদা করা যায় কি?</li>
+        <li>Tablespace বদলাতে (ALTER TABLE ... SET TABLESPACE) হলে টেবিল কি লক হয়ে যায়?</li>
+      </ul>
     `
   },
   {
     id: "db-44",
     category: "Database",
     difficulty: "Intermediate",
-    tags: ["Queries", "GROUP BY", "HAVING"],
+    tags: ["Queries","GROUP BY","HAVING"],
     question: "GROUP BY vs HAVING vs WHERE Clause-এর এক্সিকিউশন অর্ডার ও কাজের পার্থক্য কী?",
     answer: `
       <p>এই তিনটির এক্সিকিউশন অর্ডার এবং কাজের ধরন ভিন্ন:</p>
@@ -747,7 +1028,7 @@ const users = await prisma.user.findMany({
     id: "db-45",
     category: "Database",
     difficulty: "Advanced",
-    tags: ["Security", "SQL Injection", "Parameterized Queries"],
+    tags: ["Security","SQL Injection","Parameterized Queries"],
     question: "SQL Injection (SQLi) কীভাবে কাজ করে এবং Parameterized Prepared Statements এটি কেন শতভাগ প্রতিরোধ করে?",
     answer: `
       <p>ইউজার ইনপুট সরাসরি SQL স্ট্রিং-এর সাথে যুক্ত করা হলে SQL Injection ঘটে। অ্যাটাকার <code>' OR '1'='1</code> এর মতো ইনপুট দিয়ে পুরো টেবিলের ডাটা বের করে নিতে পারে বা ডাটা ডিলিট করতে পারে।</p>
@@ -758,25 +1039,68 @@ const users = await prisma.user.findMany({
     id: "db-46",
     category: "Database",
     difficulty: "Intermediate",
-    tags: ["PostgreSQL", "Extensions", "pg_trgm"],
+    tags: ["PostgreSQL","Extensions","pg_trgm"],
     question: "PostgreSQL Extension: pg_trgm (Trigram Index) দিয়ে Fuzzy Text Search কীভাবে করবেন?",
     answer: `
-      <p>সাধারণ <code>LIKE '%word%'</code> সার্চ ধীর এবং বানান ভুল হলে কাজ করে না। <code>pg_trgm</code> এক্সটেনশন টেক্সটকে ৩-অক্ষরের গ্রুপে (Trigrams) ভাগ করে সিমিলারিটি মেপার করে।</p>
+      <p><strong>pg_trgm</strong> একটি PostgreSQL এক্সটেনশন যা টেক্সটকে ৩-অক্ষরের টুকরা (trigram) হিসেবে ভেঙে ইনডেক্স করে — এর ফলে <code>LIKE '%pattern%'</code>-এর মতো ফাজি/সাবস্ট্রিং সার্চ এবং ভুল বানান সহনশীল অনুসন্ধান দ্রুত করা যায়, যা সাধারণ B-tree ইনডেক্স দিয়ে সম্ভব নয়।</p>
+      <h4>সমস্যা — কেন সাধারণ ইনডেক্স কাজ করে না</h4>
+      <div class="code-box">
+        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
+        <pre><code>-- B-tree ইনডেক্স থাকলেও এই কোয়েরি ইনডেক্স ব্যবহার করতে পারে না
+SELECT * FROM products WHERE name LIKE '%phone%';
+-- '%' প্যাটার্নের শুরুতে থাকায় B-tree কোনো prefix ম্যাচ করতে পারে না
+-- → PostgreSQL পুরো টেবিল স্ক্যান করতে বাধ্য হয় (Seq Scan)</code></pre>
+      </div>
+      <p>B-tree ইনডেক্স সাজানো ডেটার উপর কাজ করে এবং <strong>prefix ম্যাচিং</strong>-এ ভালো (<code>LIKE 'phone%'</code>) — কিন্তু মাঝে বা শেষে প্যাটার্ন থাকলে (<code>%phone%</code>) সাজানো কাঠামোর কোনো সুবিধা নেওয়া যায় না।</p>
+      <h4>Trigram ইনডেক্স কীভাবে কাজ করে</h4>
+      <div class="code-box">
+        <div class="code-header"><span>text</span><button class="copy-btn">Copy</button></div>
+        <pre><code>শব্দ "phone" ভেঙে trigram হয়:
+  "  p", " ph", "pho", "hon", "one", "ne "
+-- প্রতিটি ৩-অক্ষরের সাবস্ট্রিং আলাদাভাবে ইনডেক্স হয়
+
+সার্চ "%phone%" করলে PostgreSQL এই trigram-গুলো দিয়ে দ্রুত candidate row খুঁজে বের করে,
+তারপর সত্যিকারের ম্যাচ যাচাই করে — পুরো টেবিল স্ক্যান করতে হয় না</code></pre>
+      </div>
       <div class="code-box">
         <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
         <pre><code>CREATE EXTENSION pg_trgm;
-CREATE INDEX idx_user_name ON users USING gin (name gin_trgm_ops);
 
--- Fuzzy search (works even with spelling mistakes)
-SELECT * FROM users WHERE name % 'Nazmul';</code></pre>
+-- GIN ইনডেক্স ব্যবহার করে trigram-ভিত্তিক সার্চ দ্রুত করা
+CREATE INDEX idx_products_name_trgm ON products USING GIN (name gin_trgm_ops);
+
+-- এখন এই কোয়েরি ইনডেক্স ব্যবহার করবে
+SELECT * FROM products WHERE name LIKE '%phone%';
+SELECT * FROM products WHERE name ILIKE '%PHONE%';   -- case-insensitive-ও দ্রুত</code></pre>
       </div>
+      <h4>Similarity/Fuzzy সার্চ — ভুল বানান সহনশীলতা</h4>
+      <div class="code-box">
+        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
+        <pre><code>-- দুটি স্ট্রিং কতটা মিল, ০ থেকে ১ স্কেলে
+SELECT similarity('phone', 'fone');   -- → 0.36 (আংশিক মিল)
+
+-- ব্যবহারকারী ভুল বানান লিখলেও ফলাফল পাওয়া যায়
+SELECT name, similarity(name, 'iphon') AS score
+FROM products
+WHERE name % 'iphon'              -- '%' অপারেটর: similarity থ্রেশহোল্ডের বেশি হলে ম্যাচ
+ORDER BY score DESC
+LIMIT 10;
+-- pg_trgm.similarity_threshold (ডিফল্ট 0.3) দিয়ে সংবেদনশীলতা নিয়ন্ত্রণযোগ্য</code></pre>
+      </div>
+      <h4>কখন pg_trgm, কখন Elasticsearch</h4>
+      <p>pg_trgm ছোট-থেকে-মাঝারি স্কেলে (কয়েক লাখ রো, প্রোডাক্ট সার্চ, অটোকমপ্লিট) চমৎকার কাজ করে — <strong>আলাদা কোনো infrastructure ছাড়াই</strong> ডাটাবেজের মধ্যেই সার্চ চলে, ডেটা sync করার প্রয়োজন নেই। কিন্তু relevance ranking, faceted search, বিশাল স্কেল (কোটি কোটি ডকুমেন্ট), বা full-text অ্যানালাইটিক্স দরকার হলে Elasticsearch বেশি উপযুক্ত — এটি পারপাস-বিল্ট সার্চ ইঞ্জিন যেখানে PostgreSQL মূলত একটি ট্রানজ্যাকশনাল ডাটাবেজ যাতে সার্চ ক্ষমতা যোগ করা হয়েছে।</p>
+      <h4>Follow-up প্রশ্ন</h4>
+      <ul>
+        <li>GIN ও GiST ইনডেক্সের মধ্যে pg_trgm-এর জন্য কোনটি বেছে নেবেন এবং কেন?</li>
+        <li>PostgreSQL-এর built-in Full-Text Search (tsvector/tsquery) ও pg_trgm-এর পার্থক্য কী?</li>
+      </ul>
     `
   },
   {
     id: "db-47",
     category: "Database",
     difficulty: "Advanced",
-    tags: ["PostgreSQL", "FDW", "Foreign Data Wrapper"],
+    tags: ["PostgreSQL","FDW","Foreign Data Wrapper"],
     question: "PostgreSQL Foreign Data Wrappers (postgres_fdw) দিয়ে ডিস্ট্রিবিউটেড ডাটাবেজ কোয়েরি কীভাবে করবেন?",
     answer: `
       <p><strong>Foreign Data Wrapper (FDW)</strong> হলো PostgreSQL-এর একটি এক্সটেনশন, যার মাধ্যমে একটি ডাটাবেজ সার্ভার থেকে অন্য রিমোট সার্ভারের (PostgreSQL, MySQL, Oracle ইত্যাদি) টেবিলকে লোকাল টেবিলের মতো কুয়েরি করা যায়।</p>
@@ -795,7 +1119,7 @@ SELECT * FROM remote_users;</code></pre>
     id: "db-48",
     category: "Database",
     difficulty: "Intermediate",
-    tags: ["PostgreSQL", "COLLATE", "Case Insensitive"],
+    tags: ["PostgreSQL","COLLATE","Case Insensitive"],
     question: "PostgreSQL CITEXT Data Type vs Lowercase Indexing — Case-Insensitive Search কীভাবে করবেন?",
     answer: `
       <p>PostgreSQL-এ ডিফল্টভাবে Text Search Case-sensitive (ছোট-বড় হাতের অক্ষর সংবেদনশীল) হয়। এটি সমাধানের দুটি উপায় আছে:</p>
@@ -813,7 +1137,7 @@ SELECT * FROM remote_users;</code></pre>
     id: "db-49",
     category: "Database",
     difficulty: "Advanced",
-    tags: ["Resilience", "Two-Phase Commit", "2PC"],
+    tags: ["Resilience","Two-Phase Commit","2PC"],
     question: "Two-Phase Commit (2PC) Protocol দিয়ে Multi-Database Distributed Transaction কীভাবে সামলাবেন?",
     answer: `
       <p>যখন একটি ট্রানজেকশন একাধিক ডাটাবেজের ওপর জুড়ে থাকে (Distributed Transaction), তখন সব ডাটাবেজে একসাথে কমিট হওয়া নিশ্চিত করতে <strong>Two-Phase Commit (2PC)</strong> ব্যবহৃত হয়।</p>
@@ -827,13 +1151,55 @@ SELECT * FROM remote_users;</code></pre>
     id: "db-50",
     category: "Database",
     difficulty: "Intermediate",
-    tags: ["PostgreSQL", "Constraints", "CHECK"],
+    tags: ["PostgreSQL","Constraints","CHECK"],
     question: "PostgreSQL CHECK Constraints and EXCLUSION Constraints-এর সিকিউরিটি সুবিধা কী?",
     answer: `
-      <p>ডাটাবেজ লেভেলে ভুল ডাটা ঢোকা আটকাতে এই কনস্ট্রেইন্টগুলো ব্যবহৃত হয়।</p>
+      <p><strong>CHECK</strong> ও <strong>EXCLUSION</strong> constraint ডাটাবেজ-স্তরে ডেটা ইন্টিগ্রিটি নিয়ম প্রয়োগ করে — অ্যাপ্লিকেশন কোডের ভুল বা bypass সত্ত্বেও অবৈধ ডেটা টেবিলে ঢুকতে না পারার নিশ্চয়তা দেয়, যা নিরাপত্তার একটি গুরুত্বপূর্ণ স্তর।</p>
+      <h4>CHECK Constraint — কলাম-স্তরের নিয়ম</h4>
+      <div class="code-box">
+        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
+        <pre><code>CREATE TABLE products (
+  id serial PRIMARY KEY,
+  price numeric NOT NULL CHECK (price > 0),          -- নেগেটিভ দাম অসম্ভব
+  discount numeric CHECK (discount BETWEEN 0 AND 100),
+  status text CHECK (status IN ('active', 'draft', 'archived'))  -- enum-এর মতো
+);
+
+-- মাল্টি-কলাম CHECK
+ALTER TABLE bookings ADD CONSTRAINT valid_dates
+  CHECK (end_date > start_date);</code></pre>
+      </div>
+      <p><strong>কেন গুরুত্বপূর্ণ:</strong> অ্যাপ্লিকেশন-স্তরের validation (Zod, Joi) বাইপাস হতে পারে — সরাসরি DB access (admin script, migration, অন্য একটি সার্ভিস যা একই DB শেয়ার করে) দিয়ে অবৈধ ডেটা ঢুকতে পারে। CHECK constraint <strong>শেষ প্রতিরক্ষা স্তর</strong> — কোনোভাবেই negative price বা invalid status ডাটাবেজে থাকতে পারবে না, অ্যাপ্লিকেশন কোড যাই করুক না কেন।</p>
+      <h4>EXCLUSION Constraint — ওভারল্যাপ প্রতিরোধ</h4>
+      <p>CHECK constraint একটি রো-এর ভেতরের মান যাচাই করে, কিন্তু <strong>একাধিক রো-এর মধ্যে সম্পর্ক</strong> (যেমন সময়ের ওভারল্যাপ) যাচাই করতে পারে না — এখানেই EXCLUSION কাজে আসে।</p>
+      <div class="code-box">
+        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
+        <pre><code>CREATE EXTENSION btree_gist;
+
+CREATE TABLE room_bookings (
+  room_id integer,
+  during tsrange,   -- সময়ের রেঞ্জ টাইপ
+  EXCLUDE USING GIST (room_id WITH =, during WITH &&)
+  -- অর্থ: একই room_id-এর জন্য দুটি রো-এর সময় রেঞ্জ ওভারল্যাপ করতে পারবে না
+);
+
+INSERT INTO room_bookings VALUES (101, '[2026-08-10 10:00, 2026-08-10 12:00)');
+INSERT INTO room_bookings VALUES (101, '[2026-08-10 11:00, 2026-08-10 13:00)');
+-- ❌ ERROR: conflicting key value violates exclusion constraint
+-- ডাটাবেজ নিজেই ডাবল-বুকিং প্রতিরোধ করল, অ্যাপ্লিকেশন লজিকে race condition-এর ঝুঁকি ছাড়াই</code></pre>
+      </div>
+      <h4>কেন এটি নিরাপত্তার দৃষ্টিকোণ থেকে গুরুত্বপূর্ণ — Race Condition প্রতিরোধ</h4>
+      <p>অ্যাপ্লিকেশন-স্তরে "চেক করে তারপর ইনসার্ট করুন" (check-then-insert) লজিক লিখলে দুটি concurrent রিকোয়েস্ট একই সময়ে চেক পাস করে ফেলতে পারে (উভয়ই দেখে রুম খালি আছে, তারপর উভয়ই বুক করে ফেলে) — এটি একটি ক্লাসিক <strong>race condition</strong> যা ডেটা ইন্টিগ্রিটি ভেঙে দেয়। EXCLUSION constraint ডাটাবেজ-স্তরে atomic গ্যারান্টি দেয় — কোনো race condition সম্ভবই না, কারণ ডাটাবেজ নিজেই প্রতিটি ইনসার্টে ওভারল্যাপ চেক করে একটি single atomic operation-এ।</p>
+      <h4>বাস্তব ব্যবহার</h4>
       <ul>
-        <li><strong>CHECK Constraint:</strong> এটি নির্দিষ্ট শর্ত যাচাই করে। যেমন: <code>CHECK (price > 0)</code> দিলে কেউ প্রোডাক্টের মূল্য ০ বা নেগেটিভ দিতে পারবে না।</li>
-        <li><strong>EXCLUSION Constraint:</strong> এটি দুটি রো-এর মধ্যে ওভারল্যাপিং ঠেকায়। যেমন- হোটেল রুম বুকিংয়ে <code>EXCLUDE USING gist (room_id WITH =, booking_range WITH &&)</code> দিলে, একই রুমে একই সময়ে দুজন বুকিং দিতে পারবে না।</li>
+        <li><strong>রিসোর্স বুকিং সিস্টেম:</strong> রুম, ইকুইপমেন্ট, ইন্টারভিউ স্লট — সময়ের ওভারল্যাপ প্রতিরোধ।</li>
+        <li><strong>প্রাইস/টিয়ার রেঞ্জ:</strong> একই প্রোডাক্টে দুটি প্রাইসিং টিয়ার সংখ্যাগতভাবে ওভারল্যাপ করতে না পারা।</li>
+        <li><strong>IP রেঞ্জ বরাদ্দ:</strong> নেটওয়ার্ক সাবনেট ওভারল্যাপ প্রতিরোধ।</li>
+      </ul>
+      <h4>Follow-up প্রশ্ন</h4>
+      <ul>
+        <li>Application-স্তরে distributed lock দিয়ে একই সমস্যা সমাধান করলে EXCLUSION constraint-এর তুলনায় কী ট্রেড-অফ হয়?</li>
+        <li>CHECK constraint-এ subquery বা অন্য টেবিল রেফারেন্স করা যায় কি — কেন না?</li>
       </ul>
     `
   }

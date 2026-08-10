@@ -3,7 +3,7 @@ const seniorFrontendQuestions = [
     id: "sfe-1",
     category: "Micro Frontends",
     difficulty: "Advanced",
-    tags: ["Architecture", "Micro Frontend", "Scalability"],
+    tags: ["Architecture","Micro Frontend","Scalability"],
     question: "Micro Frontend Architecture কী এবং কখন এটি ব্যবহার করা উচিত?",
     answer: `
       <p><strong>Micro Frontend (MFE)</strong> হলো এমন একটি আর্কিটেকচারাল স্টাইল যেখানে একটি বৃহৎ ফ্রন্টএন্ড অ্যাপ্লিকেশনকে ছোট ছোট, স্বাধীন এবং ডিপ্লয়েবল মাইক্রো অ্যাপে ভাগ করা হয়। ব্যাকএন্ডের Microservices-এর মতোই ফ্রন্টএন্ডে এর প্রয়োগ।</p>
@@ -16,13 +16,18 @@ const seniorFrontendQuestions = [
       <h4>সুবিধা ও অসুবিধা:</h4>
       <p><strong>সুবিধা:</strong> Independent deployment, Codebase isolation, Team autonomy.<br>
       <strong>অসুবিধা:</strong> UI Inconsistency, Bundle size বেড়ে যাওয়া (একই লাইব্রেরি একাধিক বার লোড হতে পারে), Cross-app communication জটিলতা।</p>
+    
+      <h4>Follow-up প্রশ্ন</h4>
+      <ul>
+        <li>Micro Frontend-এ একাধিক টিমের ডিজাইন সিস্টেম কীভাবে সামঞ্জস্যপূর্ণ রাখবেন?</li>
+      </ul>
     `
   },
   {
     id: "sfe-2",
     category: "Micro Frontends",
     difficulty: "Advanced",
-    tags: ["Module Federation", "Webpack 5", "Build Tools"],
+    tags: ["Module Federation","Webpack 5","Build Tools"],
     question: "Webpack 5 Module Federation কী? এটি কীভাবে Micro Frontend ইমপ্লিমেন্ট করতে সাহায্য করে?",
     answer: `
       <p><strong>Module Federation</strong> হলো Webpack 5-এর একটি ফিচার যা একটি জাভাস্ক্রিপ্ট অ্যাপ্লিকেশনকে রানটাইমে অন্য একটি অ্যাপ্লিকেশন বা বান্ডল থেকে কোড লোড করতে দেয়। </p>
@@ -53,13 +58,27 @@ module.exports = {
 const AuthApp = React.lazy(() => import('auth/AuthWidget'));</code></pre>
       </div>
       <p><strong>সুবিধা:</strong> একই React বা ReactDOM লাইব্রেরি Host এবং Remote-এ শেয়ার করা যায় (<code>singleton: true</code>), ফলে বান্ডল সাইজ কমে এবং State শেয়ারিং সহজ হয়।</p>
+    
+      <h4>Module Federation আর্কিটেকচার</h4>
+      <pre class="mermaid">
+flowchart TB
+    Host["Host App (Container)<br/>Shell/Navigation"] -->|রানটাইমে dynamic import| RemoteA["Remote App: Checkout<br/>নিজস্বভাবে ডিপ্লয়ড"]
+    Host -->|রানটাইমে dynamic import| RemoteB["Remote App: Profile<br/>নিজস্বভাবে ডিপ্লয়ড"]
+    RemoteA -.shared dependency.-> Shared["React, React-DOM<br/>singleton হিসেবে শেয়ার্ড"]
+    RemoteB -.shared dependency.-> Shared
+      </pre>
+      <span class="diagram-caption">Host অ্যাপ রানটাইমে রিমোট অ্যাপের কোড লোড করে — প্রতিটি রিমোট স্বাধীনভাবে বিল্ড ও ডিপ্লয় হয়</span>
+      <h4>Follow-up প্রশ্ন</h4>
+      <ul>
+        <li>দুটি রিমোট অ্যাপ যদি একই লাইব্রেরির ভিন্ন ভার্সন ব্যবহার করে (version mismatch), Module Federation কী করে?</li>
+      </ul>
     `
   },
   {
     id: "sfe-3",
     category: "Micro Frontends",
     difficulty: "Advanced",
-    tags: ["Communication", "State Management", "Event Bus"],
+    tags: ["Communication","State Management","Event Bus"],
     question: "Micro Frontend-এ একাধিক independent app-এর মধ্যে Communication বা State Sharing কীভাবে করবেন?",
     answer: `
       <p>যেহেতু MFE গুলো আলাদা বান্ডল, তাই সরাসরি React Context বা Redux কাজ করবে না। কমিউনিকেশনের জন্য নিচের পদ্ধতিগুলো ব্যবহার করা হয়:</p>
@@ -92,13 +111,18 @@ window.mfeEventBus.subscribe('userLoggedIn', (user) => {
   console.log('User updated in MFE 2:', user);
 });</code></pre>
       </div>
+    
+      <h4>Follow-up প্রশ্ন</h4>
+      <ul>
+        <li>Custom Events ও একটি shared state store (যেমন একটি ছোট pub-sub লাইব্রেরি) — কোনটি বেশি loosely-coupled?</li>
+      </ul>
     `
   },
   {
     id: "sfe-4",
     category: "Micro Frontends",
     difficulty: "Advanced",
-    tags: ["Single SPA", "Routing", "Framework Agnostic"],
+    tags: ["Single SPA","Routing","Framework Agnostic"],
     question: "Single SPA (Single Page Application) Framework কী? Module Federation থেকে এর পার্থক্য কী?",
     answer: `
       <p><strong>Single SPA</strong> হলো একটি Framework-agnostic Micro Frontend ফ্রেমওয়ার্ক। এটি রাউটিং হ্যান্ডল করে এবং সিদ্ধান্ত নেয় কোন URL-এ কোন মাইক্রো অ্যাপটি লোড হবে।</p>
@@ -108,13 +132,18 @@ window.mfeEventBus.subscribe('userLoggedIn', (user) => {
         <li><strong>Single SPA:</strong> এটি একটি সম্পূর্ণ রাউটিং লেয়ার। এটি প্যাথ অনুযায়ী অ্যাপ লোড করে (যেমন- <code>/auth</code> এ Auth অ্যাপ, <code>/dashboard</code> এ Dashboard অ্যাপ)। বিভিন্ন ফ্রেমওয়ার্ক (React, Angular, Vue) একসাথে চালানো যায়।</li>
       </ul>
       <p><em>বর্তমান ট্রেন্ড:</em> Module Federation বেশি পপুলার হলেও, যদি সম্পূর্ণ আলাদা ফ্রেমওয়ার্ক একসাথে চালাতে হয়, তখন Single SPA ব্যবহার করা হয়।</p>
+    
+      <h4>Follow-up প্রশ্ন</h4>
+      <ul>
+        <li>Single-SPA-তে ফ্রেমওয়ার্ক-অজ্ঞেয় (framework-agnostic) হওয়ার সুবিধা কী — একই অ্যাপে React ও Vue একসাথে চলতে পারে কীভাবে?</li>
+      </ul>
     `
   },
   {
     id: "sfe-5",
     category: "Performance",
     difficulty: "Advanced",
-    tags: ["Core Web Vitals", "LCP", "CLS", "INP"],
+    tags: ["Core Web Vitals","LCP","CLS","INP"],
     question: "Core Web Vitals (LCP, CLS, INP) কী এবং সিনিয়র ডেভেলপার হিসেবে আপনি এগুলো কীভাবে অপটিমাইজ করবেন?",
     answer: `
       <p>Core Web Vitals হলো Google-এর প্রস্তাবিত মেট্রিক্স যা একটি ওয়েব পেজের ইউজার এক্সপেরিয়েন্স মাপে।</p>
@@ -135,7 +164,7 @@ window.mfeEventBus.subscribe('userLoggedIn', (user) => {
     id: "sfe-6",
     category: "Architecture",
     difficulty: "Advanced",
-    tags: ["State Management", "Redux", "React Query"],
+    tags: ["State Management","Redux","React Query"],
     question: "Global State (Redux) এবং Server State (React Query) এর মধ্যে পার্থক্য কী? কখন কোনটি ব্যবহার করবেন?",
     answer: `
       <p>আধুনিক ফ্রন্টএন্ড আর্কিটেকচারে State-কে দুই ভাগে ভাগ করা হয়:</p>
@@ -147,13 +176,18 @@ window.mfeEventBus.subscribe('userLoggedIn', (user) => {
       <p><strong>React Query / SWR:</strong> Server State ম্যানেজ করার জন্য সেরা। এটি অটোমেটিক্যালি Caching, Background Refetching, এবং Pagination হ্যান্ডল করে। Redux-এ এই কাজগুলো ম্যানুয়ালি করতে হয় (Boilerplate code বাড়ে)।<br>
       <strong>Redux / Zustand:</strong> শুধু Client State বা অ্যাপ্লিকেশনের গ্লোবাল UI লজিক ম্যানেজ করার জন্য ব্যবহার করা উচিত।</p>
       <p><em>আধুনিক অ্যাপ্রোচ:</em> Redux Toolkit (RTK) Query ব্যবহার করলে দুটোই একসাথে পাওয়া যায়।</p>
+    
+      <h4>Follow-up প্রশ্ন</h4>
+      <ul>
+        <li>React Query ব্যবহার করার পর Redux-এর প্রয়োজনীয়তা কতটা কমে যায় — কী তখনও Redux-এ থাকা উচিত?</li>
+      </ul>
     `
   },
   {
     id: "sfe-7",
     category: "Performance",
     difficulty: "Advanced",
-    tags: ["Bundle Size", "Code Splitting", "Tree Shaking"],
+    tags: ["Bundle Size","Code Splitting","Tree Shaking"],
     question: "React অ্যাপ্লিকেশনের Bundle Size অনেক বড় হয়ে গেলে আপনি কীভাবে অপটিমাইজ করবেন?",
     answer: `
       <p>বড় বান্ডল সাইজ পারফরম্যান্স নষ্ট করে। এটি অপটিমাইজ করার প্রধান উপায়গুলো:</p>
@@ -166,13 +200,18 @@ window.mfeEventBus.subscribe('userLoggedIn', (user) => {
         <li><strong>Bundle Analyzer:</strong> <code>webpack-bundle-analyzer</code> ব্যবহার করে দেখা কোন প্যাকেজ সবচেয়ে বেশি জায়গা নিয়েছে।</li>
         <li><strong>Image Optimization:</strong> SVG-এর বদলে WebP, এবং বড় ছবি Lazy load করা।</li>
       </ol>
+    
+      <h4>Follow-up প্রশ্ন</h4>
+      <ul>
+        <li>Tree-shaking কাজ না করার সাধারণ কারণ কী (side-effect যুক্ত ইমপোর্ট, CommonJS মিশ্রণ)?</li>
+      </ul>
     `
   },
   {
     id: "sfe-8",
     category: "Architecture",
     difficulty: "Advanced",
-    tags: ["Design System", "Monorepo", "Component Library"],
+    tags: ["Design System","Monorepo","Component Library"],
     question: "Enterprise লেভেলে Design System তৈরি করার সময় আপনি কী কী বিষয় বিবেচনা করবেন?",
     answer: `
       <p>একটি সফল Design System শুধু কম্পোনেন্টের সংগ্রহ নয়, এটি পুরো প্রোডাক্টের একই রকম লুক অ্যান্ড ফিল নিশ্চিত করে।</p>
@@ -184,13 +223,18 @@ window.mfeEventBus.subscribe('userLoggedIn', (user) => {
         <li><strong>Distribution:</strong> প্রাইভেট npm রেজিস্ট্রিতে পাবলিশ করা এবং Semantic Versioning (SemVer) ফলো করা।</li>
         <li><strong>Headless UI:</strong> লজিক (Radix UI, Headless UI) এবং স্টাইল আলাদা রাখা, যাতে ডেভেলপাররা নিজেদের মতো স্টাইল করতে পারে।</li>
       </ol>
+    
+      <h4>Follow-up প্রশ্ন</h4>
+      <ul>
+        <li>Design token কীভাবে একাধিক প্ল্যাটফর্মে (web, mobile) সামঞ্জস্যতা বজায় রাখে?</li>
+      </ul>
     `
   },
   {
     id: "sfe-9",
     category: "Real-World Scenario",
     difficulty: "Advanced",
-    tags: ["Memory Leak", "useEffect", "Cleanup"],
+    tags: ["Memory Leak","useEffect","Cleanup"],
     question: "React অ্যাপ্লিকেশনে Memory Leak কীভাবে ঘটে এবং আপনি কীভাবে ডিবাগ ও প্রতিরোধ করবেন?",
     answer: `
       <p>React-এ Memory Leak সাধারণত ঘটে যখন কোনো কম্পোনেন্ট Unmount হয়ে যায়, কিন্তু তার অ্যাসিনক্রোনাস কাজ (যেমন- API Call, setInterval) ব্যাকগ্রাউন্ডে চলতে থাকে এবং State আপডেট করার চেষ্টা করে।</p>
@@ -210,18 +254,24 @@ window.mfeEventBus.subscribe('userLoggedIn', (user) => {
   });
   return () => { isMounted = false; };
 }, []);</code></pre>
+        </li>
         <li><strong>Event Listeners:</strong> <code>window.addEventListener</code> রিমুভ না করা।</li>
         <li><strong>Closures in WebSockets:</strong> পুরোনো স্টেট ক্লোজারে আটকে থাকা।</li>
       </ul>
       <h4>ডিবাগ করার উপায়:</h4>
       <p>Chrome DevTools-এর <strong>Memory</strong> ট্যাবে গিয়ে "Heap Snapshot" নিতে হয়। কম্পোনেন্ট আনমাউন্ট করার আগে ও পরে স্ন্যাপশট তুলে তুলনা করলে বোঝা যায় কোন অবজেক্টটি মেমোরিতে ধরে রাখা হয়েছে (Detached DOM nodes)।</p>
+    
+      <h4>Follow-up প্রশ্ন</h4>
+      <ul>
+        <li>Chrome DevTools Memory Profiler দিয়ে ঠিক কীভাবে একটি leak-causing কম্পোনেন্ট শনাক্ত করবেন?</li>
+      </ul>
     `
   },
   {
     id: "sfe-10",
     category: "Architecture",
     difficulty: "Advanced",
-    tags: ["Web Workers", "Main Thread", "CPU Intensive"],
+    tags: ["Web Workers","Main Thread","CPU Intensive"],
     question: "Frontend-এ কোনো CPU-Intensive কাজ (যেমন- বড় JSON পার্সিং বা Image Processing) আসলে আপনি কীভাবে হ্যান্ডেল করবেন যাতে UI ফ্রিজ না হয়?",
     answer: `
       <p>JavaScript Single-threaded, তাই বড় হিসাব বা প্রসেসিং মেইন থ্রেডে করলে UI ব্লক হয়ে যায় (INP খারাপ হয়)। এটি সমাধানের জন্য <strong>Web Workers</strong> ব্যবহার করতে হয়।</p>
@@ -247,13 +297,18 @@ self.onmessage = function(event) {
 };</code></pre>
       </div>
       <p>React-এ এটি সহজে করার জন্য <code>comlink</code> লাইব্রেরি বা <code>useWebWorker</code> হুক ব্যবহার করা যায়।</p>
+    
+      <h4>Follow-up প্রশ্ন</h4>
+      <ul>
+        <li>Web Worker-এ DOM অ্যাক্সেস করা যায় না কেন — main thread-এর সাথে যোগাযোগ কীভাবে হয়?</li>
+      </ul>
     `
   },
   {
     id: "sfe-11",
     category: "Security",
     difficulty: "Advanced",
-    tags: ["XSS", "CSRF", "CSP"],
+    tags: ["XSS","CSRF","CSP"],
     question: "Frontend Security-তে XSS এবং CSRF অ্যাটাক কী এবং আপনি কীভাবে প্রতিরোধ করবেন?",
     answer: `
       <p><strong>XSS (Cross-Site Scripting):</strong> অ্যাটাকার যখন আপনার ওয়েবসাইটে বিপজ্জনক JavaScript ইনজেক্ট করে।</p>
@@ -264,13 +319,18 @@ self.onmessage = function(event) {
       <ul>
         <li><em>প্রতিরোধ:</em> প্রতিটি ফর্মের সাথে একটি লুকানো <strong>Anti-CSRF Token</strong> পাঠানো এবং সার্ভারে ভ্যালিডেট করা। কুকিতে <code>SameSite=Strict</code> বা <code>Lax</code> সেট করা, যাতে অন্য ডোমেইন থেকে রিকোয়েস্ট এলে কুকি না যায়।</li>
       </ul>
+    
+      <h4>Follow-up প্রশ্ন</h4>
+      <ul>
+        <li>SameSite কুকি অ্যাট্রিবিউট কীভাবে CSRF আক্রমণ প্রতিরোধ করে?</li>
+      </ul>
     `
   },
   {
     id: "sfe-12",
     category: "Real-World Scenario",
     difficulty: "Advanced",
-    tags: ["Rendering", "SSR", "Hydration"],
+    tags: ["Rendering","SSR","Hydration"],
     question: "React Hydration কী? Hydration Mismatch Error কেন ঘটে এবং কীভাবে সমাধান করবেন?",
     answer: `
       <p>SSR (Server-Side Rendering)-এ সার্ভার থেকে প্লেইন HTML ক্লায়েন্টে পাঠানো হয়। এরপর ক্লায়েন্টে জাভাস্ক্রিপ্ট লোড হওয়ার পর সেই HTML-কে ইন্টারঅ্যাকটিভ (Event listeners যুক্ত) করার প্রক্রিয়াকে <strong>Hydration</strong> বলে।</p>
@@ -284,6 +344,21 @@ self.onmessage = function(event) {
           <em>সমাধান:</em> ডেট ফরম্যাটিং ক্লায়েন্ট সাইডে করা।</li>
         <li><strong>Theme (Dark/Light):</strong> সার্ভার ডিফল্ট থিম পাঠে, কিন্তু ক্লায়েন্টের localStorage-এ আরেক থিম থাকতে পারে।
           <em>সমাধান:</em> Next.js-এ <code>next-themes</code> ব্যবহার করা বা <code>suppressHydrationWarning</code> অ্যাট্রিবিউট ব্যবহার করা।</li>
+      </ul>
+    
+      <h4>Hydration Mismatch — কীভাবে ঘটে</h4>
+      <pre class="mermaid">
+flowchart LR
+    A["সার্ভার: HTML রেন্ডার<br/>(যেমন new Date() ব্যবহার করে)"] --> B["ব্রাউজারে HTML পাঠানো"]
+    B --> C["ক্লায়েন্ট: React আবার রেন্ডার করে<br/>(ভিন্ন সময়ে, তাই ভিন্ন আউটপুট)"]
+    C --> D{"সার্ভার vs ক্লায়েন্ট<br/>আউটপুট মিলছে?"}
+    D -->|না| E["❌ Hydration Mismatch Warning<br/>React ক্লায়েন্টের ভার্সন দিয়ে ওভাররাইট করে"]
+    D -->|হ্যাঁ| F["✅ স্বাভাবিক hydration"]
+      </pre>
+      <span class="diagram-caption">সার্ভার ও ক্লায়েন্ট রেন্ডারের আউটপুট ভিন্ন হলে hydration mismatch হয় — সাধারণ কারণ: Date/random/browser-only API সরাসরি রেন্ডারে ব্যবহার করা</span>
+      <h4>Follow-up প্রশ্ন</h4>
+      <ul>
+        <li><code>suppressHydrationWarning</code> কখন নিরাপদ, আর কখন এটি প্রকৃত বাগ লুকিয়ে ফেলে?</li>
       </ul>
     `
   }

@@ -3,7 +3,7 @@ const expressjsQuestions = [
     id: "express-1",
     category: "Express.js",
     difficulty: "Intermediate",
-    tags: ["Middleware", "Architecture", "next()"],
+    tags: ["Middleware","Architecture","next()"],
     question: "Express.js-এ Middleware কী? next() এবং next(err) কীভাবে রিকোয়েস্ট-রেসপন্স সাইকেল নিয়ন্ত্রণ করে?",
     answer: `
       <p><strong>Middleware</strong> হলো এমন ফাংশন যার কাছে Request Object (<code>req</code>), Response Object (<code>res</code>), এবং রিকোয়েস্ট-রেসপন্স সাইকেলের পরবর্তী মিডলওয়্যার ফাংশন <code>next</code>-এর অ্যাক্সেস থাকে।</p>
@@ -36,7 +36,7 @@ const expressjsQuestions = [
     id: "express-2",
     category: "Express.js",
     difficulty: "Intermediate",
-    tags: ["Error Handling", "Async", "Express 5"],
+    tags: ["Error Handling","Async","Express 5"],
     question: "Express.js-এ Custom Global Error Handler কীভাবে লিখবেন? Async route handler-এর এরর কীভাবে ক্যাচ করবেন?",
     answer: `
       <p>Express.js-এ গ্লোবাল এরর হ্যান্ডলিং মিডলওয়্যার তৈরি করার জন্য চার্টি (৪টি) প্যারামিটার থাকা বাধ্যতামূলক: <code>(err, req, res, next)</code>।</p>
@@ -62,7 +62,7 @@ app.use((err, req, res, next) => {
     id: "express-3",
     category: "Express.js",
     difficulty: "Advanced",
-    tags: ["Security", "Helmet", "Rate Limit", "CORS"],
+    tags: ["Security","Helmet","Rate Limit","CORS"],
     question: "Express.js সার্ভারকে নিরাপদ (Security Best Practices) করার জন্য কী কী পদক্ষেপ নেওয়া উচিত?",
     answer: `
       <p>প্রোডাকশন লেভেলে একটি Express.js অ্যাপ্লিকেশনকে বিভিন্ন ধরনের সিকিউরিটি অ্যাটাক (XSS, CSRF, DDoS, SQL/NoSQL Injection) থেকে রক্ষা করার জন্য নিম্নের পদক্ষেপগুলো নেওয়া আবশ্যক:</p>
@@ -79,7 +79,7 @@ app.use((err, req, res, next) => {
     id: "express-4",
     category: "Express.js",
     difficulty: "Intermediate",
-    tags: ["JWT", "Auth", "Cookies"],
+    tags: ["JWT","Auth","Cookies"],
     question: "Express.js-এ JWT Authentication কীভাবে বাস্তবায়ন করবেন? Access Token এবং Refresh Token-এর সেরা নিরাপত্তা কৌশল কী?",
     answer: `
       <p>JSON Web Token (JWT) হলো স্টেটলেস অথেনটিকেশনের সবচেয়ে জনপ্রিয় মাধ্যম।</p>
@@ -105,7 +105,7 @@ res.cookie('token', token, {
     id: "express-5",
     category: "Express.js",
     difficulty: "Intermediate",
-    tags: ["Routing", "Router", "Modular Code"],
+    tags: ["Routing","Router","Modular Code"],
     question: "express.Router() কী? কীভাবে একটি স্কেলএবল ও মডুলার রাউটিং স্ট্রাকচার তৈরি করবেন?",
     answer: `
       <p><code>express.Router()</code> হলো একটি মিনি-অ্যাপ্লিকেশন (Mini-app) বা আইসোলেটেড রাউটিং ইনস্ট্যান্স, যা দিয়ে অ্যাপ্লিকেশনের বিভিন্ন রাউট মডিউল আকারে ভাগ করা যায়।</p>
@@ -135,7 +135,7 @@ app.use('/api/v1/users', userRoutes);</code></pre>
     id: "express-6",
     category: "Express.js",
     difficulty: "Intermediate",
-    tags: ["Validation", "Zod", "Joi"],
+    tags: ["Validation","Zod","Joi"],
     question: "Request Payload Validation (Body, Query, Params) কেন জরুরি এবং Zod/Joi দিয়ে কীভাবে কাস্টম মিডলওয়্যার লিখবেন?",
     answer: `
       <p>ইউজার ইনপুট ব্লাইন্ডলি বিশ্বাস করা সিকিউরিটি এবং অ্যাপ্লিকেশনের স্থিতিশীলতার জন্য বিপজ্জনক। ডাটাবেজে ডাটা পাঠানোর আগেই DTO (Data Transfer Object) ভ্যালিডেশন করা উচিত।</p>
@@ -169,7 +169,7 @@ app.post('/register', validate(registerSchema), registerController);</code></pre
     id: "express-7",
     category: "Express.js",
     difficulty: "Intermediate",
-    tags: ["Multer", "File Upload", "Streams"],
+    tags: ["Multer","File Upload","Streams"],
     question: "Express.js-এ Multer ব্যবহার করে ফাইল আপলোড কীভাবে হ্যান্ডেল করবেন? ক্লাউড স্টোরেজে (S3) স্ট্রিম করার উপায় কী?",
     answer: `
       <p>Express.js নেটিভভাবে <code>multipart/form-data</code> পার্স করতে পারে না। এজন্য <code>multer</code> মিডলওয়্যার ব্যবহৃত হয়।</p>
@@ -185,7 +185,7 @@ app.post('/register', validate(registerSchema), registerController);</code></pre
     id: "express-8",
     category: "Express.js",
     difficulty: "Advanced",
-    tags: ["Performance", "Compression", "Caching"],
+    tags: ["Performance","Compression","Caching"],
     question: "Express.js অ্যাপ্লিকেশনের রেসপন্স টাইম অপ্টিমাইজেশনের প্রধান ৩টি টেকনিক কী কী?",
     answer: `
       <p>উচ্চ ট্রাফিকের অ্যাপ্লিকেশনে Express.js-এর রেসপন্স গতি বাড়াতে ৩টি মুখ্য পদ্ধতি অবলম্বন করা যায়:</p>
@@ -200,7 +200,7 @@ app.post('/register', validate(registerSchema), registerController);</code></pre
     id: "express-9",
     category: "Express.js",
     difficulty: "Intermediate",
-    tags: ["Session", "Cookie", "Redis"],
+    tags: ["Session","Cookie","Redis"],
     question: "Session-based Authentication এবং Token-based Authentication-এর মধ্যে এক্সপ্রেসের দৃষ্টিকোণ থেকে সুবিধা-অসুবিধা কী?",
     answer: `
       <p><strong>Session-based (express-session):</strong> স্টেটফুল (Stateful)। সার্ভার মেমোরি বা Redis-এ সেশন আইডি স্টোর থাকে। ক্লায়েন্টকে শুধু সেশন আইডি কুকিতে পাঠানো হয়।</p>
@@ -213,13 +213,46 @@ app.post('/register', validate(registerSchema), registerController);</code></pre
     id: "express-10",
     category: "Express.js",
     difficulty: "Beginner",
-    tags: ["Built-in Middleware", "Body Parser"],
+    tags: ["Built-in Middleware","Body Parser"],
     question: "express.json() এবং express.urlencoded()-এর কাজ কী?",
     answer: `
-      <p>Express v4.16.0-এর পর থেকে <code>body-parser</code> প্যাকেজটি এক্সপ্রেসের ভেতরে বিল্ট-ইনভাবে ইনক্লুড করা হয়েছে।</p>
+      <p><code>express.json()</code> ও <code>express.urlencoded()</code> হলো Express-এর বিল্ট-ইন body-parsing middleware — HTTP রিকোয়েস্টের raw বাইট স্ট্রিমকে <code>req.body</code>-তে ব্যবহারযোগ্য JavaScript অবজেক্টে রূপান্তর করে।</p>
+      <h4>কেন এগুলো দরকার — সমস্যাটি বুঝা</h4>
+      <p>HTTP রিকোয়েস্ট বডি নেটওয়ার্কে <strong>raw বাইট স্ট্রিম</strong> হিসেবে আসে — Express (Node.js-এর মতোই) ডিফল্টভাবে এটি পার্স করে না। এই middleware ছাড়া <code>req.body</code> <code>undefined</code> থাকবে, এমনকি ক্লায়েন্ট সঠিকভাবে JSON পাঠালেও।</p>
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
+        <pre><code>const express = require('express');
+const app = express();
+
+// JSON বডি পার্স করে (Content-Type: application/json)
+app.use(express.json({ limit: '10mb' }));
+
+// URL-encoded ফর্ম বডি পার্স করে (Content-Type: application/x-www-form-urlencoded)
+app.use(express.urlencoded({ extended: true }));
+
+app.post('/users', (req, res) => {
+  console.log(req.body);   // { name: 'Rahim', email: '...' } — parse না করলে undefined হতো
+  res.json({ received: req.body });
+});</code></pre>
+      </div>
+      <h4>কীভাবে কাজ করে — ভেতরের প্রক্রিয়া</h4>
+      <p>এই middleware Content-Type হেডার দেখে — যদি অনুরূপ হয় (<code>application/json</code> বা <code>application/x-www-form-urlencoded</code>), তাহলে স্ট্রিম থেকে chunk-বাই-chunk ডেটা সংগ্রহ করে (Node.js stream হিসেবে), সম্পূর্ণ বডি জমা হলে JSON.parse (বা querystring parse) করে <code>req.body</code>-তে বসিয়ে দেয়। Content-Type না মিললে middleware কিছুই করে না, পরের middleware-এ চলে যায়।</p>
+      <h4>express.urlencoded-এ extended অপশন</h4>
+      <table>
+        <tr><th>অপশন</th><th>পার্সিং লাইব্রেরি</th><th>সমর্থন</th></tr>
+        <tr><td><code>extended: false</code></td><td>Node-এর বিল্ট-ইন <code>querystring</code></td><td>শুধু সাধারণ key-value, নেস্টেড অবজেক্ট নয়</td></tr>
+        <tr><td><code>extended: true</code></td><td><code>qs</code> লাইব্রেরি</td><td>নেস্টেড অবজেক্ট ও অ্যারে পার্স করতে পারে (<code>user[name]=Rahim</code>)</td></tr>
+      </table>
+      <h4>নিরাপত্তা বিবেচনা — সিনিয়র-স্তরের গুরুত্বপূর্ণ পয়েন্ট</h4>
       <ul>
-        <li><code>app.use(express.json())</code>: এটি ইনকামিং Request Payload এর JSON বডি পার্স করে <code>req.body</code> অবজেক্ট গঠন করে।</li>
-        <li><code>app.use(express.urlencoded({ extended: true }))</code>: এটি HTML Form সাবমিশনের URL-encoded ডাটাসমূহ পার্স করে <code>req.body</code>-তে উপলব্ধ করে। (<code>extended: true</code> দিলে নেস্টেড অবজেক্ট পার্স করা যায়)।</li>
+        <li><strong><code>limit</code> অপশন সবসময় সেট করুন:</strong> ডিফল্ট ১০০KB, কিন্তু স্পষ্টভাবে সেট না করলে ভুল অনুমান হতে পারে। সীমা ছাড়া একটি বিশাল বডি পাঠিয়ে DoS আক্রমণ (মেমরি এক্সহস্ট) সম্ভব।</li>
+        <li><strong>ভুল JSON পাঠালে middleware নিজেই <code>SyntaxError</code> থ্রো করে</strong> — এটি ধরার জন্য একটি error-handling middleware (৪-প্যারামিটার সিগনেচার) থাকা আবশ্যক, নাহলে ক্লায়েন্ট একটি generic ৫০০ এরর পাবে informative মেসেজ ছাড়া।</li>
+        <li><strong>Content-Type স্পুফিং:</strong> body-parser Content-Type হেডারের উপর নির্ভর করে — এটি ক্লায়েন্ট-নিয়ন্ত্রিত, তাই কখনও অন্ধভাবে বিশ্বাস করবেন না; সবসময় পার্স করা <code>req.body</code>-র উপর schema validation (Zod/Joi) চালান।</li>
+      </ul>
+      <h4>Follow-up প্রশ্ন</h4>
+      <ul>
+        <li>Multipart/form-data (ফাইল আপলোড) এই middleware দিয়ে পার্স হয় কি — না হলে কী ব্যবহার করবেন?</li>
+        <li>body-parser SyntaxError কীভাবে সঠিকভাবে হ্যান্ডল করবেন?</li>
       </ul>
     `
   },
@@ -316,12 +349,64 @@ app.get('/', (req, res) => {
     tags: ["Logging","Winston","Morgan"],
     question: "Production Express app-এ Morgan এবং Winston logger কীভাবে ব্যবহৃত হয়?",
     answer: `
-      <p>প্রোডাকশনে স্ট্রাকচার্ড লগিংয়ের জন্য এই দুটি প্যাকেজ একসাথে ব্যবহৃত হয়:</p>
+      <p>প্রোডাকশন Express অ্যাপে দুই ধরনের logging দরকার — <strong>HTTP অ্যাক্সেস লগ</strong> (কে, কখন, কোন এন্ডপয়েন্ট হিট করল) এবং <strong>অ্যাপ্লিকেশন লগ</strong> (এরর, ডিবাগ তথ্য, বিজনেস ইভেন্ট)। Morgan প্রথমটির জন্য, Winston দ্বিতীয়টির জন্য — একসাথে ব্যবহার করা সাধারণ প্র্যাকটিস।</p>
+      <h4>Morgan — HTTP Request Logger Middleware</h4>
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
+        <pre><code>const morgan = require('morgan');
+app.use(morgan('combined'));   // Apache-স্টাইল লগ ফরম্যাট
+// আউটপুট: 127.0.0.1 - - [10/Aug/2026:10:00:00] "GET /api/users HTTP/1.1" 200 1234
+
+// প্রোডাকশনে Winston-এর সাথে ইন্টিগ্রেট — Morgan-এর আউটপুট Winston দিয়ে লেখা
+app.use(morgan('combined', {
+  stream: { write: (msg) => logger.info(msg.trim()) }
+}));</code></pre>
+      </div>
+      <p>Morgan প্রতিটি HTTP রিকোয়েস্টের জন্য স্বয়ংক্রিয়ভাবে একটি লগ লাইন তৈরি করে (method, URL, status code, response time) — এটি একটি middleware, তাই request pipeline-এর প্রতিটি রিকোয়েস্টে চলে, ম্যানুয়ালি প্রতিটি রুটে লগ লেখার দরকার নেই।</p>
+      <h4>Winston — Structured Application Logger</h4>
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
+        <pre><code>const winston = require('winston');
+
+const logger = winston.createLogger({
+  level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.json()          // ← structured JSON, log aggregator পার্স করতে পারে
+  ),
+  transports: [
+    new winston.transports.Console(),
+    new winston.transports.File({ filename: 'error.log', level: 'error' }),
+    new winston.transports.File({ filename: 'combined.log' })
+  ]
+});
+
+// অ্যাপ্লিকেশন কোডে ব্যবহার
+logger.info('Order created', { orderId: 123, userId: 45 });
+logger.error('Payment failed', { orderId: 123, error: err.message });</code></pre>
+      </div>
+      <h4>কেন JSON ফরম্যাট — Structured Logging-এর গুরুত্ব</h4>
+      <p>প্লেইন টেক্সট লগ (<code>"Order 123 failed"</code>) মানুষের পড়ার জন্য সহজ, কিন্তু <strong>মেশিন পার্স করার জন্য কঠিন</strong>। JSON ফরম্যাটে লগ লিখলে (<code>{"orderId": 123, "level": "error", "msg": "Payment failed"}</code>) log aggregation টুল (ELK Stack, Datadog, CloudWatch) সরাসরি ফিল্ড-ভিত্তিক সার্চ ও ড্যাশবোর্ড তৈরি করতে পারে — "গত ১ ঘণ্টায় সব payment error দেখাও" এর মতো কোয়েরি সম্ভব হয়।</p>
+      <h4>Log Level নিয়ন্ত্রণ — প্রোডাকশনে গুরুত্বপূর্ণ</h4>
+      <table>
+        <tr><th>Level</th><th>কখন ব্যবহার</th></tr>
+        <tr><td><code>error</code></td><td>এক্সসেপশন, ফেইলিউর — তাৎক্ষণিক অ্যাকশন দরকার</td></tr>
+        <tr><td><code>warn</code></td><td>অস্বাভাবিক কিন্তু ক্র্যাশ নয় (deprecated API ব্যবহার, retry হচ্ছে)</td></tr>
+        <tr><td><code>info</code></td><td>গুরুত্বপূর্ণ বিজনেস ইভেন্ট (অর্ডার তৈরি, ইউজার লগইন)</td></tr>
+        <tr><td><code>debug</code></td><td>ডেভেলপমেন্ট-স্তরের বিস্তারিত তথ্য — প্রোডাকশনে সাধারণত বন্ধ থাকে</td></tr>
+      </table>
+      <p>প্রোডাকশনে <code>debug</code> লেভেল চালু রাখলে লগ ভলিউম বিস্ফোরিত হয়ে যায় (স্টোরেজ খরচ, পারফরম্যান্স প্রভাব) — <code>NODE_ENV</code> অনুযায়ী লেভেল নিয়ন্ত্রণ জরুরি।</p>
+      <h4>সিনিয়র-স্তরের বিবেচনা</h4>
       <ul>
-        <li><strong>Morgan:</strong> এটি HTTP রিকোয়েস্ট লগার। কোন আইপি থেকে কোন রাউটে রিকোয়েস্ট এসেছে এবং রেসপন্স টাইম কত তা লগ করে।</li>
-        <li><strong>Winston:</strong> এটি অ্যাপ্লিকেশন লগার। এটি এরর, ইনফো, বা ডিবাগ মেসেজকে ফাইল বা ডাটাবেজে JSON ফরম্যাটে স্টোর করে।</li>
+        <li><strong>সংবেদনশীল ডেটা কখনও লগ করবেন না</strong> — পাসওয়ার্ড, টোকেন, ক্রেডিট কার্ড নম্বর। লগ প্রায়ই কম সুরক্ষিত সিস্টেমে সংরক্ষিত/এক্সপোর্ট হয়।</li>
+        <li><strong>Correlation ID:</strong> প্রতিটি রিকোয়েস্টে একটি ইউনিক ID যোগ করে (middleware দিয়ে) সব লগ লাইনে সেটি সংযুক্ত করুন — একটি নির্দিষ্ট রিকোয়েস্টের পুরো জীবনচক্র ট্রেস করা সহজ হয় (microservices-এ বিশেষভাবে গুরুত্বপূর্ণ)।</li>
+        <li><strong>Log rotation:</strong> ফাইলে লগ লিখলে <code>winston-daily-rotate-file</code> ব্যবহার করুন — নাহলে একটি একক লগ ফাইল ডিস্ক পূর্ণ করে ফেলতে পারে।</li>
       </ul>
-      <p>Morgan-এর আউটপুটকে Winston-এর মাধ্যমে স্ট্রিম করা যায়, যাতে সব লগ একই ফাইলে জমা হয়।</p>
+      <h4>Follow-up প্রশ্ন</h4>
+      <ul>
+        <li>Correlation ID কীভাবে microservices জুড়ে propagate করবেন?</li>
+        <li>Winston-এর transport কীভাবে কাজ করে — একাধিক destination-এ একসাথে লেখা কীভাবে সম্ভব?</li>
+      </ul>
     `
   },
   {
@@ -371,7 +456,7 @@ app.use(hpp()); // Protects against HPP</code></pre>
     id: "express-19",
     category: "Express.js",
     difficulty: "Intermediate",
-    tags: ["Middleware", "Architecture", "Flow"],
+    tags: ["Middleware","Architecture","Flow"],
     question: "Express.js Middleware Architecture এবং next() / next(err) কন্ট্রোল ফ্লো কীভাবে কাজ করে?",
     answer: `
       <p>Express মিডলওয়্যার চেইন আকারে কাজ করে। একটি মিডলওয়্যার তার কাজ শেষ করে <code>next()</code> ডাকলে পরবর্তী মিডলওয়্যারে কন্ট্রোল যায়।</p>
@@ -393,7 +478,7 @@ app.use((err, req, res, next) => {
     id: "express-20",
     category: "Express.js",
     difficulty: "Intermediate",
-    tags: ["Error Handling", "Global Handler", "Async"],
+    tags: ["Error Handling","Global Handler","Async"],
     question: "Express 4 vs Express 5-এ Async Error Handling-এর পার্থক্য কী? express-async-errors কেন লাগত?",
     answer: `
       <p><strong>Express 4:</strong> অ্যাসিনক্রোনাস ফাংশনে (<code>async/await</code>) যদি কোনো এরর থ্রো হয় বা প্রমিস রিজেক্ট হয়, এক্সপ্রেস সেটি স্বয়ংক্রিয়ভাবে ধরতে পারত না (Unhandled Rejection)। এটি হ্যান্ডেল করতে <code>try...catch</code> ব্লক লিখে ম্যানুয়ালি <code>next(err)</code> ডাকতে হতো, অথবা <code>express-async-handler</code> বা <code>express-async-errors</code> প্যাকেজ ব্যবহার করতে হতো।</p>
@@ -412,7 +497,7 @@ app.get('/users', async (req, res, next) => {
     id: "express-21",
     category: "Express.js",
     difficulty: "Intermediate",
-    tags: ["Routing", "express.Router", "Modular"],
+    tags: ["Routing","express.Router","Modular"],
     question: "express.Router() দিয়ে মডুলার ও মেইনটেইনেবল রুট আর্কিটেকচার কীভাবে সাজাবেন?",
     answer: `
       <p>বড় অ্যাপ্লিকেশনে সব রাউট এক ফাইলে রাখলে কোড আনমেইনটেইনেবল হয়ে যায়। <code>express.Router()</code> ব্যবহার করে রিসোর্স ভিত্তিক আর্কিটেকচার তৈরি করা হয়।</p>
@@ -435,7 +520,7 @@ app.use('/api/v1/users', userRouter);</code></pre>
     id: "express-22",
     category: "Express.js",
     difficulty: "Advanced",
-    tags: ["Performance", "Route Matcher", "radix-tree"],
+    tags: ["Performance","Route Matcher","radix-tree"],
     question: "Express Route Matching Performance এবং অতিরিক্ত মিডলওয়্যার ওভারহেড কীভাবে কমাবেন?",
     answer: `
       <p>Express-এ প্রতিটি ইনকামিং রিকোয়েস্ট সব গ্লোবাল মিডলওয়্যার এবং রাউট স্ট্যাকের মধ্য দিয়ে যায়। পারফরম্যান্স অপটিমাইজ করতে নিচের নিয়মগুলো মানা উচিত:</p>
@@ -450,7 +535,7 @@ app.use('/api/v1/users', userRouter);</code></pre>
     id: "express-23",
     category: "Express.js",
     difficulty: "Intermediate",
-    tags: ["Request", "Response", "Methods"],
+    tags: ["Request","Response","Methods"],
     question: "req.params vs req.query vs req.body-এর পার্থক্য ও ব্যবহার কী?",
     answer: `
       <p>ক্লায়েন্ট থেকে ডেটা রিসিভ করার ৩টি প্রধান উপায় হলো:</p>
@@ -465,23 +550,46 @@ app.use('/api/v1/users', userRouter);</code></pre>
     id: "express-24",
     category: "Express.js",
     difficulty: "Intermediate",
-    tags: ["Body Parsing", "express.json", "raw-body"],
-    question: "express.json() এবং express.urlencoded() মিডলওয়্যারের কাজ কী? limit সেটিংস কেন জরুরি?",
+    tags: ["Express.js","Middleware","Architecture","Senior"],
+    question: "Express-এ Application-level, Router-level এবং Route-level Middleware-এর scope ও execution order কী?",
     answer: `
-      <p>এই মিডলওয়্যারগুলো ইনকামিং Raw HTTP Payload পার্স করে <code>req.body</code>-তে জাভাস্ক্রিপ্ট অবজেক্ট হিসেবে স্টোর করে।</p>
+      <p>Express middleware তিনটি ভিন্ন স্তরে ডিফাইন করা যায় — প্রতিটির scope ও কার্যকরী পরিসর ভিন্ন, এবং তাদের ডিফাইন করার ক্রমই নির্ধারণ করে execution order।</p>
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
+        <pre><code>// Application-level — প্রতিটি রিকোয়েস্টে চলে (পুরো অ্যাপে)
+app.use((req, res, next) => { console.log('সব রিকোয়েস্টে'); next(); });
+
+// Router-level — শুধু নির্দিষ্ট router-এর রুটগুলোতে চলে
+const router = express.Router();
+router.use((req, res, next) => { console.log('শুধু /api/* রুটে'); next(); });
+app.use('/api', router);
+
+// Route-level — শুধু একটি নির্দিষ্ট রুটে চলে
+app.get('/orders/:id', authMiddleware, validateId, getOrderController);
+// authMiddleware, validateId শুধু এই একটি রুটেই সক্রিয়</code></pre>
+      </div>
+      <h4>Execution Order — কেন এটি গুরুত্বপূর্ণ</h4>
+      <p>Express middleware <strong>ডিফাইন করার ক্রম অনুযায়ী</strong> চলে — উপর থেকে নিচে। একটি Application-level middleware Router-level middleware-এর আগে <code>app.use()</code> করা হলে, সেটি router-এর middleware চেইনের আগে চলবে। এই কারণে সাধারণ নিয়ম: সবচেয়ে সাধারণ (broad) middleware (logging, CORS, body-parser) আগে, নির্দিষ্ট (specific) middleware (auth, validation) পরে।</p>
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
+        <pre><code>app.use(morgan('combined'));       // ১. সব রিকোয়েস্টে লগিং
+app.use(express.json());           // ২. body parsing
+app.use('/api', apiRouter);        // ৩. router-level middleware + রুট হ্যান্ডলার
+app.use(errorHandler);             // ৪. সবার শেষে — ৪-প্যারামিটার error middleware</code></pre>
+      </div>
+      <h4>সিনিয়র-স্তরের সতর্কতা</h4>
+      <p>Error-handling middleware (৪-প্যারামিটার সিগনেচার <code>(err, req, res, next)</code>) সবসময় সব রুট ডিফাইন করার <strong>পরে</strong> রাখতে হবে — নাহলে এটি কখনও ট্রিগার হবে না, কারণ Express middleware ক্রমানুসারে চেক করে এবং error middleware শুধুমাত্র <code>next(err)</code> কল হলে খোঁজা হয়।</p>
+      <h4>Follow-up প্রশ্ন</h4>
       <ul>
-        <li><code>express.json()</code>: JSON বডি পার্স করে।</li>
-        <li><code>express.urlencoded()</code>: HTML ফর্মের URL-encoded ডেটা পার্স করে।</li>
+        <li>একটি route-level middleware থেকে router-level middleware skip করানো সম্ভব কি (next('route'))?</li>
       </ul>
-      <h4>Limit সেটিংস কেন জরুরি?</h4>
-      <p>ডিফল্টভাবে এক্সপ্রেস ১০০kb লিমিট দেয়। কিন্তু যদি <code>{ limit: '10mb' }</code> সেট করা হয় এবং ক্লায়েন্ট হ্যাকার হয়, সে যদি শত মেগাবাইটের একটি ভুয়া JSON পাঠায়, তবে সার্ভার সেটি পার্স করতে গিয়ে RAM ফুল হয়ে মেমোরি ক্র্যাশ (DoS অ্যাটাক) করতে পারে। তাই নিরাপত্তার জন্য কম লিমিট রাখা উচিত।</p>
     `
   },
   {
     id: "express-25",
     category: "Express.js",
     difficulty: "Advanced",
-    tags: ["Security", "CORS", "Preflight"],
+    tags: ["Security","CORS","Preflight"],
     question: "CORS Preflight Options Request (HTTP OPTIONS) কী এবং Express-এ cors() মিডলওয়্যার কীভাবে কাজ করে?",
     answer: `
       <p>ব্রাউজার যখন কোনো ক্রস-অরিজিন রিকোয়েস্ট (যেমন- কাস্টম হেডার বা PUT/DELETE মেথড) পাঠায়, তখন সে নিরাপত্তার জন্য আসল রিকোয়েস্টের আগে একটি <strong>OPTIONS</strong> (Preflight) রিকোয়েস্ট পাঠায় সার্ভারকে জিজ্ঞেস করতে যে এই রিকোয়েস্টটি গ্রহণযোগ্য কি না।</p>
@@ -501,7 +609,7 @@ app.use(cors({
     id: "express-26",
     category: "Express.js",
     difficulty: "Intermediate",
-    tags: ["Cookies", "cookie-parser", "httpOnly"],
+    tags: ["Cookies","cookie-parser","httpOnly"],
     question: "cookie-parser মিডলওয়্যার এবং httpOnly, Secure, SameSite Cookie Attributes-এর সিকিউরিটি ভূমিকা কী?",
     answer: `
       <p><code>cookie-parser</code> ক্লায়েন্টের পাঠানো <code>Cookie</code> হেডারকে পার্স করে <code>req.cookies</code> অবজেক্ট বানায়।</p>
@@ -517,7 +625,7 @@ app.use(cors({
     id: "express-27",
     category: "Express.js",
     difficulty: "Advanced",
-    tags: ["Security", "Rate Limiting", "Redis"],
+    tags: ["Security","Rate Limiting","Redis"],
     question: "rate-limit-redis ব্যবহার করে ডিস্ট্রিবিউটেড Express Cluster-এ Rate Limiting কীভাবে করবেন?",
     answer: `
       <p>এক্সপ্রেস যদি PM2 বা Kubernetes-এ ক্লাস্টার মোডে একাধিক প্রসেসে চলে, তবে ডিফল্ট <code>express-rate-limit</code> এর ইন-মেমোরি স্টোর কাজ করবে না, কারণ প্রতিটি প্রসেসের আইপি কাউন্টার আলাদা হবে।</p>
@@ -540,7 +648,7 @@ app.use(limiter);</code></pre>
     id: "express-28",
     category: "Express.js",
     difficulty: "Intermediate",
-    tags: ["Streaming", "res.pipe", "Download"],
+    tags: ["Streaming","res.pipe","Download"],
     question: "Express-এ res.sendFile vs res.download vs Streams দিয়ে বড় ফাইল ডাউনলোড কীভাবে করাবেন?",
     answer: `
       <ul>
@@ -562,7 +670,7 @@ app.get('/video', (req, res) => {
     id: "express-29",
     category: "Express.js",
     difficulty: "Advanced",
-    tags: ["Security", "SQLi", "Sanitization"],
+    tags: ["Security","SQLi","Sanitization"],
     question: "Express-এ Input Validation (express-validator) এবং Sanitization কীভাবে করবেন?",
     answer: `
       <p>Validation যাচাই করে ইনপুট সঠিক কি না, আর Sanitization ইনপুট থেকে ক্ষতিকর অংশ মুছে ফেলে।</p>
@@ -587,7 +695,7 @@ app.post('/register', [
     id: "express-30",
     category: "Express.js",
     difficulty: "Intermediate",
-    tags: ["Sessions", "express-session", "Connect-Redis"],
+    tags: ["Sessions","express-session","Connect-Redis"],
     question: "express-session এবং connect-redis দিয়ে Scalable Session Storage কীভাবে তৈরি করবেন?",
     answer: `
       <p><code>express-session</code> ডিফল্টভাবে মেমোরিতে সেশন স্টোর করে, যা প্রোডাকশনে মেমোরি লিক ঘটায় এবং ক্লাস্টার মোডে কাজ করে না। স্কেলেবিলিটির জন্য <code>connect-redis</code> ব্যবহার করে সেশন ডাটাবেজে স্টোর করা হয়।</p>
@@ -610,7 +718,7 @@ app.use(session({
     id: "express-31",
     category: "Express.js",
     difficulty: "Advanced",
-    tags: ["Performance", "Compression", "Brotli"],
+    tags: ["Performance","Compression","Brotli"],
     question: "Express-এ compression middleware এবং Brotli/Gzip এনকোডিং কনফিগারেশন কীভাবে করবেন?",
     answer: `
       <p>রেসপন্স পেলোড কমাতে <code>compression</code> মিডলওয়্যার ব্যবহৃত হয়। ব্রাউজার যদি <code>Accept-Encoding: br</code> হেডার পাঠায়, তবে এটি Brotli (যা Gzip-এর চেয়ে বেশি কম্প্রেস করে) ব্যবহার করে।</p>
@@ -630,27 +738,56 @@ app.get('/data', (req, res) => res.json(largeData)); // Compressed automatically
     id: "express-32",
     category: "Express.js",
     difficulty: "Intermediate",
-    tags: ["Static Files", "express.static", "Caching"],
+    tags: ["Static Files","express.static","Caching"],
     question: "express.static() দিয়ে স্ট্যাটিক ফাইল সার্ভিং এবং Cache-Control Max-Age সেট কীভাবে করবেন?",
     answer: `
-      <p>ইমেজ, CSS বা JS ফাইল সার্ভ করার জন্য <code>express.static</code> ব্যবহৃত হয়। ব্রাউজার ক্যাশিং অন করলে সার্ভারের লোড অনেক কমে যায়।</p>
+      <p><code>express.static()</code> একটি বিল্ট-ইন middleware যা একটি নির্দিষ্ট ডিরেক্টরি থেকে ফাইল (HTML, CSS, JS, ছবি) সরাসরি সার্ভ করে — প্রতিটি ফাইলের জন্য আলাদা রুট হ্যান্ডলার লেখার প্রয়োজন হয় না।</p>
       <div class="code-box">
         <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
         <pre><code>const path = require('path');
 
 app.use(express.static(path.join(__dirname, 'public'), {
-  maxAge: '1d', // Cache for 1 day
-  etag: true,   // Enable ETag generation
-  lastModified: true
-}));</code></pre>
+  maxAge: '1y',              // ব্রাউজার ক্যাশ কতদিন বৈধ থাকবে
+  etag: true,                 // কনটেন্ট বদলেছে কিনা যাচাইয়ের জন্য
+  immutable: true,            // ফাইলনাম বদলাবে না, ক্যাশ পুনরায় যাচাই না করেই ব্যবহারযোগ্য
+  index: 'index.html'
+}));
+
+// রিকোয়েস্ট: GET /style.css → সার্ভ হয় public/style.css থেকে</code></pre>
       </div>
+      <h4>Cache-Control হেডার — কেন এত গুরুত্বপূর্ণ</h4>
+      <p>স্ট্যাটিক ফাইল (CSS, JS bundle, ছবি) প্রতি রিকোয়েস্টে বদলায় না — একবার ব্রাউজারে ক্যাশ হয়ে গেলে বারবার নেটওয়ার্কে আনার প্রয়োজন নেই। <code>maxAge</code> অপশন <code>Cache-Control: max-age=...</code> হেডার সেট করে, যা ব্রাউজারকে বলে দেয় কতক্ষণ পর্যন্ত সার্ভারকে না জিজ্ঞেস করেই cache থেকে ফাইল ব্যবহার করা যাবে।</p>
+      <h4>Cache Busting — versioned ফাইলনামের সাথে সংমিশ্রণ</h4>
+      <div class="code-box">
+        <div class="code-header"><span>text</span><button class="copy-btn">Copy</button></div>
+        <pre><code>❌ সমস্যা: /style.css দীর্ঘ maxAge দিয়ে ক্যাশ করা হলে,
+   সার্ভারে ফাইল আপডেট হলেও ব্রাউজার পুরনো ভার্সন দেখাতে থাকবে ১ বছর পর্যন্ত!
+
+✅ সমাধান: বিল্ড টুল ফাইলনামে hash যোগ করে
+   /style.a3f92c.css   ← কনটেন্ট বদলালে hash-ও বদলে যায়, নতুন URL
+   → immutable + maxAge: 1y নিরাপদ, কারণ URL-ই বদলে গেছে
+   → HTML ফাইল (যা নতুন hash রেফারেন্স করে) সবসময় no-cache/short cache</code></pre>
+      </div>
+      <p><strong>এই কারণেই <code>immutable: true</code></strong> শুধু hash-নেমড ফাইলে নিরাপদ — ব্রাউজারকে বলে "এই URL-এর কনটেন্ট কখনও বদলাবে না, revalidate করারও দরকার নেই"। কিন্তু <code>index.html</code>-এর মতো এন্ট্রি ফাইল, যা নতুন hash রেফারেন্স করে, দীর্ঘ ক্যাশ করা যাবে না — নাহলে ব্যবহারকারী পুরনো bundle-এর রেফারেন্স নিয়ে আটকে থাকবেন।</p>
+      <h4>ETag — Conditional Revalidation</h4>
+      <p>যেসব ফাইলের নামে hash নেই (বা ছোট maxAge সেট করা), ব্রাউজার পরবর্তী রিকোয়েস্টে <code>If-None-Match</code> হেডারে পুরনো ETag পাঠায় — সার্ভার যদি দেখে ফাইল বদলায়নি, শুধু <code>304 Not Modified</code> পাঠায় (কোনো বডি ছাড়া) — পুরো ফাইল আবার ডাউনলোড করার প্রয়োজন হয় না।</p>
+      <h4>প্রোডাকশনে সিনিয়র-স্তরের বিবেচনা</h4>
+      <ul>
+        <li><strong>Node.js প্রসেস দিয়ে স্ট্যাটিক ফাইল সার্ভ করা প্রোডাকশনে অদক্ষ</strong> — Node single-threaded event loop স্ট্যাটিক ফাইল সার্ভিংয়ে ব্যস্ত থাকলে actual API রিকোয়েস্ট প্রসেস করার ক্ষমতা কমে যায়। প্রোডাকশনে সাধারণত <strong>Nginx বা CDN</strong> স্ট্যাটিক ফাইল সার্ভ করে, Node শুধু API হ্যান্ডল করে।</li>
+        <li><strong>Compression:</strong> <code>compression</code> middleware বা Nginx gzip/brotli দিয়ে ফাইল সংকুচিত করে পাঠানো — নেটওয়ার্ক ট্রান্সফার কমায়।</li>
+      </ul>
+      <h4>Follow-up প্রশ্ন</h4>
+      <ul>
+        <li>CDN ব্যবহার করলে express.static-এর ভূমিকা কী থাকে?</li>
+        <li>ETag ও Last-Modified হেডারের মধ্যে পার্থক্য কী?</li>
+      </ul>
     `
   },
   {
     id: "express-33",
     category: "Express.js",
     difficulty: "Advanced",
-    tags: ["Security", "Helmet", "Content-Security-Policy"],
+    tags: ["Security","Helmet","Content-Security-Policy"],
     question: "Helmet.js দিয়ে Express-এ Content Security Policy (CSP) কীভাবে সেটআপ করবেন?",
     answer: `
       <p><strong>CSP (Content Security Policy)</strong> একটি হেডার যা ব্রাউজারকে নির্দেশ দেয় কোন ডোমেইন থেকে স্ক্রিপ্ট, স্টাইল বা ইমেজ লোড করা নিরাপদ। এটি XSS অ্যাটাক প্রতিরোধ করে। Helmet.js দিয়ে এটি কনফিগার করা যায়।</p>
@@ -671,7 +808,7 @@ app.use(express.static(path.join(__dirname, 'public'), {
     id: "express-34",
     category: "Express.js",
     difficulty: "Intermediate",
-    tags: ["Routing", "Param Middleware", "router.param"],
+    tags: ["Routing","Param Middleware","router.param"],
     question: "Express-এ router.param() মিডলওয়্যার দিয়ে ড্রাই (DRY) কোড কীভাবে লিখবেন?",
     answer: `
       <p>যখন কোনো রাউটে <code>:id</code> প্যারামিটার থাকে, তখন ডাটাবেজ থেকে ইউজার খুঁজে আনার লজিক প্রতিটি রাউটে না লিখে <code>router.param()</code> দিয়ে একবার লেখা যায়।</p>
@@ -697,23 +834,87 @@ router.put('/users/:userId', (req, res) => updateUser(req.user));</code></pre>
     id: "express-35",
     category: "Express.js",
     difficulty: "Advanced",
-    tags: ["Architecture", "MVC", "Layered"],
+    tags: ["Architecture","MVC","Layered"],
     question: "Express.js-এ MVC / Controller-Service-Repository Pattern আর্কিটেকচার কেন প্রয়োজনীয়?",
     answer: `
-      <p>এক্সপ্রেস রাউট ফাইলের ভেতর সরাসরি ডাটাবেজ কোয়েরি লিখলে কোড আনমেইনটেইনেবল হয়। <strong>Layered Architecture</strong> কোডকে ভাগ করে:</p>
-      <ol>
-        <li><strong>Routes/Controllers:</strong> শুধু HTTP রিকোয়েস্ট রিসিভ করে এবং রেসপন্স পাঠায়।</li>
-        <li><strong>Services:</strong> মূল বিজনেস লজিক (যেমন- পেমেন্ট ক্যালকুলেশন) এখানে থাকে।</li>
-        <li><strong>Repositories:</strong> ডাটাবেজ কোয়েরি (Mongoose/Prisma) এখানে থাকে।</li>
-      </ol>
-      <p>এতে কোড টেস্ট করা সহজ হয় এবং একই সার্ভিস লজিক অন্য কোথাও (যেমন- WebSocket) রি-ইউজ করা যায়।</p>
+      <p>MVC (Model-View-Controller) বা তার API-কেন্দ্রিক রূপ <strong>Controller-Service-Repository</strong> প্যাটার্ন Express অ্যাপে দায়িত্ব আলাদা করার জন্য ব্যবহৃত হয় — ছোট অ্যাপে সব লজিক একটি ফাইলে (route handler-এ) লেখা সম্ভব, কিন্তু বড় হতে থাকলে এটি রক্ষণাবেক্ষণযোগ্য থাকে না।</p>
+      <h4>কেন প্রয়োজন — সমস্যাটি</h4>
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
+        <pre><code>// ❌ সব লজিক একসাথে — route handler-এ DB কোয়েরি, বিজনেস লজিক, response ফরম্যাটিং
+app.post('/orders', async (req, res) => {
+  const { userId, items } = req.body;
+  if (!items.length) return res.status(400).json({ error: 'Empty cart' });
+  const user = await db.query('SELECT * FROM users WHERE id = $1', [userId]);
+  if (!user) return res.status(404).json({ error: 'User not found' });
+  let total = 0;
+  for (const item of items) { total += item.price * item.qty; }
+  const discount = user.isPremium ? total * 0.1 : 0;
+  const order = await db.query('INSERT INTO orders ...', [...]);
+  await emailService.send(user.email, 'Order confirmed');
+  res.json({ order, total: total - discount });
+});
+// টেস্ট করা কঠিন, পুনর্ব্যবহার অসম্ভব, ফাইল বড় হতে থাকলে বোঝা কঠিন</code></pre>
+      </div>
+      <h4>তিন স্তরে ভাগ করা</h4>
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
+        <pre><code>// Controller — শুধু HTTP layer সামলায় (request/response)
+class OrderController {
+  async create(req, res, next) {
+    try {
+      const order = await orderService.createOrder(req.body);
+      res.status(201).json(order);
+    } catch (err) { next(err); }
+  }
+}
+
+// Service — বিজনেস লজিক, HTTP সম্পর্কে কিছুই জানে না
+class OrderService {
+  async createOrder({ userId, items }) {
+    const user = await userRepository.findById(userId);
+    if (!user) throw new NotFoundError('User not found');
+    const total = this.calculateTotal(items, user.isPremium);
+    const order = await orderRepository.create({ userId, items, total });
+    await emailService.sendConfirmation(user.email, order);
+    return order;
+  }
+  calculateTotal(items, isPremium) { /* pure বিজনেস লজিক, সহজে ইউনিট টেস্টযোগ্য */ }
+}
+
+// Repository — শুধু ডেটা অ্যাক্সেস, কোনো বিজনেস লজিক নেই
+class OrderRepository {
+  async create(data) { return db.query('INSERT INTO orders ...', [...]); }
+  async findById(id) { return db.query('SELECT * FROM orders WHERE id = $1', [id]); }
+}</code></pre>
+      </div>
+      <h4>প্রতিটি স্তরের দায়িত্ব</h4>
+      <table>
+        <tr><th>স্তর</th><th>দায়িত্ব</th><th>জানে না</th></tr>
+        <tr><td><strong>Controller</strong></td><td>HTTP রিকোয়েস্ট পার্স করা, response ফরম্যাট করা, status code</td><td>বিজনেস লজিক, SQL</td></tr>
+        <tr><td><strong>Service</strong></td><td>বিজনেস লজিক, একাধিক repository/external service সমন্বয়</td><td>HTTP (req/res), SQL সিনট্যাক্স</td></tr>
+        <tr><td><strong>Repository</strong></td><td>ডেটাবেজ কোয়েরি, ORM/query builder ব্যবহার</td><td>বিজনেস নিয়ম</td></tr>
+      </table>
+      <h4>সুবিধা</h4>
+      <ul>
+        <li><strong>টেস্টেবিলিটি:</strong> Service স্তর ইউনিট টেস্ট করা যায় HTTP বা ডাটাবেজ ছাড়াই — mock repository দিয়ে বিজনেস লজিক আলাদাভাবে যাচাই করা যায়।</li>
+        <li><strong>পুনর্ব্যবহারযোগ্যতা:</strong> একই Service একাধিক Controller থেকে (REST API + GraphQL resolver + CLI script) ব্যবহার করা যায়।</li>
+        <li><strong>ডাটাবেজ পরিবর্তন সহজ:</strong> Repository-তে ডাটাবেজ-নির্দিষ্ট কোড আটকে থাকে — MongoDB থেকে PostgreSQL-এ সরলে শুধু Repository বদলাতে হয়, Service/Controller অপরিবর্তিত থাকে।</li>
+      </ul>
+      <h4>সিনিয়র-স্তরের সতর্কতা — Over-engineering এড়ানো</h4>
+      <p>খুব ছোট CRUD API-তে (৩-৪টি এন্ডপয়েন্ট, কোনো জটিল বিজনেস লজিক নেই) এই তিন-স্তর বিভাজন অপ্রয়োজনীয় জটিলতা যোগ করতে পারে। <strong>প্যাটার্ন প্রয়োগের সিদ্ধান্ত প্রজেক্টের জটিলতার সাথে সামঞ্জস্যপূর্ণ হওয়া উচিত</strong> — একটি ৫-রুটের প্রোটোটাইপে এই কাঠামো চাপিয়ে দেওয়া অপ্রয়োজনীয় বয়লারপ্লেট তৈরি করে।</p>
+      <h4>Follow-up প্রশ্ন</h4>
+      <ul>
+        <li>Dependency Injection কীভাবে এই প্যাটার্নের সাথে সংযুক্ত হয় (NestJS-এর তুলনায়)?</li>
+        <li>Repository প্যাটার্ন ব্যবহার করলে ORM (Prisma/TypeORM)-এর সাথে কীভাবে সংমিশ্রণ করবেন?</li>
+      </ul>
     `
   },
   {
     id: "express-36",
     category: "Express.js",
     difficulty: "Intermediate",
-    tags: ["HTTP Status", "Status Codes", "REST"],
+    tags: ["HTTP Status","Status Codes","REST"],
     question: "RESTful API-তে এক্সপ্রেস দিয়ে সঠিক HTTP Status Codes (200, 201, 204, 400, 401, 403, 404, 409, 500) ব্যবহারের নিয়ম কী?",
     answer: `
       <p>REST API-তে সঠিক স্ট্যাটাস কোড ক্লায়েন্টকে রিকোয়েস্টের ফলাফল বোঝাতে সাহায্য করে।</p>
@@ -734,7 +935,7 @@ router.put('/users/:userId', (req, res) => updateUser(req.user));</code></pre>
     id: "express-37",
     category: "Express.js",
     difficulty: "Advanced",
-    tags: ["WebSockets", "ws", "http"],
+    tags: ["WebSockets","ws","http"],
     question: "একই Express HTTP Server-এ ws / Socket.io সকেট কীভাবে একসাথে রান করবেন?",
     answer: `
       <p>সাধারণত এক্সপ্রেস (<code>app.listen</code>) এবং Socket.io আলাদা পোর্টে রান করা যায়। তবে একই পোর্টে চালাতে হলে HTTP সার্ভার ইনস্ট্যান্স শেয়ার করতে হয়।</p>
@@ -760,7 +961,7 @@ server.listen(3000, () => console.log('HTTP & WS running on port 3000'));</code>
     id: "express-38",
     category: "Express.js",
     difficulty: "Intermediate",
-    tags: ["Request Context", "res.locals", "req.state"],
+    tags: ["Request Context","res.locals","req.state"],
     question: "res.locals vs req.user — রিকুয়েস্ট লাইফসাইকেলে ডাটা শেয়ার করার মাধ্যম কোনটি?",
     answer: `
       <p>মিডলওয়্যার থেকে কন্ট্রোলারে ডেটা পাস করার জন্য <code>req</code> অবজেক্টে কাস্টম প্রপার্টি (যেমন <code>req.user</code>) যোগ করা হয়। এটি কাজ করলেও, এক্সপ্রেসের অফিশিয়াল ও নিরাপদ উপায় হলো <code>res.locals</code>।</p>
@@ -783,7 +984,7 @@ app.get('/', (req, res) => {
     id: "express-39",
     category: "Express.js",
     difficulty: "Advanced",
-    tags: ["Microservices", "Proxy", "express-http-proxy"],
+    tags: ["Microservices","Proxy","express-http-proxy"],
     question: "express-http-proxy দিয়ে এক্সপ্রেসকে এপিআই গেটওয়ে প্রক্সি হিসেবে কীভাবে ব্যবহার করবেন?",
     answer: `
       <p>মাইক্রোসার্ভিস আর্কিটেকচারে একটি এক্সপ্রেস অ্যাপকে API Gateway হিসেবে ব্যবহার করে অন্যান্য ইন্টারনাল সার্ভিসে রিকোয়েস্ট ফরওয়ার্ড করা যায়। <code>express-http-proxy</code> এর মাধ্যমে এটি সহজ।</p>
@@ -805,7 +1006,7 @@ app.use('/services/user', proxy('http://user-service:4000', {
     id: "express-40",
     category: "Express.js",
     difficulty: "Intermediate",
-    tags: ["Events", "Response", "finish event"],
+    tags: ["Events","Response","finish event"],
     question: "Express-এ res.on('finish') এবং res.on('close') ইভেন্ট দিয়ে Response Metrics ট্র্যাকিং কীভাবে করবেন?",
     answer: `
       <p>রেসপন্স ক্লায়েন্টের কাছে যাওয়ার পর বা কানেকশন বন্ধ হওয়ার পর কিছু কাজ (যেমন- মেট্রিক্স বা অ্যানালিটিক্স লগ করা) করার জন্য এই ইভেন্টগুলো ব্যবহৃত হয়।</p>
@@ -830,7 +1031,7 @@ app.use('/services/user', proxy('http://user-service:4000', {
     id: "express-41",
     category: "Express.js",
     difficulty: "Advanced",
-    tags: ["Security", "Header Injection", "res.set"],
+    tags: ["Security","Header Injection","res.set"],
     question: "Express-এ HTTP Response Splitting / Header Injection কীভাবে এড়াবেন?",
     answer: `
       <p><strong>HTTP Response Splitting</strong> হলো এমন একটি অ্যাটাক যেখানে অ্যাটাকার ইউজার ইনপুটের মাধ্যমে হেডারে <code>\\r\\n</code> (Carriage Return Line Feed) ইনজেক্ট করে নতুন হেডার বা বডি তৈরি করে।</p>
@@ -850,7 +1051,7 @@ app.use('/services/user', proxy('http://user-service:4000', {
     id: "express-42",
     category: "Express.js",
     difficulty: "Intermediate",
-    tags: ["Uploads", "Multer", "Memory Leak"],
+    tags: ["Uploads","Multer","Memory Leak"],
     question: "Multer ফাইল আপলোডের সময় Disk Storage vs Memory Buffer Memory Leak এড়ানোর কৌশল কী?",
     answer: `
       <p>Multer ডিফল্টভাবে ফাইলকে মেমোরিতে (MemoryStorage) রাখে। বড় ফাইল আপলোড হলে পুরো ফাইল RAM-এ স্পেস নেয়, যা Memory Leak বা ক্র্যাশ করতে পারে।</p>
@@ -870,7 +1071,7 @@ const upload = multer({ storage: storage });</code></pre>
     id: "express-43",
     category: "Express.js",
     difficulty: "Advanced",
-    tags: ["Optimization", "ETag", "Fresh"],
+    tags: ["Optimization","ETag","Fresh"],
     question: "Express ETag Generation এবং HTTP 304 Not Modified Status কীভাবে কাজ করে?",
     answer: `
       <p><strong>ETag</strong> (Entity Tag) হলো একটি হ্যাশ ভ্যালু যা এক্সপ্রেস প্রতিটি রেসপন্সের সাথে পাঠায়। ব্রাউজার পরের বার একই রিসোর্স চাইলে <code>If-None-Match</code> হেডারে সেই ETag পাঠায়। সার্ভার যদি দেখে ডাটা পরিবর্তন হয়নি, তবে সে কোনো বডি ছাড়া শুধু <strong>304 Not Modified</strong> স্ট্যাটাস পাঠায়।</p>
@@ -887,35 +1088,124 @@ app.set('etag', 'strong'); // or 'weak'
     id: "express-44",
     category: "Express.js",
     difficulty: "Intermediate",
-    tags: ["Testing", "Supertest", "Mocks"],
+    tags: ["Testing","Supertest","Mocks"],
     question: "Supertest এবং Jest দিয়ে Express REST API Route Testing কীভাবে করবেন?",
     answer: `
-      <p>Supertest ব্যবহার করে কোনো পোর্ট লিসেন না করেই সরাসরি এক্সপ্রেস অ্যাপকে টেস্ট করা যায়।</p>
+      <p>Supertest ও Jest একসাথে ব্যবহার করে Express রুট টেস্ট করার অর্থ — অ্যাপকে বাস্তব পোর্টে চালু না করেই HTTP রিকোয়েস্ট সিমুলেট করা এবং response যাচাই করা।</p>
+      <h4>বেসিক সেটআপ</h4>
       <div class="code-box">
         <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>const request = require('supertest');
-const app = require('../app'); // Import app, not server
+        <pre><code>// app.js — app.listen() আলাদা রাখা, শুধু app এক্সপোর্ট করা (টেস্টের জন্য গুরুত্বপূর্ণ)
+const app = express();
+app.use(express.json());
+app.get('/users/:id', getUserController);
+module.exports = app;   // listen() এখানে নেই!
 
-test('GET /api/users should return 200', async () => {
-  const response = await request(app).get('/api/users');
-  
-  expect(response.statusCode).toBe(200);
-  expect(response.body).toHaveProperty('users');
+// server.js — শুধু এখানে listen()
+const app = require('./app');
+app.listen(3000);
+
+// users.test.js
+const request = require('supertest');
+const app = require('../app');
+
+describe('GET /users/:id', () => {
+  it('returns 200 with user data for valid id', async () => {
+    const res = await request(app).get('/users/1');
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({ id: 1, name: expect.any(String) });
+  });
+
+  it('returns 404 for non-existent user', async () => {
+    const res = await request(app).get('/users/99999');
+    expect(res.status).toBe(404);
+  });
 });</code></pre>
       </div>
+      <h4>কেন app.listen() আলাদা রাখা জরুরি</h4>
+      <p>Supertest সরাসরি Express app instance-এর সাথে কাজ করে — এটি অভ্যন্তরীণভাবে একটি এলোমেলো পোর্টে সাময়িক সার্ভার চালু করে, তারপর বন্ধ করে দেয়, প্রতিটি টেস্টের জন্য। যদি <code>app.js</code>-এ <code>app.listen(3000)</code> সরাসরি থাকে, প্রতিটি টেস্ট ফাইল সেই একই পোর্টে বাইন্ড করার চেষ্টা করবে — <code>EADDRINUSE</code> এরর দেবে। এজন্যই app ও server আলাদা ফাইলে ভাগ করা একটি গুরুত্বপূর্ণ টেস্টেবিলিটি প্যাটার্ন।</p>
+      <h4>POST রিকোয়েস্ট ও Authentication টেস্ট</h4>
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
+        <pre><code>it('creates an order with valid data', async () => {
+  const res = await request(app)
+    .post('/orders')
+    .set('Authorization', \`Bearer \${testToken}\`)
+    .send({ items: [{ productId: 1, qty: 2 }] });
+
+  expect(res.status).toBe(201);
+  expect(res.body.total).toBe(200);
+});
+
+it('rejects request without auth token', async () => {
+  const res = await request(app).post('/orders').send({ items: [] });
+  expect(res.status).toBe(401);
+});</code></pre>
+      </div>
+      <h4>Database Mocking বনাম Test Database — সিনিয়র-স্তরের সিদ্ধান্ত</h4>
+      <table>
+        <tr><th>পদ্ধতি</th><th>সুবিধা</th><th>ঝুঁকি</th></tr>
+        <tr><td><strong>Mock DB layer</strong></td><td>দ্রুত, বিচ্ছিন্ন (isolated)</td><td>প্রকৃত SQL/query ভুল ধরা পড়ে না</td></tr>
+        <tr><td><strong>Test DB (Docker container, প্রতিটি টেস্ট রানে রিসেট)</strong></td><td>বাস্তব ডাটাবেজ আচরণ যাচাই করে — constraint, transaction, migration সবকিছু</td><td>ধীর, সেটআপ জটিল</td></tr>
+      </table>
+      <p><strong>ইন্টিগ্রেশন টেস্টে বাস্তব (কিন্তু বিচ্ছিন্ন) টেস্ট ডাটাবেজ ব্যবহার করা বেশি নির্ভরযোগ্য</strong> — DB layer মক করলে মক ও বাস্তব ডাটাবেজের আচরণ ভিন্ন হয়ে গেলে সেই বাগ টেস্টে ধরা পড়ে না, প্রোডাকশনে গিয়ে দেখা যায়।</p>
+      <h4>টেস্ট আইসোলেশন — প্রতিটি টেস্ট স্বাধীন হওয়া উচিত</h4>
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
+        <pre><code>beforeEach(async () => {
+  await db.query('BEGIN');           // প্রতিটি টেস্টের আগে transaction শুরু
+});
+afterEach(async () => {
+  await db.query('ROLLBACK');        // পরে rollback — কোনো side effect থাকবে না
+});
+// এভাবে একটি টেস্ট অন্য টেস্টের ডেটার উপর নির্ভর করে না, ক্রম যাই হোক ফলাফল একই</code></pre>
+      </div>
+      <h4>Follow-up প্রশ্ন</h4>
+      <ul>
+        <li>Supertest দিয়ে ফাইল আপলোড এন্ডপয়েন্ট কীভাবে টেস্ট করবেন?</li>
+        <li>CI pipeline-এ টেস্ট ডাটাবেজ কীভাবে সেটআপ করবেন (Docker Compose)?</li>
+      </ul>
     `
   },
   {
     id: "express-45",
     category: "Express.js",
     difficulty: "Advanced",
-    tags: ["Routing", "Case Sensitivity", "Strict Routing"],
+    tags: ["Routing","Case Sensitivity","Strict Routing"],
     question: "Express Application Settings: 'case sensitive routing' এবং 'strict routing' এর কাজ কী?",
     answer: `
-      <p>এগুলো এক্সপ্রেসের রাউটিং বিহেভিয়ার কন্ট্রোল করে:</p>
+      <p>Express-এর <code>app.set()</code>-এ দুটি রাউটিং-সম্পর্কিত সেটিং আছে যা ডিফল্টভাবে বন্ধ থাকে — এগুলো URL ম্যাচিং কতটা কঠোর হবে তা নিয়ন্ত্রণ করে, এবং ভুল বোঝাবুঝি প্রায়ই প্রোডাকশনে অপ্রত্যাশিত রাউট আচরণের কারণ হয়।</p>
+      <h4>case sensitive routing</h4>
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
+        <pre><code>app.set('case sensitive routing', true);
+
+app.get('/Users', handler);
+// ডিফল্ট (false): /users এবং /Users উভয়ই এই হ্যান্ডলারে যায়
+// true হলে: শুধু /Users ম্যাচ করবে, /users হবে 404</code></pre>
+      </div>
+      <p>ডিফল্টভাবে Express কেস-ইনসেনসিটিভ — <code>/Users</code> ও <code>/users</code> একই রুট হিসেবে গণ্য হয়। এটি চালু করলে এই দুটি সম্পূর্ণ আলাদা রুট হিসেবে বিবেচিত হয়।</p>
+      <h4>strict routing</h4>
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
+        <pre><code>app.set('strict routing', true);
+
+app.get('/users', handler);
+// ডিফল্ট (false): /users এবং /users/ উভয়ই একই হ্যান্ডলারে যায়
+// true হলে: /users/ আলাদা রুট হিসেবে গণ্য — যদি আলাদাভাবে ডিফাইন না করা থাকে, 404 হবে</code></pre>
+      </div>
+      <h4>এই সেটিং ডিফল্টে বন্ধ কেন — ব্যবহারিক কারণ</h4>
+      <p>ওয়েবের বাস্তবতা হলো ব্যবহারকারী ও ক্লায়েন্ট প্রায়ই URL-এ সামান্য অসামঞ্জস্য রেখে রিকোয়েস্ট পাঠায় (trailing slash যোগ/বাদ, কেস ভিন্নতা) — এগুলো ব্যবহারকারীর ভুল নয়, শুধু স্বাভাবিক বৈচিত্র্য। Express ডিফল্টভাবে <strong>নমনীয় (lenient)</strong> থাকে, যাতে সাধারণ ব্যবহারকারী অভিজ্ঞতা ভেঙে না যায় শুধুমাত্র URL-এর ছোট পার্থক্যের কারণে।</p>
+      <h4>কখন কঠোর মোড ব্যবহার করবেন — সিনিয়র বিবেচনা</h4>
       <ul>
-        <li><strong>Case Sensitive Routing:</strong> ডিফল্টভাবে এক্সপ্রেস <code>/Users</code> এবং <code>/users</code> কে একই রাউট হিসেবে ধরে। <code>app.set('case sensitive routing', true)</code> দিলে এরা আলাদা রুট হিসেবে বিবেচিত হবে।</li>
-        <li><strong>Strict Routing:</strong> ডিফল্টভাবে <code>/users</code> এবং <code>/users/</code> (শেষে স্ল্যাশ) একই রাউট। <code>app.set('strict routing', true)</code> দিলে এরা আলাদা রাউট হবে।</li>
+        <li><strong>SEO সংবেদনশীল সাইটে:</strong> <code>/page</code> ও <code>/page/</code> দুটি আলাদা URL হিসেবে সার্চ ইঞ্জিনে ইনডেক্স হলে duplicate content সমস্যা তৈরি হতে পারে — কিন্তু এটি সাধারণত canonical URL ও redirect দিয়ে সমাধান করা হয়, strict routing দিয়ে নয়।</li>
+        <li><strong>API versioning-এ কঠোরতা প্রয়োজন হলে:</strong> কিছু টিম চায় <code>/api/v1/Users</code> ও <code>/api/v1/users</code> স্পষ্টভাবে ভিন্ন রুট হিসেবে গণ্য হোক, যাতে ভুল করে ভুল কেসে রিকোয়েস্ট গেলে সেটি ধরা পড়ে (silent success না হয়ে 404 দেয়)।</li>
+        <li><strong>সাধারণত বেশিরভাগ প্রোডাকশন API ডিফল্ট (lenient) সেটিং-ই রাখে</strong> — কঠোরতা যোগ করলে অতিরিক্ত edge case তৈরি হয় (প্রতিটি রুট trailing slash সহ ও ছাড়া দুইভাবে ডিফাইন করতে হতে পারে) যার সুবিধা প্রায়ই ঝামেলার তুলনায় কম।</li>
+      </ul>
+      <h4>Follow-up প্রশ্ন</h4>
+      <ul>
+        <li>Nginx বা reverse proxy স্তরে trailing slash normalize করা কি Express-এর strict routing-এর চেয়ে ভালো সমাধান?</li>
+        <li>এই সেটিং কি রানটাইমে (অ্যাপ চালু হওয়ার পরে) বদলানো যায়?</li>
       </ul>
     `
   },
@@ -923,22 +1213,51 @@ test('GET /api/users should return 200', async () => {
     id: "express-46",
     category: "Express.js",
     difficulty: "Intermediate",
-    tags: ["Security", "Disable X-Powered-By", "Hide Tech"],
+    tags: ["Security","Disable X-Powered-By","Hide Tech"],
     question: "app.disable('x-powered-by') কেন প্রোডাকশন অ্যাপে কল করা বাধ্যতামূলক?",
     answer: `
-      <p>এক্সপ্রেস বাই ডিফল্ট প্রতিটি রেসপন্সের হেডারে <code>X-Powered-By: Express</code> পাঠায়। এটি হ্যাকারদের সার্ভারের টেকনোলজি স্ট্যাক সম্পর্কে ধারণা দেয়, যাতে তারা এক্সপ্রেসের কোনো নির্দিষ্ট ভার্সনের ভালনারেবিলিটি ব্যবহার করে হ্যাক করতে পারে।</p>
-      <p>নিরাপত্তার জন্য এটি বন্ধ করা উচিত। <code>helmet()</code> ব্যবহার করলে এটি অটোমেটিক বন্ধ হয়ে যায়।</p>
+      <p>Express ডিফল্টভাবে প্রতিটি রেসপন্সে একটি <code>X-Powered-By: Express</code> হেডার যোগ করে — <code>app.disable('x-powered-by')</code> এই হেডার বন্ধ করে দেয়। এটি ছোট একটি পরিবর্তন মনে হলেও, নিরাপত্তার দৃষ্টিকোণ থেকে গুরুত্বপূর্ণ।</p>
       <div class="code-box">
         <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>app.disable('x-powered-by');</code></pre>
+        <pre><code>const app = express();
+app.disable('x-powered-by');
+// অথবা helmet middleware ব্যবহার করলে এটি স্বয়ংক্রিয়ভাবে বন্ধ হয়ে যায়
+const helmet = require('helmet');
+app.use(helmet());   // x-powered-by সহ আরও অনেক নিরাপত্তা হেডার একসাথে সেট করে</code></pre>
       </div>
+      <h4>কেন এটি নিরাপত্তা ঝুঁকি — Fingerprinting আক্রমণ</h4>
+      <p><code>X-Powered-By: Express</code> হেডার আক্রমণকারীকে জানিয়ে দেয় সার্ভার ঠিক কোন ফ্রেমওয়ার্ক ব্যবহার করছে। এই তথ্য দিয়ে আক্রমণকারী:</p>
+      <ul>
+        <li><strong>নির্দিষ্ট Express ভার্সনের পরিচিত vulnerability খুঁজতে পারে</strong> — যদি সার্ভার পুরনো Express ভার্সনে চলে যাতে কোনো known CVE আছে, আক্রমণকারীর কাজ সহজ হয়ে যায় কারণ তারা জানে ঠিক কী আক্রমণ চেষ্টা করতে হবে।</li>
+        <li><strong>Automated স্ক্যানার/বট বিশেষভাবে Express-নির্দিষ্ট আক্রমণ target করতে পারে</strong> — বড় মাপের attack surface reconnaissance-এ HTTP হেডার একটি প্রথম ধাপ।</li>
+      </ul>
+      <p>এটি "security through obscurity" — অর্থাৎ, শুধু তথ্য লুকিয়ে সুরক্ষা বাড়ানো, প্রকৃত দুর্বলতা সমাধান নয়। কিন্তু এটি <strong>attack surface reconnaissance কঠিন করে তোলে</strong> — একটি সহজ, শূন্য-খরচ পদক্ষেপ যা defense-in-depth-এর অংশ হিসেবে মূল্যবান।</p>
+      <h4>শুধু এই একটি হেডার যথেষ্ট নয় — Helmet-এর ব্যাপকতা</h4>
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
+        <pre><code>// helmet() একসাথে ১৫+ নিরাপত্তা হেডার সেট করে:
+app.use(helmet());
+// Strict-Transport-Security  → শুধু HTTPS বাধ্যতামূলক করে (HSTS)
+// X-Content-Type-Options: nosniff → ব্রাউজারকে MIME sniffing বন্ধ করতে বলে
+// X-Frame-Options: DENY → clickjacking প্রতিরোধ (iframe-এ embed হতে বাধা)
+// Content-Security-Policy → XSS আক্রমণ সীমিত করে
+// X-Powered-By হেডার মুছে ফেলে</code></pre>
+      </div>
+      <p><strong>প্রোডাকশন-প্রস্তুত Express অ্যাপে <code>app.disable('x-powered-by')</code> আলাদাভাবে করার চেয়ে সরাসরি <code>helmet()</code> মিডলওয়্যার ব্যবহার করা বেশি প্র্যাক্টিক্যাল</strong> — এটি এই একটি হেডার সহ আরও অনেক গুরুত্বপূর্ণ নিরাপত্তা হেডার একসাথে সেট করে দেয়, প্রতিটি আলাদাভাবে মনে রেখে কনফিগার করার দরকার নেই।</p>
+      <h4>এটি কেন যথেষ্ট নয় — বাস্তবতা</h4>
+      <p>একজন দৃঢ়সংকল্প আক্রমণকারী হেডার ছাড়াই framework শনাক্ত করতে পারে — response-এর error page ফরম্যাট, কুকি নাম প্যাটার্ন (<code>connect.sid</code>), বা timing বিশ্লেষণ দিয়ে। তাই এই সেটিং একটি <strong>ভালো অভ্যাস</strong>, কিন্তু প্রকৃত নিরাপত্তার মূল ভিত্তি নয় — ভিত্তি হলো: dependency আপ-টু-ডেট রাখা, input validation, authentication/authorization সঠিকভাবে বাস্তবায়ন, rate limiting।</p>
+      <h4>Follow-up প্রশ্ন</h4>
+      <ul>
+        <li>Helmet-এর CSP (Content-Security-Policy) কীভাবে কনফিগার করবেন একটি রিয়েল অ্যাপে?</li>
+        <li>Security through obscurity ও প্রকৃত নিরাপত্তার মধ্যে পার্থক্য একটি বাস্তব উদাহরণ দিয়ে ব্যাখ্যা করুন।</li>
+      </ul>
     `
   },
   {
     id: "express-47",
     category: "Express.js",
     difficulty: "Advanced",
-    tags: ["Middleware", "Conditional Middleware", "express-unless"],
+    tags: ["Middleware","Conditional Middleware","express-unless"],
     question: "নির্দিষ্ট রুটে মিডলওয়্যার স্কিপ করতে express-unless কীভাবে ব্যবহার করবেন?",
     answer: `
       <p>অথেন্টিকেশন মিডলওয়্যার সাধারণত সব রাউটে লাগে, কিন্তু <code>/login</code> বা <code>/register</code> রাউটে এটি লাগে না। এটি স্কিপ করার জন্য <code>express-unless</code> প্যাকেজ ব্যবহৃত হয়।</p>
@@ -958,7 +1277,7 @@ app.use(authMiddleware.unless({ path: ['/api/login', '/api/register'] }));</code
     id: "express-48",
     category: "Express.js",
     difficulty: "Intermediate",
-    tags: ["Graceful Shutdown", "stoppable", "http-terminator"],
+    tags: ["Graceful Shutdown","stoppable","http-terminator"],
     question: "http-terminator দিয়ে Express Active Keep-Alive HTTP Connections দ্রুত বন্ধ কীভাবে করবেন?",
     answer: `
       <p>Graceful Shutdown এর সময় ডিফল্ট <code>server.close()</code> কন্টিনিউয়াস Keep-alive কানেকশন সকেট বন্ধ করতে দীর্ঘ সময় নেয়, কখনো কখনো হ্যাং করে। <code>http-terminator</code> বা <code>stoppable</code> প্যাকেজ সব আইডল সকেট দ্রুত কিল করে শাটডাউন প্রসেস ফাস্ট করে।</p>
@@ -978,7 +1297,7 @@ process.on('SIGTERM', async () => {
     id: "express-49",
     category: "Express.js",
     difficulty: "Advanced",
-    tags: ["OpenAPI", "express-openapi-validator", "Swagger"],
+    tags: ["OpenAPI","express-openapi-validator","Swagger"],
     question: "express-openapi-validator দিয়ে OpenAPI Specs (.yaml) থেকে অটোমেটিক রুট ভ্যালিডেশন কীভাবে করবেন?",
     answer: `
       <p>Swagger YAML স্পেক্স ফাইল লোড করে দিলে এটি ইনকামিং রিকোয়েস্টের Body, Query, Params অটোমেটিক ওপেনএপিআই স্পেক্স অনুযায়ী টেস্ট ও ভ্যালিডেট করে। হাতে কোড করে ভ্যালিডেশন করতে হয় না।</p>
@@ -998,7 +1317,7 @@ app.use(OpenApiValidator.middleware({
     id: "express-50",
     category: "Express.js",
     difficulty: "Intermediate",
-    tags: ["Response", "res.format", "Content Negotiation"],
+    tags: ["Response","res.format","Content Negotiation"],
     question: "res.format() দিয়ে Express-এ Content Negotiation (JSON, HTML, Text) কীভাবে করবেন?",
     answer: `
       <p>ক্লায়েন্ট যখন <code>Accept</code> হেডার পাঠায়, তখন সেই হেডার অনুযায়ী একই রাউট থেকে ভিন্ন ভিন্ন ফরম্যাটে রেসপন্স পাঠানোর টেকনিককে Content Negotiation বলে। <code>res.format()</code> দিয়ে এটি করা হয়।</p>

@@ -24,18 +24,14 @@ document.addEventListener("DOMContentLoaded", () => {
   if (typeof nestjsQuestions !== 'undefined') allQuestions.push(...nestjsQuestions);
   if (typeof databaseQuestions !== 'undefined') allQuestions.push(...databaseQuestions);
   if (typeof mongodbQuestions !== 'undefined') allQuestions.push(...mongodbQuestions);
-  if (typeof systemDesignQuestions !== 'undefined') allQuestions.push(...systemDesignQuestions);
-  if (typeof nginxQuestions !== 'undefined') allQuestions.push(...nginxQuestions);
-  if (typeof rabbitmqKafkaQuestions !== 'undefined') allQuestions.push(...rabbitmqKafkaQuestions);
-  if (typeof grpcQuestions !== 'undefined') allQuestions.push(...grpcQuestions);
-  if (typeof elasticsearchQuestions !== 'undefined') allQuestions.push(...elasticsearchQuestions);
-  if (typeof redisQuestions !== 'undefined') allQuestions.push(...redisQuestions);
+  if (typeof systemDesignInfraQuestions !== 'undefined') allQuestions.push(...systemDesignInfraQuestions);
   if (typeof seniorFrontendQuestions !== 'undefined') allQuestions.push(...seniorFrontendQuestions.map(q => ({...q, category: `Frontend - ${q.category}`})));
   if (typeof seniorFullstackQuestions !== 'undefined') allQuestions.push(...seniorFullstackQuestions.map(q => ({...q, category: `Full-Stack - ${q.category}`})));
   if (typeof seniorBackendQuestions !== 'undefined') allQuestions.push(...seniorBackendQuestions.map(q => ({...q, category: `Backend - ${q.category}`})));
 
   // Initialize UI & Sidebar Sublists
   initTheme();
+  initMermaid();
   initVoices();
   renderSidebarCategories();
   updateProgressStats();
@@ -65,6 +61,58 @@ function toggleTheme() {
   userProgress.theme = userProgress.theme === 'dark' ? 'light' : 'dark';
   localStorage.setItem('interview_theme', userProgress.theme);
   initTheme();
+  // Diagrams are baked as SVG with theme colours, so redraw them on theme switch
+  initMermaid();
+  resetMermaidDiagrams(document);
+  renderMermaidIn(document);
+}
+
+/* =========================================================
+   Mermaid Diagram Rendering
+   Answers embed diagrams as <pre class="mermaid">...</pre>.
+   Answer bodies are display:none until opened, and Mermaid
+   cannot measure text inside a hidden element, so diagrams
+   are rendered lazily the first time a card becomes visible.
+   ========================================================= */
+function initMermaid() {
+  if (typeof mermaid === 'undefined') return;
+  mermaid.initialize({
+    startOnLoad: false,
+    securityLevel: 'loose',
+    theme: userProgress.theme === 'dark' ? 'dark' : 'default',
+    fontFamily: 'inherit',
+    flowchart: { htmlLabels: true, curve: 'basis', useMaxWidth: true },
+    sequence: { useMaxWidth: true, wrap: true },
+    er: { useMaxWidth: true }
+  });
+}
+
+// Render every not-yet-drawn diagram inside a visible root element
+function renderMermaidIn(root) {
+  if (typeof mermaid === 'undefined' || !root) return;
+  const pending = Array.from(root.querySelectorAll('pre.mermaid'))
+    .filter(node => node.dataset.rendered !== 'true' && node.offsetParent !== null);
+  if (!pending.length) return;
+
+  // Keep the source around so the diagram can be redrawn on theme change
+  pending.forEach(node => {
+    if (node.dataset.src === undefined) node.dataset.src = node.textContent.trim();
+    node.dataset.rendered = 'true';
+  });
+
+  Promise.resolve(mermaid.run({ nodes: pending, suppressErrors: true }))
+    .catch(err => console.warn('Mermaid render failed:', err));
+}
+
+// Restore diagrams back to their source text so they can be drawn again
+function resetMermaidDiagrams(root) {
+  if (!root) return;
+  root.querySelectorAll('pre.mermaid[data-src]').forEach(node => {
+    node.innerHTML = '';
+    node.textContent = node.dataset.src;
+    node.removeAttribute('data-processed');
+    node.dataset.rendered = 'false';
+  });
 }
 
 // Render Sidebar Category Tree with Expandable Question Sublists
@@ -176,7 +224,8 @@ function navigateToQuestion(qId, catName) {
     if (card) {
       // Expand question open
       card.classList.add('open');
-      
+      renderMermaidIn(card);
+
       // Scroll into view smoothly
       card.scrollIntoView({ behavior: 'smooth', block: 'center' });
       
@@ -311,6 +360,7 @@ function toggleQuestion(id) {
   const card = document.getElementById(`card-${id}`);
   if (card) {
     card.classList.toggle('open');
+    if (card.classList.contains('open')) renderMermaidIn(card);
   }
 }
 
@@ -324,6 +374,7 @@ function toggleExpandAllAnswers() {
   document.querySelectorAll('.question-card').forEach(card => {
     if (allExpanded) {
       card.classList.add('open');
+      renderMermaidIn(card);
     } else {
       card.classList.remove('open');
     }

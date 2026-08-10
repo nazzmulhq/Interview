@@ -3,7 +3,7 @@ const javascriptQuestions = [
     id: "js-1",
     category: "JavaScript",
     difficulty: "Intermediate",
-    tags: ["Execution Context", "V8", "Hoisting"],
+    tags: ["Execution Context","V8","Hoisting"],
     question: "JavaScript-এ Execution Context এবং Global Execution Context কীভাবে কাজ করে?",
     answer: `
       <p><strong>Execution Context</strong> হলো এমন একটি এনভায়রনমেন্ট (Environment) বা পরিবেশ যেখানে JavaScript কোড অ্যাসেম্বল ও এক্সিকিউট (Execute) হয়। JS ইঞ্জিন যখনই কোনো কোড রান করে, তখন সে একটি Execution Context তৈরি করে।</p>
@@ -33,7 +33,7 @@ var result = calculate(5); // FEC is created for calculate(5)</code></pre>
     id: "js-2",
     category: "JavaScript",
     difficulty: "Advanced",
-    tags: ["Event Loop", "Microtask", "Macrotask"],
+    tags: ["Event Loop","Microtask","Macrotask"],
     question: "JavaScript-এর Event Loop, Call Stack, Microtask Queue এবং Macrotask Queue কীভাবে কাজ করে?",
     answer: `
       <p>JavaScript হলো একটি <strong>Single-threaded Synchronous</strong> ল্যাঙ্গুয়েজ, কিন্তু এটি Event Loop-এর সাহায্যে Non-blocking Asynchronous অপারেশন পরিচালনা করতে পারে।</p>
@@ -68,7 +68,7 @@ console.log('End'); // 2. Call Stack
     id: "js-3",
     category: "JavaScript",
     difficulty: "Intermediate",
-    tags: ["Closure", "Scope", "Memory"],
+    tags: ["Closure","Scope","Memory"],
     question: "Closure কী? এর প্র্যাকটিক্যাল ইউজ কেস এবং মেমোরি ইমপ্যাক্ট ব্যাখ্যা করুন।",
     answer: `
       <p><strong>Closure</strong> হলো একটি ফাংশন এবং তার সাথে সম্পৃক্ত <strong>Lexical Environment</strong>-এর সমন্বয়। সহজ কথায়, একটি ফাংশন যখন তার প্যারেন্ট (Outer) ফাংশনের স্কোপের ভ্যারিয়েবলগুলোকে প্যারেন্ট ফাংশন রিটার্ন হয়ে যাওয়ার পরও অ্যাক্সেস করতে পারে, সেটাই Closure।</p>
@@ -101,7 +101,7 @@ console.log(counter.getCount());  // 1 (count is not directly accessible)</code>
     id: "js-4",
     category: "JavaScript",
     difficulty: "Intermediate",
-    tags: ["Hoisting", "let", "const", "var"],
+    tags: ["Hoisting","let","const","var"],
     question: "Hoisting কী? var, let এবং const-এর ক্ষেত্রে Hoisting-এর পার্থক্য ও Temporal Dead Zone (TDZ) কী?",
     answer: `
       <p><strong>Hoisting</strong> হলো JavaScript-এর একটি প্রসেস যেখানে মেমোরি ক্রিয়েশন ফেজে ভ্যারিয়েবল এবং ফাংশন ডিক্লেয়ারেশনকে তাদের স্কোপের একদম উপরে নিয়ে নেওয়া হয়।</p>
@@ -126,7 +126,7 @@ let b = 10;</code></pre>
     id: "js-5",
     category: "JavaScript",
     difficulty: "Advanced",
-    tags: ["this Keyword", "Call Apply Bind"],
+    tags: ["this Keyword","Call Apply Bind"],
     question: "JavaScript-এ 'this' কিওয়ার্ডের বাইন্ডিং রুলস (Binding Rules) এবং call(), apply(), bind()-এর ব্যবহার ব্যাখ্যা করুন।",
     answer: `
       <p>JavaScript-এ <code>this</code> এর ভ্যালু ফাংশনটি কোথায় ডিক্লেয়ার হয়েছে তার ওপর নির্ভর করে না, বরং <strong>ফাংশনটি কীভাবে কল (Invoked) করা হয়েছে</strong> তার ওপর নির্ভর করে।</p>
@@ -162,7 +162,7 @@ boundGreet('!'); // Welcome, Rahim!</code></pre>
     id: "js-6",
     category: "JavaScript",
     difficulty: "Intermediate",
-    tags: ["Prototype", "Inheritance", "ES6 Class"],
+    tags: ["Prototype","Inheritance","ES6 Class"],
     question: "Prototypes এবং Prototype Chain কী? ES6 Class কীভাবে এর ব্যাকগ্রাউন্ডে কাজ করে?",
     answer: `
       <p>JavaScript হলো একটি <strong>Prototype-based Object Oriented</strong> ল্যাঙ্গুয়েজ। JS-ে প্রতিটি অবজেক্টের সাথে একটি হিডেন প্রপার্টি থাকে যাকে <code>[[Prototype]]</code> বা <code>__proto__</code> বলা হয়, যা আরেকটি অবজেক্টকে নির্দেশ করে।</p>
@@ -192,7 +192,7 @@ UserProto.prototype.sayHi = function() {
     id: "js-7",
     category: "JavaScript",
     difficulty: "Intermediate",
-    tags: ["Promises", "Async Await", "Error Handling"],
+    tags: ["Promises","Async Await","Error Handling"],
     question: "Promise-এর ৩টি স্টেট কী কী? Promise.all, Promise.allSettled, Promise.race এবং Promise.any-এর পার্থক্য কী?",
     answer: `
       <p><strong>Promise</strong> হলো একটি অবজেক্ট যা কোনো Asynchronous অপারেশনের চূড়ান্ত সাফল্য (Fulfillment) বা ব্যর্থতা (Rejection) এবং তার ভ্যালু প্রতিনিধিত্ব করে।</p>
@@ -215,7 +215,7 @@ UserProto.prototype.sayHi = function() {
     id: "js-8",
     category: "JavaScript",
     difficulty: "Advanced",
-    tags: ["Performance", "Debounce", "Throttle"],
+    tags: ["Performance","Debounce","Throttle"],
     question: "Debouncing এবং Throttling-এর মধ্যে পার্থক্য কী এবং কোন বাস্তব পরিস্থিতিতে কোনটি ব্যবহার করা উচিত?",
     answer: `
       <p>Debouncing এবং Throttling উভয়ই উচ্চ ফ্রিকোয়েন্সির (High-frequency) ইভেন্ট কলসমূহকে সীমিত (Rate-limit) করার টেকনিক, যা DOM Performance বাড়াতে ব্যবহার করা হয়।</p>
@@ -254,7 +254,7 @@ function throttle(fn, limit) {
     id: "js-9",
     category: "JavaScript",
     difficulty: "Advanced",
-    tags: ["Memory Leak", "Garbage Collection", "WeakMap"],
+    tags: ["Memory Leak","Garbage Collection","WeakMap"],
     question: "JavaScript-এ Memory Leaks কী কী কারণে ঘটে এবং তা প্রতিরোধ করার উপায় কী?",
     answer: `
       <p><strong>Memory Leak</strong> ঘটে যখন অ্যাপ্লিকেশন দ্বারা কোনো মেমোরির আর প্রয়োজন থাকে না, কিন্তু V8 ইঞ্জিনের Garbage Collector (Mark-and-Sweep) সেই মেমোরি ফ্রি/রিলিজ করতে পারে না।</p>
@@ -277,7 +277,7 @@ function throttle(fn, limit) {
     id: "js-10",
     category: "JavaScript",
     difficulty: "Intermediate",
-    tags: ["Shallow Copy", "Deep Copy", "StructuredClone"],
+    tags: ["Shallow Copy","Deep Copy","StructuredClone"],
     question: "Shallow Copy এবং Deep Copy-এর পার্থক্য কী? কীভাবে একটি অবজেক্টকে সঠিকভাবে Deep Copy করবেন?",
     answer: `
       <p>অবজেক্ট কপি করার সময় রেফারেন্স বনাম ভ্যালু কপি করার ধারণার ওপর এটি নির্ভর করে।</p>
@@ -310,7 +310,7 @@ deep.details.age = 40; // original user remain unchanged</code></pre>
     id: "js-11",
     category: "JavaScript",
     difficulty: "Intermediate",
-    tags: ["Event Delegation", "Bubbling", "Capturing"],
+    tags: ["Event Delegation","Bubbling","Capturing"],
     question: "Event Bubbling, Event Capturing এবং Event Delegation কীভাবে কাজ করে?",
     answer: `
       <p>DOM Event Propagation এর তিনটি ধাপ রয়েছে: <strong>Capturing Phase</strong> (উপর থেকে নিচে), <strong>Target Phase</strong> (টার্গেট এলিমেন্ট), এবং <strong>Bubbling Phase</strong> (নিচ থেকে উপরে)।</p>
@@ -338,7 +338,7 @@ document.getElementById('parent-ul').addEventListener('click', function(e) {
     id: "js-12",
     category: "JavaScript",
     difficulty: "Advanced",
-    tags: ["Proxy", "Reflect", "Metaprogramming"],
+    tags: ["Proxy","Reflect","Metaprogramming"],
     question: "JavaScript-ে Proxy এবং Reflect অবজেক্টের কাজ কী? মেটাপ্রোগ্রামিংয়ে এর ব্যবহার কী?",
     answer: `
       <p><strong>Proxy</strong> হলো একটি অবজেক্ট যা অন্য কোনো অবজেক্টের মৌলিক অপারেশনগুলোকে (যেমন: Property Lookup, Assignment, Enumeration, Function Invocation) ইন্টারসেপ্ট (Intercept) এবং কাস্টমাইজ করতে ব্যবহৃত হয়।</p>
@@ -375,7 +375,7 @@ console.log(proxyUser.name); // Logs access and returns Sakib</code></pre>
     id: "js-13",
     category: "JavaScript",
     difficulty: "Intermediate",
-    tags: ["Map", "Set", "WeakMap", "WeakSet"],
+    tags: ["Map","Set","WeakMap","WeakSet"],
     question: "Map vs Object এবং WeakMap vs Map-এর মধ্যে পার্থক্য ব্যাখ্যা করুন।",
     answer: `
       <p>JavaScript ES6-এ কী-ভ্যালু পেয়ার ও ইউনিক কালেকশনের জন্য নতুন ডেটা স্ট্রাকচার যুক্ত করা হয়েছে।</p>
@@ -397,7 +397,7 @@ console.log(proxyUser.name); // Logs access and returns Sakib</code></pre>
     id: "js-14",
     category: "JavaScript",
     difficulty: "Beginner",
-    tags: ["Equality", "Coercion"],
+    tags: ["Equality","Coercion"],
     question: "== (Loose Equality) এবং === (Strict Equality)-এর মধ্যে পার্থক্য কী? Type Coercion কীভাবে কাজ করে?",
     answer: `
       <p><strong>== (Double Equals):</strong> এটি ডাল ভ্যালু কম্পেয়ার করার আগে স্বয়ংক্রিয়ভাবে টাইপ কনভার্সন বা <strong>Type Coercion</strong> ঘটায়।</p>
@@ -417,7 +417,7 @@ console.log(null === undefined); // false</code></pre>
     id: "js-15",
     category: "JavaScript",
     difficulty: "Intermediate",
-    tags: ["Generator", "Iterator", "Yield"],
+    tags: ["Generator","Iterator","Yield"],
     question: "Generator Function কী? function* এবং yield কীভাবে কাজ করে?",
     answer: `
       <p><strong>Generator Function</strong> হলো একটি বিশেষ ধরনের ফাংশন যাকে মাঝপথে থামিয়ে রাখা (Pause) এবং পরবর্তীতে আবার যেখান থেকে থামা হয়েছিল সেখান থেকে পুনরায় চালানো (Resume) যায়।</p>
@@ -443,7 +443,7 @@ console.log(gen.next()); // { value: undefined, done: true }</code></pre>
     id: "js-16",
     category: "JavaScript",
     difficulty: "Intermediate",
-    tags: ["Currying", "Functional Programming"],
+    tags: ["Currying","Functional Programming"],
     question: "Function Currying কী এবং এর প্র্যাকটিক্যাল সুবিধা কী?",
     answer: `
       <p><strong>Currying</strong> হলো একটি ফাংশনাল প্রোগ্রামিং টেকনিক, যেখানে একটি বহুমাত্রিক আর্গুমেন্ট গ্রহণকারী ফাংশনকে ভেঙে একাধিক একক-আর্গুমেন্ট গ্রহণকারী ফাংশনের চেইনে রূপান্তর করা হয়।</p>
@@ -476,16 +476,36 @@ console.log(curriedAdd(1)(2)(3)); // 6</code></pre>
     id: "js-17",
     category: "JavaScript",
     difficulty: "Advanced",
-    tags: ["Modules", "ESM", "CommonJS"],
-    question: "ES Modules (ESM) এবং CommonJS (CJS)-এর মধ্যে পার্থক্য কী?",
+    tags: ["JavaScript","ES Modules","Browser API","Senior"],
+    question: "Import Maps কী? npm bundler ছাড়াই ব্রাউজারে সরাসরি bare module specifier কীভাবে resolve করে?",
     answer: `
-      <p>JavaScript-ে মডিউল সিস্টেম কোডকে মডুলার এবং রি-ইউজেবল করতে ব্যবহৃত হয়।</p>
-      <h4>পার্থক্যসমূহ:</h4>
+      <p><strong>Import Maps</strong> একটি ব্রাউজার-নেটিভ ফিচার যা <code>import 'lodash'</code>-এর মতো bare specifier (যা ব্রাউজার সাধারণত বুঝতে পারে না, শুধু URL/relative path বোঝে) কে একটি নির্দিষ্ট URL-এ ম্যাপ করে দেয় — কোনো bundler (Webpack/Vite) ছাড়াই।</p>
+      <div class="code-box">
+        <div class="code-header"><span>html</span><button class="copy-btn">Copy</button></div>
+        <pre><code>&lt;script type="importmap"&gt;
+{
+  "imports": {
+    "lodash": "https://cdn.jsdelivr.net/npm/lodash-es@4/lodash.js",
+    "react": "https://esm.sh/react@18"
+  }
+}
+&lt;/script&gt;
+
+&lt;script type="module"&gt;
+  import _ from 'lodash';   // ব্রাউজার এখন জানে এটি কোথায় খুঁজতে হবে
+  import React from 'react';
+&lt;/script&gt;</code></pre>
+      </div>
+      <h4>কেন গুরুত্বপূর্ণ — বিল্ড টুল ছাড়া মডুলার JS</h4>
+      <p>ঐতিহ্যবাহীভাবে, npm প্যাকেজ ব্যবহার করতে Webpack/Rollup-এর মতো bundler লাগত কারণ ব্রাউজার <code>import 'react'</code>-এর মতো bare specifier resolve করতে জানে না — শুধু <code>import './react.js'</code>-এর মতো সম্পূর্ণ পথ বোঝে। Import Maps এই ফাঁক পূরণ করে — ছোট প্রজেক্ট বা প্রোটোটাইপে সম্পূর্ণ বিল্ড পাইপলাইন ছাড়াই native ES modules ব্যবহার করা যায়।</p>
+      <h4>সীমাবদ্ধতা</h4>
       <ul>
-        <li><strong>Syntax:</strong> CommonJS ব্যবহার করে <code>require()</code> এবং <code>module.exports</code>। ES Modules ব্যবহার করে <code>import</code> এবং <code>export</code>।</li>
-        <li><strong>Loading Mode:</strong> CommonJS হলো <strong>Synchronous & Dynamic</strong> (কোডের যেকোনো জায়গায় Conditionally require করা যায়)। ESM হলো <strong>Asynchronous & Static</strong> (ফাইল টপে পার্স টাইমেই অ্যালাইজ হয়)।</li>
-        <li><strong>Tree Shaking:</strong> ESM স্ট্যাটিক হওয়ার কারণে বিল্ড টুলগুলো (Webpack/Vite) অব্যবহৃত কোড বাদ বা Tree Shaking করতে পারে। CommonJS-ে Tree Shaking কষ্টসাধ্য।</li>
-        <li><strong>Top-level Await:</strong> ESM-ে Top-level await সাপোর্ট করে, CJS-ে করে না।</li>
+        <li><strong>Tree-shaking/minification নেই</strong> — bundler-এর অপ্টিমাইজেশন সুবিধা পাওয়া যায় না, তাই বড় প্রোডাকশন অ্যাপে এখনও bundler প্রয়োজন।</li>
+        <li><strong>প্রতিটি মডিউল আলাদা HTTP রিকোয়েস্ট</strong> — HTTP/2 multiplexing থাকলেও bundled একক ফাইলের চেয়ে বেশি ওভারহেড।</li>
+      </ul>
+      <h4>Follow-up প্রশ্ন</h4>
+      <ul>
+        <li>Import Maps ও Deno-এর মডিউল রেজোলিউশনের মধ্যে সম্পর্ক কী?</li>
       </ul>
     `
   },
@@ -493,7 +513,7 @@ console.log(curriedAdd(1)(2)(3)); // 6</code></pre>
     id: "js-18",
     category: "JavaScript",
     difficulty: "Intermediate",
-    tags: ["ES6", "Destructuring", "Rest Spread"],
+    tags: ["ES6","Destructuring","Rest Spread"],
     question: "Rest Parameter এবং Spread Operator-ের মধ্যে পার্থক্য উদাহরণসহ বুঝিয়ে বলুন।",
     answer: `
       <p>উভয়ই ট্রিপল ডট <code>...</code> সিনট্যাক্স ব্যবহার করলেও কাজের দিক থেকে সম্পূর্ণ বিপরীত।</p>
@@ -519,7 +539,7 @@ const arr2 = [...arr1, 3, 4]; // [1, 2, 3, 4]</code></pre>
     id: "js-19",
     category: "JavaScript",
     difficulty: "Intermediate",
-    tags: ["Symbol", "Primitive Data Types"],
+    tags: ["Symbol","Primitive Data Types"],
     question: "JavaScript-ে Symbol কী এবং এটি কেন ব্যবহার করা হয়?",
     answer: `
       <p><strong>Symbol</strong> হলো ES6-এ প্রবর্তিত একটি Primitive Data Type। প্রতিটি তৈরি হওয়া Symbol মান সম্পূর্ণ <strong>Unique & Immutable</strong> (অনন্য এবং অপরিবর্তনযোগ্য)।</p>
@@ -540,7 +560,7 @@ console.log(sym1 === sym2); // false!</code></pre>
     id: "js-20",
     category: "JavaScript",
     difficulty: "Advanced",
-    tags: ["V8 Engine", "JIT Compiler", "Optimization"],
+    tags: ["V8 Engine","JIT Compiler","Optimization"],
     question: "V8 Engine কীভাবে JavaScript কোড কম্পাইল ও এক্সিকিউট করে? (Ignition & TurboFan)",
     answer: `
       <p>Google V8 Engine হলো একটি হাই-পারফরম্যান্স ওপেন সোর্স C++ ভিত্তিক JavaScript ও WebAssembly ইঞ্জিন।</p>
@@ -677,25 +697,38 @@ console.log(words); // ["Hello", "World", "JS", "Tips"]</code></pre>
     id: "js-26",
     category: "JavaScript",
     difficulty: "Beginner",
-    tags: ["ES6+","Intl","Localization"],
-    question: "JavaScript Intl (Internationalization) API কী?",
+    tags: ["JavaScript","ES2024","Array Methods","Senior"],
+    question: "Object.groupBy() ও Map.groupBy() (ES2024) কী? আগে Array.reduce() দিয়ে যা করতে হতো তা কীভাবে সহজ করে?",
     answer: `
-      <p><strong>Intl</strong> হলো JavaScript-এর বিল্ট-ইন নেমস্পেস যা আন্তর্জাতিকীকরণ ও স্থানিকীকরণের (Localization) কাজগুলো থার্ড-পার্টি লাইব্রেরি ছাড়াই নেটিভভাবে সম্পাদন করতে সাহায্য করে। যেমন- ভাষা অনুযায়ী তারিখ, সময়, সংখ্যা ও মুদ্রার ফরম্যাটিং।</p>
+      <p><code>Object.groupBy()</code> ও <code>Map.groupBy()</code> একটি অ্যারেকে একটি callback function-এর রিটার্ন করা key অনুযায়ী গ্রুপ করে দেয় — আগে এই কাজের জন্য <code>reduce()</code> দিয়ে ম্যানুয়াল বয়লারপ্লেট লিখতে হতো।</p>
       <div class="code-box">
         <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>// Currency Formatting
-const priceFormatter = new Intl.NumberFormat("bn-BD", {
-  style: "currency",
-  currency: "BDT"
-});
-console.log(priceFormatter.format(5000)); // ৳৫,০০০.০০
+        <pre><code>const orders = [
+  { id: 1, status: 'pending' }, { id: 2, status: 'shipped' },
+  { id: 3, status: 'pending' }, { id: 4, status: 'delivered' },
+];
 
-// Date Formatting
-const dateFormatter = new Intl.DateTimeFormat("en-US", {
-  dateStyle: "full"
-});
-console.log(dateFormatter.format(new Date())); // e.g., Monday, August 14, 2023</code></pre>
+// ❌ আগে — reduce() দিয়ে ম্যানুয়াল গ্রুপিং
+const grouped = orders.reduce((acc, order) => {
+  (acc[order.status] ??= []).push(order);
+  return acc;
+}, {});
+
+// ✅ এখন — Object.groupBy()
+const groupedByStatus = Object.groupBy(orders, (order) => order.status);
+// { pending: [...], shipped: [...], delivered: [...] }
+
+// Map.groupBy() — key হিসেবে যেকোনো টাইপ ব্যবহার করা যায় (শুধু string নয়)
+const groupedMap = Map.groupBy(orders, (order) => order.status);</code></pre>
       </div>
+      <h4>Object.groupBy() বনাম Map.groupBy() — কখন কোনটি</h4>
+      <p><code>Object.groupBy()</code> একটি plain object রিটার্ন করে — key স্বয়ংক্রিয়ভাবে string-এ কনভার্ট হয়। <code>Map.groupBy()</code> একটি <code>Map</code> রিটার্ন করে — key যেকোনো টাইপ (object, number) হতে পারে, এবং key-এর ইনসার্শন অর্ডার নিশ্চিতভাবে বজায় থাকে।</p>
+      <h4>ব্রাউজার/Node.js সাপোর্ট বিবেচনা</h4>
+      <p>এটি একটি তুলনামূলক নতুন ফিচার (ES2024, Node.js 21+, আধুনিক ব্রাউজার) — পুরনো এনভায়রনমেন্ট সাপোর্ট করতে হলে এখনও <code>reduce()</code>-ভিত্তিক polyfill বা Lodash-এর <code>groupBy</code> প্রয়োজন হতে পারে।</p>
+      <h4>Follow-up প্রশ্ন</h4>
+      <ul>
+        <li>একাধিক ফিল্ড দিয়ে (composite key) গ্রুপ করতে হলে callback ফাংশন কীভাবে লিখবেন?</li>
+      </ul>
     `
   },
   {
@@ -789,7 +822,7 @@ queueMicrotask(() => console.log('2. Microtask'));
     id: "js-30",
     category: "JavaScript",
     difficulty: "Advanced",
-    tags: ["Performance", "Memory", "Garbage Collection"],
+    tags: ["Performance","Memory","Garbage Collection"],
     question: "JavaScript Garbage Collection Algorithms (Mark-and-Sweep, Generational GC, Scavenge vs Mark-Sweep-Compact) কীভাবে কাজ করে?",
     answer: `
       <p>V8 ইঞ্জিনের গারবেজ কালেকশন (GC) মেমোরি ম্যানেজমেন্টের জন্য <strong>Generational Garbage Collection</strong> ব্যবহার করে। মেমোরিকে দুই ভাগে ভাগ করা হয়: <strong>Young Generation</strong> (Nursery) এবং <strong>Old Generation</strong>।</p>
@@ -809,7 +842,7 @@ queueMicrotask(() => console.log('2. Microtask'));
     id: "js-31",
     category: "JavaScript",
     difficulty: "Advanced",
-    tags: ["Async", "Iterators", "Generators"],
+    tags: ["Async","Iterators","Generators"],
     question: "Async Iterators এবং Async Generators (Symbol.asyncIterator, for await...of) কীভাবে স্ট্রিম প্রসেস করে?",
     answer: `
       <p><strong>Async Iterators</strong> ব্যবহার করে আমরা অ্যাসিনক্রোনাস ডেটা সোর্স (যেমন- নেটওয়ার্ক স্ট্রিম, ফাইল রিডিং বা ডাটাবেজ কার্সর) থেকে ডেটা চাংক (chunk) আকারে পড়তে পারি। এটি <code>Symbol.asyncIterator</code> মেথড ইমপ্লিমেন্ট করে এবং <code>next()</code> কল করলে একটি <strong>Promise</strong> রিটার্ন করে।</p>
@@ -840,34 +873,52 @@ queueMicrotask(() => console.log('2. Microtask'));
     id: "js-32",
     category: "JavaScript",
     difficulty: "Advanced",
-    tags: ["Metaprogramming", "Proxy", "Reflect"],
-    question: "JavaScript Proxy and Reflect API দিয়ে Validation, Data Binding এবং Negative Array Indexing কীভাবে বাস্তবায়ন করবেন?",
+    tags: ["JavaScript","Immutability","Senior"],
+    question: "Object.freeze() কেন শুধু Shallow Freeze করে? নেস্টেড অবজেক্টে Deep Freeze কীভাবে বাস্তবায়ন করবেন?",
     answer: `
-      <p><code>Proxy</code> অবজেক্টের মৌলিক আচরণ (Get, Set, Delete) ইন্টারসেপ্ট করে এবং <code>Reflect</code> অবজেক্টের ডিফল্ট মেথড সেফলি বজায় রাখে। এর মাধ্যমে আমরা কাস্টম ভ্যালিডেশন বা অ্যারের নেগেটিভ ইনডেক্সিং (Python এর মতো) তৈরি করতে পারি।</p>
+      <p><code>Object.freeze()</code> শুধুমাত্র <strong>প্রথম স্তরের</strong> প্রপার্টি immutable করে — নেস্টেড অবজেক্ট এখনও পরিবর্তনযোগ্য থাকে। এই সীমাবদ্ধতা প্রায়ই ভুল বোঝাবুঝি ও production বাগের কারণ হয়।</p>
       <div class="code-box">
         <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>const arr = [10, 20, 30];
-const proxyArr = new Proxy(arr, {
-  get(target, prop, receiver) {
-    const index = Number(prop);
-    // Negative Array Indexing Logic
-    if (!isNaN(index) && index < 0) {
-      return target[target.length + index];
-    }
-    return Reflect.get(target, prop, receiver);
-  }
+        <pre><code>const config = Object.freeze({
+  name: 'App',
+  settings: { theme: 'dark', maxRetries: 3 }
 });
 
-console.log(proxyArr[-1]); // 30 (Last element)
-console.log(proxyArr[-2]); // 20</code></pre>
+config.name = 'Changed';           // ❌ silently ব্যর্থ (strict mode-এ TypeError)
+console.log(config.name);          // 'App' — অপরিবর্তিত ✅
+
+config.settings.theme = 'light';   // ⚠️ এটি কাজ করে যায়! settings ফ্রিজড নয়
+console.log(config.settings.theme); // 'light' — বদলে গেছে ❌</code></pre>
       </div>
+      <h4>Deep Freeze — রিকার্সিভ সমাধান</h4>
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
+        <pre><code>function deepFreeze(obj) {
+  Object.getOwnPropertyNames(obj).forEach((key) => {
+    const value = obj[key];
+    if (value && typeof value === 'object' && !Object.isFrozen(value)) {
+      deepFreeze(value);   // রিকার্সিভভাবে নেস্টেড অবজেক্ট ফ্রিজ করা
+    }
+  });
+  return Object.freeze(obj);
+}
+
+const config = deepFreeze({ name: 'App', settings: { theme: 'dark' } });
+config.settings.theme = 'light';   // এখন silently ব্যর্থ হবে</code></pre>
+      </div>
+      <h4>বাস্তবিক বিকল্প — কখন লাইব্রেরি ব্যবহার করবেন</h4>
+      <p>নিজে <code>deepFreeze</code> লেখার বদলে, Redux-এর মতো state management-এ <strong>Immer</strong> লাইব্রেরি ব্যবহার করা বেশি প্রচলিত — এটি "draft" অবজেক্টে সাধারণ mutable syntax লিখতে দেয়, কিন্তু ভেতরে ভেতরে immutable আপডেট তৈরি করে (structural sharing দিয়ে) — কর্মক্ষমতা ও এরগনমিক্স উভয়ই ভালো।</p>
+      <h4>Follow-up প্রশ্ন</h4>
+      <ul>
+        <li>Object.freeze() ও TypeScript-এর readonly-এর মধ্যে পার্থক্য কী — একটি compile-time, অন্যটি runtime কেন?</li>
+      </ul>
     `
   },
   {
     id: "js-33",
     category: "JavaScript",
     difficulty: "Advanced",
-    tags: ["WebAssembly", "Wasm", "Performance"],
+    tags: ["WebAssembly","Wasm","Performance"],
     question: "WebAssembly (Wasm) কী এবং JavaScript-এর সাথে WebAssembly.instantiateStreaming কীভাবে কাজ করে?",
     answer: `
       <p><strong>WebAssembly (Wasm)</strong> হলো একটি লো-লেভেল বাইনারি ইনস্ট্রাকশন ফরম্যাট। C, C++, বা Rust এ লেখা কোড কম্পাইল করে Wasm-এ রূপান্তর করে ব্রাউজারে প্রায় নেটিভ স্পিডে এক্সিকিউট করা যায়। ভিডিও এডিটিং, গেমিং, বা ক্রিপ্টোগ্রাফির মতো CPU-ইনটেনসিভ কাজের জন্য এটি জাভাস্ক্রিপ্টের চেয়ে অনেক দ্রুত।</p>
@@ -888,14 +939,44 @@ WebAssembly.instantiateStreaming(fetch('module.wasm'), importObject)
     id: "js-34",
     category: "JavaScript",
     difficulty: "Intermediate",
-    tags: ["Data Structures", "StructuredClone", "Deep Copy"],
-    question: "structuredClone() API vs JSON.parse(JSON.stringify()) vs Object.assign() — Deep Cloning-এর পার্থক্য কী?",
+    tags: ["JavaScript","Immutability","Performance","Senior"],
+    question: "Structural Sharing কী? Immer-এর মতো লাইব্রেরি কীভাবে Immutability ও Performance দুটোই একসাথে দেয়?",
     answer: `
-      <p>অবজেক্ট কপি করার এই তিনটি মেথডের কাজের ধরন সম্পূর্ণ আলাদা।</p>
+      <p><strong>Structural Sharing</strong> একটি কৌশল যেখানে একটি বড় ডেটা স্ট্রাকচারের নতুন (immutable) ভার্সন তৈরি করার সময়, যা <em>বদলায়নি</em> তার রেফারেন্স পুনর্ব্যবহার করা হয় — শুধু যে অংশ বদলেছে সেটুকুই নতুনভাবে তৈরি হয়।</p>
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
+        <pre><code>const state = {
+  user: { name: 'Rahim', age: 25 },
+  settings: { theme: 'dark' },
+  posts: [/* ১০০০টি পোস্ট */]
+};
+
+// ❌ পুরো ডিপ ক্লোন — অপ্রয়োজনীয় মেমরি ও CPU খরচ
+const newState1 = JSON.parse(JSON.stringify(state));
+newState1.user.age = 26;
+
+// ✅ Structural sharing — শুধু user অবজেক্ট নতুন, settings ও posts একই রেফারেন্স
+const newState2 = { ...state, user: { ...state.user, age: 26 } };
+console.log(newState2.settings === state.settings);  // true — একই রেফারেন্স, কপি হয়নি
+console.log(newState2.posts === state.posts);        // true — ১০০০ পোস্ট আবার কপি হয়নি</code></pre>
+      </div>
+      <h4>কেন এটি গুরুত্বপূর্ণ — React-এর সাথে সম্পর্ক</h4>
+      <p>React-এর <code>memo</code>/<code>useMemo</code> reference equality (<code>===</code>) দিয়ে বদল সনাক্ত করে। Structural sharing থাকলে অপরিবর্তিত অংশের রেফারেন্স একই থাকে — React বুঝতে পারে সেই অংশ re-render করার দরকার নেই। পুরো ডিপ ক্লোন করলে সব রেফারেন্স বদলে যায়, ফলে অপ্রয়োজনীয় re-render হয়।</p>
+      <h4>Immer কীভাবে এটি স্বয়ংক্রিয় করে</h4>
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
+        <pre><code>import { produce } from 'immer';
+
+const newState = produce(state, (draft) => {
+  draft.user.age = 26;   // সাধারণ mutable syntax লিখলেই যথেষ্ট
+});
+// Immer ভেতরে Proxy ব্যবহার করে বুঝে নেয় কোন অংশ বদলেছে,
+// এবং স্বয়ংক্রিয়ভাবে structural sharing সহ একটি নতুন immutable object তৈরি করে</code></pre>
+      </div>
+      <p>Immer একটি JavaScript Proxy দিয়ে "draft" অবজেক্ট তৈরি করে — আপনি স্বাভাবিক mutable কোড লেখেন, কিন্তু ভেতরে Immer ঠিক কোন প্রপার্টি স্পর্শ হয়েছে তা ট্র্যাক করে এবং শুধু সেই পথের নতুন কপি তৈরি করে, বাকি সব পুরনো রেফারেন্স বজায় রাখে।</p>
+      <h4>Follow-up প্রশ্ন</h4>
       <ul>
-        <li><strong>Object.assign():</strong> এটি কেবল ১ম লেভেলের <strong>Shallow Copy</strong> করে। নেস্টেড অবজেক্ট পরিবর্তন করলে মূল অবজেক্টও পরিবর্তিত হয়।</li>
-        <li><strong>JSON.parse(JSON.stringify()):</strong> এটি <strong>Deep Copy</strong> করে, কিন্তু এটি Date, RegExp, Map, Set, undefined এবং Functions কপি করতে পারে না এবং Circular Reference থাকলে এরর দেয়।</li>
-        <li><strong>structuredClone():</strong> এটি নেটিভ HTML5 স্পেক্স API যা Circular Reference, Map, Set, ArrayBuffer, Date সহ নির্ভুলভাবে <strong>Deep Copy</strong> করে। তবে এটি ফাংশন কপি করতে পারে না।</li>
+        <li>Redux Toolkit-এ Immer ডিফল্টভাবে ব্যবহৃত হয় কেন — এটি reducer লেখা কীভাবে সহজ করে?</li>
       </ul>
     `
   },
@@ -903,7 +984,7 @@ WebAssembly.instantiateStreaming(fetch('module.wasm'), importObject)
     id: "js-35",
     category: "JavaScript",
     difficulty: "Advanced",
-    tags: ["Web APIs", "Web Workers", "SharedArrayBuffer"],
+    tags: ["Web APIs","Web Workers","SharedArrayBuffer"],
     question: "Web Workers এবং SharedArrayBuffer / Atomics দিয়ে Multi-threaded JavaScript প্রোগ্রামিং কীভাবে করবেন?",
     answer: `
       <p>JavaScript সিঙ্গেল থ্রেডেড হলেও <strong>Web Workers</strong> ব্যবহার করে মেইন UI থ্রেডকে ব্লক না করে ব্যাকগ্রাউন্ডে কাজ চালানো যায়। তবে Worker এবং মেইন থ্রেডের মধ্যে ডেটা শেয়ার করতে <code>postMessage</code> দিয়ে ডেটা কপি করতে হয়, যা ভারী ডেটার জন্য অদক্ষ।</p>
@@ -926,7 +1007,7 @@ Atomics.store(sharedArray, 0, 42);</code></pre>
     id: "js-36",
     category: "JavaScript",
     difficulty: "Intermediate",
-    tags: ["Web APIs", "Service Workers", "PWA"],
+    tags: ["Web APIs","Service Workers","PWA"],
     question: "Service Workers Life Cycle (Install, Activate, Fetch) এবং Offline Cache Strategies কী?",
     answer: `
       <p>Service Worker-এর জীবনচক্র (Life Cycle) মূলত ৩টি ধাপে বিভক্ত:</p>
@@ -947,35 +1028,107 @@ Atomics.store(sharedArray, 0, 42);</code></pre>
     id: "js-37",
     category: "JavaScript",
     difficulty: "Advanced",
-    tags: ["Performance", "Tail Call Optimization", "TCO"],
-    question: "Tail Call Optimization (TCO) কী এবং রিকার্সিভ ফাংশনে Stack Overflow কীভাবে প্রতিরোধ করে?",
+    tags: ["JavaScript","Iterators","Symbol","Senior"],
+    question: "Symbol.iterator কী? কাস্টম ইটারেবল অবজেক্ট তৈরি করে for...of লুপে ব্যবহার কীভাবে করবেন?",
     answer: `
-      <p>যখন কোনো ফাংশনের সর্বশেষ কাজ হিসেবে অন্য একটি ফাংশন কল করা হয় (Tail Call), তখন জাভাস্ক্রিপ্ট ইঞ্জিন (যদি TCO সাপোর্ট করে) নতুন স্ট্যাক ফ্রেম তৈরি না করে বর্তমান ফ্রেমটি পুনঃব্যবহার করে।</p>
-      <h4>Stack Overflow প্রতিরোধ:</h4>
-      <p>সাধারণ রিকার্সিভ ফাংশনে (যেমন- ফ্যাক্টরিয়াল) প্রতিটি কলের স্ট্যাক ফ্রেম মেমোরিতে জমা হতে থাকে। হাজার হাজার কল হলে <code>Call Stack Size Exceeded</code> এরর দেয়। TCO তে কল শেষ হলে সাথে সাথেই স্ট্যাক ক্লিয়ার হয়ে যায়, ফলে মেমোরি O(1) থাকে।</p>
+      <p><code>Symbol.iterator</code> একটি বিশেষ well-known symbol যা একটি অবজেক্টকে <strong>iterable</strong> বানায় — অর্থাৎ <code>for...of</code>, spread operator (<code>...</code>), বা destructuring-এ ব্যবহারযোগ্য করে তোলে।</p>
       <div class="code-box">
         <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>// Tail recursive function
-function factorial(n, acc = 1) {
-  if (n <= 1) return acc;
-  return factorial(n - 1, n * acc); // No calculation after function call
-}</code></pre>
+        <pre><code>const numberRange = {
+  from: 1, to: 5,
+  [Symbol.iterator]() {
+    let current = this.from;
+    const last = this.to;
+    return {
+      next() {
+        return current <= last
+          ? { value: current++, done: false }
+          : { value: undefined, done: true };
+      }
+    };
+  }
+};
+
+for (const num of numberRange) console.log(num);  // 1, 2, 3, 4, 5
+console.log([...numberRange]);                     // [1, 2, 3, 4, 5]
+const [first, second] = numberRange;                // destructuring-ও কাজ করে</code></pre>
       </div>
-      <p><em>বিঃদ্রঃ বর্তমানে Safari ছাড়া অন্য ব্রাউজার/Node.js TCO সাপোর্ট করে না, তাই ট্রাম্পোলিন (Trampoline) প্যাটার্ন ব্যবহার করা হয়।</em></p>
+      <h4>Iterator Protocol — ভেতরের নিয়ম</h4>
+      <p>একটি অবজেক্ট iterable হওয়ার জন্য এর <code>[Symbol.iterator]</code> প্রপার্টি একটি ফাংশন হতে হবে যা একটি <strong>iterator object</strong> রিটার্ন করে — এবং iterator object-এ একটি <code>next()</code> মেথড থাকতে হবে যা প্রতিবার <code>{ value, done }</code> আকৃতির একটি অবজেক্ট রিটার্ন করে। <code>done: true</code> না হওয়া পর্যন্ত <code>for...of</code> লুপ চলতেই থাকে।</p>
+      <h4>কেন এটি দরকার — Array/Map/Set ছাড়াও কাস্টম ডেটা স্ট্রাকচার</h4>
+      <p>Array, Map, Set-এর নিজস্ব বিল্ট-ইন iterator আছে বলে <code>for...of</code>-এ সরাসরি ব্যবহার করা যায়। কিন্তু নিজস্ব ডেটা স্ট্রাকচার (linked list, tree, custom range/collection ক্লাস) তৈরি করলে, <code>Symbol.iterator</code> implement করলেই সেটি জাভাস্ক্রিপ্টের সব iteration সিনট্যাক্সের সাথে স্বাভাবিকভাবে কাজ করবে — আলাদা কোনো <code>.toArray()</code> মেথড না লিখেই।</p>
+      <h4>Generator দিয়ে সংক্ষিপ্ত লেখা</h4>
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
+        <pre><code>const numberRange2 = {
+  from: 1, to: 5,
+  *[Symbol.iterator]() {   // generator function ব্যবহার করলে next()/done ম্যানুয়ালি লিখতে হয় না
+    for (let i = this.from; i <= this.to; i++) yield i;
+  }
+};</code></pre>
+      </div>
+      <h4>Follow-up প্রশ্ন</h4>
+      <ul>
+        <li>Iterable ও Iterator-এর মধ্যে পার্থক্য কী — একটি অবজেক্ট কি একইসাথে দুটোই হতে পারে?</li>
+      </ul>
     `
   },
   {
     id: "js-38",
     category: "JavaScript",
     difficulty: "Intermediate",
-    tags: ["Features", "Optional Chaining", "Nullish Coalescing"],
-    question: "Optional Chaining (?.) এবং Nullish Coalescing Operator (??) vs OR Operator (||) এর পার্থক্য কী?",
+    tags: ["JavaScript","Async","Fetch API","Senior"],
+    question: "AbortController ও AbortSignal দিয়ে fetch/async অপারেশন কীভাবে বাতিল (cancel) করবেন?",
     answer: `
-      <p><strong>Optional Chaining (<code>?.</code>):</strong> নেস্টেড অবজেক্ট থেকে ডেটা রিড করার সময় <code>Cannot read property 'x' of undefined</code> এরর থেকে বাঁচায়। ভ্যালু না থাকলে এরর না দিয়ে <code>undefined</code> রিটার্ন করে।</p>
-      <p><strong>OR (<code>||</code>) vs Nullish Coalescing (<code>??</code>):</strong></p>
+      <p><code>AbortController</code> একটি ওয়েব-স্ট্যান্ডার্ড API যা চলমান async অপারেশন (মূলত <code>fetch</code>) বাতিল করার একটি প্রমিত উপায় দেয় — এটি ছাড়া একটি রিকোয়েস্ট শুরু হয়ে গেলে সেটি থামানোর কোনো সরাসরি উপায় ছিল না।</p>
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
+        <pre><code>const controller = new AbortController();
+
+fetch('/api/search?q=laptop', { signal: controller.signal })
+  .then(res => res.json())
+  .then(data => renderResults(data))
+  .catch(err => {
+    if (err.name === 'AbortError') console.log('রিকোয়েস্ট বাতিল হয়েছে');
+    else console.error('অন্য এরর:', err);
+  });
+
+// ৫ সেকেন্ড পরও রেসপন্স না এলে বাতিল করে দাও
+setTimeout(() => controller.abort(), 5000);</code></pre>
+      </div>
+      <h4>বাস্তব ব্যবহার — Search-as-you-type</h4>
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
+        <pre><code>let currentController = null;
+
+async function search(query) {
+  if (currentController) currentController.abort();   // আগের চলমান রিকোয়েস্ট বাতিল
+  currentController = new AbortController();
+  try {
+    const res = await fetch(\`/api/search?q=\${query}\`, { signal: currentController.signal });
+    return res.json();
+  } catch (err) {
+    if (err.name !== 'AbortError') throw err;
+  }
+}
+// ইউজার দ্রুত টাইপ করলে প্রতিটি নতুন key-stroke-এ আগের রিকোয়েস্ট বাতিল হয়ে যায়
+// — পুরনো, দেরিতে আসা রেসপন্স নতুন রেজাল্ট ওভাররাইট করতে পারে না (race condition এড়ানো)</code></pre>
+      </div>
+      <h4>React-এ ব্যবহার — cleanup-এর সাথে সংযোগ</h4>
+      <div class="code-box">
+        <div class="code-header"><span>jsx</span><button class="copy-btn">Copy</button></div>
+        <pre><code>useEffect(() => {
+  const controller = new AbortController();
+  fetch(\`/api/user/\${id}\`, { signal: controller.signal })
+    .then(res => res.json()).then(setUser);
+  return () => controller.abort();   // কম্পোনেন্ট unmount বা id বদলালে পুরনো রিকোয়েস্ট বাতিল
+}, [id]);</code></pre>
+      </div>
+      <h4>কেন গুরুত্বপূর্ণ — মেমরি লিক ও Race Condition প্রতিরোধ</h4>
+      <p>বাতিল না করলে দুটি সমস্যা হতে পারে: (১) কম্পোনেন্ট unmount হওয়ার পরেও রেসপন্স এলে <code>setState</code> কল করার চেষ্টা — React warning/মেমরি লিক, (২) দ্রুত পরপর একাধিক রিকোয়েস্ট পাঠালে পুরনো রিকোয়েস্টের রেসপন্স নতুনটির পরে এসে ভুল ডেটা দেখানো (race condition)। <code>AbortController</code> উভয় সমস্যাই কাঠামোগতভাবে সমাধান করে।</p>
+      <h4>Follow-up প্রশ্ন</h4>
       <ul>
-        <li><code>||</code> অপারেটর বামের ভ্যালু যদি Falsy হয় (যেমন- <code>0</code>, <code>""</code>, <code>false</code>, <code>null</code>, <code>undefined</code>), তবে ডানের ভ্যালু রিটার্ন করে।</li>
-        <li><code>??</code> অপারেটর কেবল বামের ভ্যালু <code>null</code> বা <code>undefined</code> হলেই ডানের ভ্যালু রিটার্ন করে। ফলে <code>0</code> বা <code>false</code> ভ্যালু হিসেবে সঠিকভাবে কাজ করে।</li>
+        <li>একটি single AbortController দিয়ে একাধিক fetch একসাথে বাতিল করা যায় কি?</li>
       </ul>
     `
   },
@@ -983,52 +1136,85 @@ function factorial(n, acc = 1) {
     id: "js-39",
     category: "JavaScript",
     difficulty: "Intermediate",
-    tags: ["Features", "BigInt", "Precision"],
-    question: "BigInt Data Type কী এবং Number.MAX_SAFE_INTEGER (2^53 - 1) এর চেয়ে বড় সংখ্যা কীভাবে প্রসেস করবেন?",
+    tags: ["JavaScript","Temporal API","Dates","Senior"],
+    question: "Temporal API কী? এটি কেন প্রচলিত Date অবজেক্ট প্রতিস্থাপনের জন্য প্রস্তাবিত হয়েছে?",
     answer: `
-      <p>JavaScript-এর <code>Number</code> টাইপ 64-bit IEEE 754 ফ্লোটিং পয়েন্ট ফরম্যাট অনুসরণ করে। তাই <code>Number.MAX_SAFE_INTEGER</code> (<code>9007199254740991</code> বা <code>2^53 - 1</code>) এর চেয়ে বড় সংখ্যায় প্রেসিকেশন হারায় যায় (রাউন্ডিং এরর)।</p>
-      <p><strong>BigInt</strong> ব্যবহার করে অসীম দৈর্ঘ্যের পূর্ণসংখ্যা (Arbitrary precision integers) নির্ভুলভাবে হিসাব করা যায়। এটি তৈরি করতে সংখ্যার শেষে <code>n</code> যোগ করতে হয়।</p>
+      <p><strong>Temporal</strong> একটি নতুন প্রস্তাবিত JavaScript API যা <code>Date</code> অবজেক্টের দীর্ঘদিনের সমস্যাগুলো সমাধান করার জন্য ডিজাইন করা হয়েছে — এটি ইতিমধ্যেই বহুল ব্যবহৃত <code>date-fns</code>/<code>Day.js</code>-এর মতো লাইব্রেরির প্রয়োজনীয়তা কমানোর লক্ষ্যে তৈরি।</p>
+      <h4>Date অবজেক্টের সমস্যা — কেন প্রতিস্থাপন দরকার</h4>
+      <ul>
+        <li><strong>Mutable:</strong> <code>date.setMonth()</code> মূল অবজেক্ট বদলে দেয় — অপ্রত্যাশিত bug-এর সাধারণ কারণ।</li>
+        <li><strong>শুধু একটি টাইমজোন কনসেপ্ট (local + UTC):</strong> একাধিক টাইমজোন নিয়ে কাজ করা (যেমন একটি মিটিং তিনটি ভিন্ন দেশের জন্য) কষ্টকর।</li>
+        <li><strong>Month 0-indexed:</strong> জানুয়ারি = 0, ডিসেম্বর = 11 — একটি ক্লাসিক off-by-one bug উৎস।</li>
+        <li><strong>Date-only বা Time-only আলাদা টাইপ নেই:</strong> শুধু "জন্মতারিখ" (সময় ছাড়া) সংরক্ষণ করতে চাইলেও পুরো Date অবজেক্ট (সময়সহ) ব্যবহার করতে হয়।</li>
+      </ul>
+      <h4>Temporal-এর সমাধান</h4>
       <div class="code-box">
         <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>console.log(9007199254740991 + 2); // 9007199254740992 (Wrong precision!)
+        <pre><code>// Immutable — প্রতিটি অপারেশন নতুন instance রিটার্ন করে
+const date = Temporal.PlainDate.from('2026-08-10');
+const nextMonth = date.add({ months: 1 });   // মূল date অপরিবর্তিত
 
-const bigNum1 = 9007199254740991n;
-const bigNum2 = 2n;
-console.log(bigNum1 + bigNum2); // 9007199254740993n (Perfect precision)</code></pre>
+// স্পষ্ট টাইপ — শুধু date, শুধু time, বা উভয়ই
+const birthDate = Temporal.PlainDate.from('1995-03-15');       // শুধু তারিখ
+const meetingTime = Temporal.PlainTime.from('14:30');           // শুধু সময়
+const zonedMeeting = Temporal.ZonedDateTime.from('2026-08-10T14:30[Asia/Dhaka]'); // টাইমজোন-সচেতন
+
+// সহজ, নির্ভুল টাইমজোন কনভার্সন
+const newYorkTime = zonedMeeting.withTimeZone('America/New_York');</code></pre>
       </div>
+      <h4>বর্তমান অবস্থা — Stage ও সাপোর্ট</h4>
+      <p>Temporal TC39 প্রক্রিয়ায় একটি উন্নত স্তরে রয়েছে, কিন্তু এখনও সব ব্রাউজারে নেটিভভাবে উপলব্ধ নয় — বর্তমানে ব্যবহার করতে হলে polyfill প্রয়োজন। প্রোডাকশনে আজকের দিনে এখনও <code>date-fns</code> বা <code>Day.js</code>-এর মতো লাইব্রেরিই মূলধারার পছন্দ, কিন্তু ভবিষ্যতে Temporal এগুলোর প্রয়োজনীয়তা অনেকটাই কমিয়ে দেবে।</p>
+      <h4>Follow-up প্রশ্ন</h4>
+      <ul>
+        <li>Temporal.Instant ও Temporal.ZonedDateTime-এর মধ্যে পার্থক্য কী?</li>
+      </ul>
     `
   },
   {
     id: "js-40",
     category: "JavaScript",
     difficulty: "Intermediate",
-    tags: ["Features", "Array Methods", "flat"],
-    question: "Array.prototype.flat() এবং Array.prototype.flatMap() এর বাস্তবমুখী ব্যবহার কী?",
+    tags: ["JavaScript","ES2023","Array Methods","Senior"],
+    question: "ES2023-এর Non-mutating Array মেথড: toSorted(), toReversed(), toSpliced(), with() কী সমস্যা সমাধান করে?",
     answer: `
-      <p>অ্যারে ম্যানিপুলেশনের জন্য এই দুটি মেথড খুবই কার্যকর।</p>
-      <ul>
-        <li><strong>flat(depth):</strong> নেস্টেড অ্যারেকে নির্দিষ্ট গভীরতা পর্যন্ত সমতল (flatten) করে। ডেটা স্ক্র্যাপিং বা নেস্টেড API রেসপন্স সোর্ট করতে এটি ব্যবহৃত হয়।</li>
-        <li><strong>flatMap(callback):</strong> এটি <code>map()</code> এবং <code>flat(1)</code> এর কম্বিনেশন। যখন ম্যাপ করার সময় রেজাল্ট হিসেবে অ্যারে আসে এবং সেটি ফ্ল্যাট করতে হয়, তখন এটি পারফরম্যান্স বাড়ায়।</li>
-      </ul>
+      <p>ES2023-এ চারটি নতুন array মেথড যোগ হয়েছে যা তাদের পুরনো mutating সংস্করণের (<code>sort</code>, <code>reverse</code>, <code>splice</code>, index assignment) মতোই কাজ করে, কিন্তু <strong>মূল অ্যারে না বদলে একটি নতুন অ্যারে রিটার্ন করে</strong>।</p>
       <div class="code-box">
         <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>// Example: Extracting words from sentences
-const sentences = ["Hello World", "JS Tips", "Deep Dive"];
+        <pre><code>const original = [3, 1, 4, 1, 5];
 
-// Using map() requires an extra flat()
-const wordsMap = sentences.map(s => s.split(" ")).flat(); 
+// ❌ পুরনো — sort() মূল অ্যারে mutate করে
+const sorted1 = original.sort();
+console.log(original);   // [1, 1, 3, 4, 5] — মূল অ্যারেও বদলে গেছে! বিপজ্জনক
 
-// flatMap does it in one pass (More efficient)
-const wordsFlatMap = sentences.flatMap(s => s.split(" "));
-console.log(wordsFlatMap); // ["Hello", "World", "JS", "Tips", "Deep", "Dive"]</code></pre>
+// ✅ নতুন — toSorted() মূল অ্যারে অপরিবর্তিত রাখে
+const original2 = [3, 1, 4, 1, 5];
+const sorted2 = original2.toSorted();
+console.log(original2);  // [3, 1, 4, 1, 5] — অপরিবর্তিত ✅
+console.log(sorted2);    // [1, 1, 3, 4, 5] — নতুন অ্যারে
+
+original2.toReversed();       // reverse()-এর immutable ভার্সন
+original2.toSpliced(1, 2);    // splice()-এর immutable ভার্সন
+original2.with(0, 99);        // arr[0] = 99-এর immutable ভার্সন — নির্দিষ্ট index বদলে নতুন অ্যারে</code></pre>
       </div>
+      <h4>কেন এই মেথডগুলো দরকার — সাধারণ bug উৎস দূর করা</h4>
+      <p>একটি ক্লাসিক জাভাস্ক্রিপ্ট bug: একটি ফাংশনে অ্যারে পাস করে <code>.sort()</code> কল করলে caller-এর মূল অ্যারেও নিঃশব্দে বদলে যায় — এটি প্রায়ই অপ্রত্যাশিত side effect তৈরি করে, বিশেষ করে React-এর মতো immutability-নির্ভর UI লাইব্রেরিতে (যেখানে state সরাসরি mutate করা একটি গুরুতর অ্যান্টি-প্যাটার্ন)।</p>
+      <div class="code-box">
+        <div class="code-header"><span>jsx</span><button class="copy-btn">Copy</button></div>
+        <pre><code>// React state আপডেটে এখন সরাসরি ব্যবহারযোগ্য, spread অপারেটরের প্রয়োজন নেই
+setItems(prev => prev.toSorted((a, b) => a.price - b.price));
+// আগে লিখতে হতো: setItems(prev => [...prev].sort((a, b) => a.price - b.price));</code></pre>
+      </div>
+      <h4>Follow-up প্রশ্ন</h4>
+      <ul>
+        <li>Redux reducer-এ toSorted()/toSpliced() ব্যবহার করলে immutability নিয়ম মেনে চলা কীভাবে সহজ হয়?</li>
+      </ul>
     `
   },
   {
     id: "js-41",
     category: "JavaScript",
     difficulty: "Intermediate",
-    tags: ["Internationalization", "Intl API", "Formatting"],
+    tags: ["Internationalization","Intl API","Formatting"],
     question: "Intl API (NumberFormat, DateTimeFormat, Collator) দিয়ে লোকাল মুদ্রা ও তারিখ ফরম্যাটিং কীভাবে করবেন?",
     answer: `
       <p><code>Intl</code> অবজেক্ট ব্যবহার করে ভাষা ও অঞ্চল অনুযায়ী সংখ্যা, তারিখ এবং স্ট্রিং সর্টিং করা যায়। Moment.js এর মতো হেভি লাইব্রেরি ছাড়াই এটি নেটিভভাবে কাজ করে।</p>
@@ -1058,22 +1244,61 @@ console.log(sorted); // ['a', 'ä', 'b']</code></pre>
     id: "js-42",
     category: "JavaScript",
     difficulty: "Advanced",
-    tags: ["Web Components", "Custom Elements", "Shadow DOM"],
-    question: "Web Components Architecture: Custom Elements, Shadow DOM, এবং HTML Templates কী?",
+    tags: ["JavaScript","Web Components","Custom Elements","Senior"],
+    question: "Custom Elements-এর Lifecycle Callbacks (connectedCallback, disconnectedCallback, attributeChangedCallback) কীভাবে কাজ করে?",
     answer: `
-      <p>Web Components হলো রিইউজেবল UI উইজেট তৈরির ব্রাউজার নেটিভ স্ট্যান্ডার্ড। এর ৩টি মূল পিলার রয়েছে:</p>
-      <ol>
-        <li><strong>Custom Elements:</strong> নিজস্ব HTML ট্যাগ ডিফাইন করার API (যেমন- <code>customElements.define()</code>), যার নিজস্ব লাইফসাইকেল কলব্যাক (<code>connectedCallback</code>) থাকে।</li>
-        <li><strong>Shadow DOM:</strong> কম্পোনেন্টের DOM এবং CSS কে গ্লোবাল পেইজ থেকে সম্পূর্ণ আইসোলেটেড রাখে। বাইরের CSS এর প্রভাব এর ভেতরে পড়ে না।</li>
-        <li><strong>HTML Templates (<code>&lt;template&gt;</code>):</strong> এটি এমন একটি ট্যাগ যার ভেতরের কনটেন্ট পেইজ লোড হলে রেন্ডার হয় না, কিন্তু জাভাস্ক্রিপ্ট দিয়ে ক্লোন করে ব্যবহার করা যায়।</li>
-      </ol>
+      <p>একটি Custom Element ক্লাস <code>HTMLElement</code> এক্সটেন্ড করে এবং নির্দিষ্ট lifecycle callback মেথড implement করলে — ব্রাউজার স্বয়ংক্রিয়ভাবে সঠিক মুহূর্তে সেগুলো কল করে, ঠিক যেমন React কম্পোনেন্টের lifecycle method কাজ করে।</p>
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
+        <pre><code>class UserCard extends HTMLElement {
+  static get observedAttributes() { return ['user-id']; }  // কোন attribute পর্যবেক্ষণ করবে
+
+  connectedCallback() {
+    // এলিমেন্ট DOM-এ যোগ হওয়ার সাথে সাথে চলে — React-এর componentDidMount-এর মতো
+    console.log('DOM-এ যুক্ত হলো');
+    this.render();
+  }
+
+  disconnectedCallback() {
+    // এলিমেন্ট DOM থেকে সরানো হলে চলে — cleanup-এর জায়গা
+    console.log('DOM থেকে সরানো হলো');
+    this.removeEventListener('click', this.handleClick);
+  }
+
+  attributeChangedCallback(name, oldValue, newValue) {
+    // observedAttributes-এ তালিকাভুক্ত কোনো attribute বদলালে চলে
+    if (name === 'user-id' && oldValue !== newValue) this.fetchUser(newValue);
+  }
+
+  adoptedCallback() {
+    // এলিমেন্ট এক document থেকে অন্য document-এ move হলে (খুবই বিরল ব্যবহার)
+  }
+}
+
+customElements.define('user-card', UserCard);</code></pre>
+      </div>
+      <h4>HTML-এ ব্যবহার</h4>
+      <div class="code-box">
+        <div class="code-header"><span>html</span><button class="copy-btn">Copy</button></div>
+        <pre><code>&lt;user-card user-id="42"&gt;&lt;/user-card&gt;
+&lt;script&gt;
+  document.querySelector('user-card').setAttribute('user-id', '99');
+  // → attributeChangedCallback('user-id', '42', '99') স্বয়ংক্রিয়ভাবে ট্রিগার হবে
+&lt;/script&gt;</code></pre>
+      </div>
+      <h4>React-এর সাথে তুলনা — Framework-Agnostic হওয়ার সুবিধা</h4>
+      <p>এই lifecycle React/Vue/Angular কোনো ফ্রেমওয়ার্কের উপর নির্ভর করে না — এটি ব্রাউজারের নেটিভ স্ট্যান্ডার্ড। এই কারণে একটি Custom Element একবার লিখলে React, Vue, বা plain HTML — যেকোনো জায়গায় ব্যবহার করা যায়, যা Design System-এর মতো ফ্রেমওয়ার্ক-অজ্ঞেয় (framework-agnostic) কম্পোনেন্ট লাইব্রেরি তৈরিতে মূল্যবান।</p>
+      <h4>Follow-up প্রশ্ন</h4>
+      <ul>
+        <li>observedAttributes ডিফাইন না করলে attributeChangedCallback কেন কখনও ট্রিগার হয় না?</li>
+      </ul>
     `
   },
   {
     id: "js-43",
     category: "JavaScript",
     difficulty: "Intermediate",
-    tags: ["Objects", "Object.freeze", "Object.seal"],
+    tags: ["Objects","Object.freeze","Object.seal"],
     question: "Object.freeze() vs Object.seal() vs Object.preventExtensions()-এর পার্থক্য কী?",
     answer: `
       <p>অবজেক্টের মিউটেবিলিটি (Mutability) নিয়ন্ত্রণ করার জন্য এই তিনটি মেথড ব্যবহৃত হয়।</p>
@@ -1097,7 +1322,7 @@ console.log(obj); // { a: 1 }</code></pre>
     id: "js-44",
     category: "JavaScript",
     difficulty: "Advanced",
-    tags: ["Security", "XSS", "DOM Purify"],
+    tags: ["Security","XSS","DOM Purify"],
     question: "Cross-Site Scripting (XSS) অ্যাটাক প্রতিরোধে innerHTML-এর বদলে innerText / textContent বা Sanitizer API কেন ব্যবহার করা উচিত?",
     answer: `
       <p><strong>Cross-Site Scripting (XSS)</strong> হলো এমন একটি অ্যাটাক যেখানে অ্যাটাকার আপনার ওয়েবসাইটে বিপজ্জনক জাভাস্ক্রিপ্ট ইনজেক্ট করে। যখন আমরা ইউজারের দেওয়া ইনপুট সরাসরি <code>innerHTML</code> দিয়ে DOM-এ রেন্ডার করি, তখন ইনপুটের ভেতরের <code>&lt;script&gt;</code> ট্যাগ বা ইভেন্ট হ্যান্ডলার সরাসরি এক্সিকিউট হয়ে যায়।</p>
@@ -1126,7 +1351,7 @@ document.body.append(cleanHTML);</code></pre>
     id: "js-45",
     category: "JavaScript",
     difficulty: "Intermediate",
-    tags: ["Web APIs", "Intersection Observer", "Lazy Loading"],
+    tags: ["Web APIs","Intersection Observer","Lazy Loading"],
     question: "Intersection Observer API দিয়ে ইমেজ লেজি লোডিং এবং ইনফিনিট স্ক্রলিং কীভাবে বাস্তবায়িত হয়?",
     answer: `
       <p><strong>Intersection Observer API</strong> হলো ব্রাউজারের একটি নেটিভ টুল যা কোনো এলিমেন্ট ভিউপোর্টের (Viewport) ভেতরে বা বাইরে অবস্থান করছে কিনা তা অ্যাসিনক্রোনাসভাবে ট্র্যাক করে। এটি স্ক্রোল ইভেন্টের চেয়ে অনেক বেশি পারফরম্যান্ট।</p>
@@ -1154,7 +1379,7 @@ document.querySelectorAll('img[data-src]').forEach(img => {
     id: "js-46",
     category: "JavaScript",
     difficulty: "Advanced",
-    tags: ["Web APIs", "Mutation Observer", "DOM"],
+    tags: ["Web APIs","Mutation Observer","DOM"],
     question: "MutationObserver API দিয়ে DOM সাব-ট্রি পরিবর্তন বা Attribute Modification কীভাবে ট্র্যাক করবেন?",
     answer: `
       <p><strong>MutationObserver</strong> হলো এমন একটি Web API যা দিয়ে DOM ট্রি-তে যেকোনো পরিবর্তন (যেমন- নতুন নোড যুক্ত হওয়া, টেক্সট পরিবর্তন, বা এট্রিবিউট পরিবর্তন) অ্যাসিনক্রোনাসভাবে ট্র্যাক করা যায়। এটি ডিপ্রেকেটেড Mutation Events-এর চেয়ে অনেক বেশি পারফরম্যান্ট।</p>
@@ -1188,7 +1413,7 @@ observer.observe(targetNode, config);
     id: "js-47",
     category: "JavaScript",
     difficulty: "Intermediate",
-    tags: ["Web APIs", "Resize Observer", "Responsive"],
+    tags: ["Web APIs","Resize Observer","Responsive"],
     question: "ResizeObserver API দিয়ে এলিমেন্টের নিজস্ব সাইজ পরিবর্তন কীভাবে ডিটেক্ট করবেন?",
     answer: `
       <p>সাধারণত উইন্ডো রিসাইজ (<code>window.onresize</code>) ডিটেক্ট করা যায়, কিন্তু নির্দিষ্ট কোনো <code>div</code> বা এলিমেন্টের সাইজ পরিবর্তন হলে তা ডিটেক্ট করা কঠিন। <strong>ResizeObserver</strong> API যেকোনো এলিমেন্টের সাইজ পরিবর্তন রিয়েল-টাইমে ট্র্যাক করতে পারে।</p>
@@ -1216,15 +1441,54 @@ resizeObserver.observe(document.querySelector('.dynamic-container'));</code></pr
     id: "js-48",
     category: "JavaScript",
     difficulty: "Advanced",
-    tags: ["Concurrency", "Promise.allSettled", "Promise.any"],
-    question: "Promise Combinators: Promise.all vs Promise.allSettled vs Promise.race vs Promise.any-এর সূক্ষ্ম পার্থক্য কী?",
+    tags: ["JavaScript","Promise","Error Handling","Senior"],
+    question: "Promise Chain-এ Error Propagation কীভাবে কাজ করে? .catch()-এর অবস্থান কেন গুরুত্বপূর্ণ?",
     answer: `
-      <p>একাধিক প্রমিস একসাথে হ্যান্ডেল করার জন্য Promise Combinators ব্যবহৃত হয়। তাদের পার্থক্য নিচে দেওয়া হলো:</p>
+      <p>একটি Promise chain-এ যেকোনো <code>.then()</code>-এ এরর থ্রো হলে, সেটি চেইনের পরবর্তী <code>.then()</code>-গুলো সব <strong>skip করে সরাসরি নিকটতম <code>.catch()</code></strong>-এ চলে যায় — এই propagation বোঝা না থাকলে erratic bug হতে পারে।</p>
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
+        <pre><code>fetchUser(id)
+  .then(user => {
+    if (!user) throw new Error('User not found');   // এখানে থ্রো হলো
+    return fetchOrders(user.id);
+  })
+  .then(orders => {
+    console.log(orders);   // ⏭️ এই .then() স্কিপ হয়ে যাবে
+    return processOrders(orders);
+  })
+  .then(result => console.log(result))   // ⏭️ এটিও স্কিপ
+  .catch(err => console.error('চেইনের যেকোনো ধাপের এরর এখানে ধরা পড়বে:', err.message));</code></pre>
+      </div>
+      <h4>.catch()-এর অবস্থান কেন গুরুত্বপূর্ণ — মাঝপথে বসালে</h4>
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
+        <pre><code>fetchUser(id)
+  .then(user => { if (!user) throw new Error('Not found'); return user; })
+  .catch(err => {
+    console.error('ধরা পড়ল:', err.message);
+    return null;   // ⚠️ catch থেকে রিটার্ন করলে chain "সুস্থ" হয়ে যায়
+  })
+  .then(user => {
+    console.log(user);   // null — এরর হ্যান্ডেল হয়ে গেছে, এই .then() স্বাভাবিকভাবে চলবে
+  });
+// catch()-এর পরের .then() সবসময় চলবে, যদি না catch() নিজেই আবার থ্রো করে</code></pre>
+      </div>
+      <p><strong>গুরুত্বপূর্ণ নিয়ম:</strong> একটি <code>.catch()</code> একটি এরর "সামলে নিলে" (কোনো নতুন এরর থ্রো না করে normal ভ্যালু রিটার্ন করলে), চেইন আবার স্বাভাবিক প্রবাহে ফিরে যায় — এর পরের <code>.then()</code> চলবে যেন কোনো এরর হয়ইনি।</p>
+      <h4>async/await-এ সমতুল্য আচরণ</h4>
+      <div class="code-box">
+        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
+        <pre><code>try {
+  const user = await fetchUser(id);
+  if (!user) throw new Error('User not found');
+  const orders = await fetchOrders(user.id);   // user না থাকলে এই লাইনে পৌঁছাবেই না
+  console.log(orders);
+} catch (err) {
+  console.error('একই আচরণ:', err.message);   // try ব্লকের যেকোনো await-এর এরর এখানে ধরা পড়ে
+}</code></pre>
+      </div>
+      <h4>Follow-up প্রশ্ন</h4>
       <ul>
-        <li><strong>Promise.all([p1, p2]):</strong> সবগুলো প্রমিস সফল (Resolve) হলে রেজাল্ট অ্যারে দেয়। যদি শুধু ১টি প্রমিসও Fail (Reject) হয়, তবে সাথে সাথে পুরো <code>Promise.all</code> Reject হয়ে যাবে (Short-circuit)।</li>
-        <li><strong>Promise.allSettled([p1, p2]):</strong> সব প্রমিস সম্পূর্ণ (Settle) হওয়া পর্যন্ত অপেক্ষা করে। সফল হোক বা ব্যর্থ, সবার স্ট্যাটাস ও ভ্যালুর অ্যারে রিটার্ন করে। কখনো Reject হয় না।</li>
-        <li><strong>Promise.race([p1, p2]):</strong> সবার আগে যে প্রমিসটি নিষ্পত্তিকৃত (Resolve বা Reject যাই হোক) হবে, কেবল সেটির ফলাফল বা এরর রিটার্ন করবে।</li>
-        <li><strong>Promise.any([p1, p2]):</strong> সবার আগে যে প্রমিসটি <strong>সফলভাবে (Resolve)</strong> হবে, সেটির ভ্যালু রিটার্ন করে। যদি সবগুলো Reject হয়, তবে <code>AggregateError</code> দেয়।</li>
+        <li>একাধিক .catch() একটি চেইনে ব্যবহার করলে কী হয় — কখন এটি প্রয়োজনীয়?</li>
       </ul>
     `
   },
@@ -1232,7 +1496,7 @@ resizeObserver.observe(document.querySelector('.dynamic-container'));</code></pr
     id: "js-49",
     category: "JavaScript",
     difficulty: "Intermediate",
-    tags: ["Modules", "ESM vs CJS", "Dynamic Import"],
+    tags: ["Modules","ESM vs CJS","Dynamic Import"],
     question: "ES Modules (import/export) vs CommonJS (require/module.exports) এবং Dynamic import() কেন প্রয়োজন?",
     answer: `
       <p><strong>CommonJS (CJS):</strong> এটি Node.js-এর পুরোনো সিস্টেম। এটি সিঙ্ক্রোনাস এবং রান-টাইমে কোড লোড করে (<code>require()</code>)। এটি ডাইনামিক লোডিং সাপোর্ট করে কিন্তু Tree Shaking (অব্যবহৃত কোড বাদ দেওয়া) করতে পারে না।</p>
@@ -1253,7 +1517,7 @@ resizeObserver.observe(document.querySelector('.dynamic-container'));</code></pr
     id: "js-50",
     category: "JavaScript",
     difficulty: "Advanced",
-    tags: ["Security", "Prototype Pollution", "Object.create"],
+    tags: ["Security","Prototype Pollution","Object.create"],
     question: "Prototype Pollution Attack কী এবং Object.create(null) দিয়ে এটি কীভাবে আটকাবেন?",
     answer: `
       <p><strong>Prototype Pollution</strong> হলো একটি সিকিউরিটি ভালনারেবিলিটি যেখানে অ্যাটাকার গ্লোবাল <code>Object.prototype</code>-এ নতুন প্রপার্টি ইনজেক্ট করে দেয়। ফলে পুরো অ্যাপ্লিকেশনের সকল অবজেক্ট সেই প্রপার্টি ইনহেরিট করে ফেলে, যা লজিক ভেঙে দিতে পারে।</p>

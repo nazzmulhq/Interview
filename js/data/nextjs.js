@@ -3,7 +3,7 @@ const nextjsQuestions = [
     id: "next-1",
     category: "Next.js",
     difficulty: "Intermediate",
-    tags: ["App Router", "Pages Router", "File-based Routing"],
+    tags: ["App Router","Pages Router","File-based Routing"],
     question: "Next.js App Router vs Pages Router — পার্থক্য কী? নতুন প্রজেক্টে কোনটি ব্যবহার করবেন?",
     answer: `
       <p>Next.js 13+ থেকে <strong>App Router</strong> (<code>app/</code> directory) ডিফল্ট হিসেবে ব্যবহৃত হয়। এটি React Server Components, nested layouts, এবং streaming সাপোর্ট করে।</p>
@@ -55,7 +55,7 @@ app/
     id: "next-2",
     category: "Next.js",
     difficulty: "Advanced",
-    tags: ["Server Components", "Client Components", "use client"],
+    tags: ["Server Components","Client Components","use client"],
     question: "Next.js-এ Server Components vs Client Components — কখন কোনটি ব্যবহার করবেন? 'use client' directive কীভাবে কাজ করে?",
     answer: `
       <p>App Router-এ সব কম্পোনেন্ট ডিফল্টভাবে <strong>Server Component</strong>। Interactive features দরকার হলে <code>'use client'</code> directive দিয়ে Client Component বানাতে হবে।</p>
@@ -103,7 +103,7 @@ function AddToCartButton({ productId }) {
     id: "next-3",
     category: "Next.js",
     difficulty: "Advanced",
-    tags: ["SSR", "SSG", "ISR", "Rendering"],
+    tags: ["SSR","SSG","ISR","Rendering"],
     question: "Next.js-এ SSR, SSG, ISR এবং Streaming কীভাবে কাজ করে? কখন কোনটি ব্যবহার করবেন?",
     answer: `
       <h4>Rendering Strategies:</h4>
@@ -175,7 +175,7 @@ async function Page() {
     id: "next-4",
     category: "Next.js",
     difficulty: "Advanced",
-    tags: ["Server Actions", "Form", "Mutation"],
+    tags: ["Server Actions","Form","Mutation"],
     question: "Next.js Server Actions কী? Form handling এবং data mutation কীভাবে করবেন?",
     answer: `
       <p><strong>Server Actions</strong> হলো server-side functions যা সরাসরি client components থেকে call করা যায়। API route তৈরি না করেই server-এ mutation করা যায়।</p>
@@ -228,7 +228,7 @@ function CreatePostForm() {
     id: "next-5",
     category: "Next.js",
     difficulty: "Advanced",
-    tags: ["Middleware", "Authentication", "Edge"],
+    tags: ["Middleware","Authentication","Edge"],
     question: "Next.js Middleware কী? Authentication, rate limiting এবং redirects কীভাবে implement করবেন?",
     answer: `
       <p><strong>Middleware</strong> রিকোয়েস্ট সার্ভারে পৌঁছানোর আগে Edge-এ চলে। Authentication check, redirects, headers modification, A/B testing ইত্যাদির জন্য ব্যবহৃত হয়।</p>
@@ -278,7 +278,7 @@ export const config = {
     id: "next-6",
     category: "Next.js",
     difficulty: "Advanced",
-    tags: ["Data Fetching", "Caching", "Revalidation"],
+    tags: ["Data Fetching","Caching","Revalidation"],
     question: "Next.js App Router-এ Data Fetching এবং Caching কীভাবে কাজ করে? Caching layers কী কী?",
     answer: `
       <p>Next.js-এর caching system বেশ কমপ্লেক্স। এখানে চারটি caching layer আছে।</p>
@@ -319,7 +319,7 @@ async function Layout({ children }) {
     id: "next-7",
     category: "Next.js",
     difficulty: "Intermediate",
-    tags: ["Layout", "Template", "Nested"],
+    tags: ["Layout","Template","Nested"],
     question: "Next.js-এ Layouts এবং Templates কীভাবে কাজ করে? Nested layouts-এর সুবিধা কী?",
     answer: `
       <p><strong>Layout</strong> হলো UI যা multiple pages-এ share হয় এবং navigation-এ re-render হয় না। <strong>Template</strong> প্রতি navigation-এ re-mount হয়।</p>
@@ -361,7 +361,7 @@ export default function DashboardTemplate({ children }) {
     id: "next-8",
     category: "Next.js",
     difficulty: "Advanced",
-    tags: ["Image", "Font", "Optimization"],
+    tags: ["Image","Font","Optimization"],
     question: "Next.js Image এবং Font Optimization কীভাবে কাজ করে? Performance-এ কী প্রভাব ফেলে?",
     answer: `
       <h4>next/image — Automatic Image Optimization:</h4>
@@ -414,9 +414,17 @@ const hindSiliguri = Hind_Siliguri({
     id: "next-9",
     category: "Next.js",
     difficulty: "Advanced",
-    tags: ["API Routes", "Route Handlers", "REST"],
+    tags: ["API Routes","Route Handlers","REST"],
     question: "Next.js Route Handlers (API Routes) কীভাবে লিখবেন? Request/Response handling best practices কী?",
     answer: `
+      <p><strong>Route Handler</strong> হলো App Router-এর API এন্ডপয়েন্ট — <code>app/api/**/route.ts</code> ফাইলে HTTP মেথডের নামে ফাংশন এক্সপোর্ট করলেই সেটি এন্ডপয়েন্ট হয়ে যায় (<code>GET</code>, <code>POST</code>, <code>PUT</code>, <code>PATCH</code>, <code>DELETE</code>)।</p>
+      <p>Pages Router-এর <code>req/res</code>-এর বদলে এখানে ওয়েব স্ট্যান্ডার্ড <code>Request</code> ও <code>Response</code> অবজেক্ট ব্যবহার হয়, তাই একই কোড Edge ও Node — দুই রানটাইমেই চলে।</p>
+      <h4>মনে রাখার বিষয়</h4>
+      <ul>
+        <li><code>GET</code> হ্যান্ডলার ডিফল্টভাবে স্ট্যাটিক্যালি ক্যাশ হতে পারে; ডায়নামিক করতে <code>export const dynamic = 'force-dynamic'</code> দিন।</li>
+        <li>ভ্যালিডেশন সবসময় সার্ভারে করুন (Zod ইত্যাদি) — ক্লায়েন্টের পাঠানো ডেটা কখনও বিশ্বাস করবেন না।</li>
+        <li>এরর রেসপন্সে সঠিক HTTP স্ট্যাটাস দিন; ভেতরের এরর মেসেজ সরাসরি ফাঁস করবেন না।</li>
+      </ul>
       <div class="code-box">
         <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
         <pre><code>// app/api/users/route.ts
@@ -456,7 +464,7 @@ export async function GET(request, { params }) {
     id: "next-10",
     category: "Next.js",
     difficulty: "Advanced",
-    tags: ["Authentication", "NextAuth", "Session"],
+    tags: ["Authentication","NextAuth","Session"],
     question: "Next.js-এ Authentication কীভাবে implement করবেন? NextAuth.js (Auth.js) এর architecture কী?",
     answer: `
       <p><strong>NextAuth.js (Auth.js v5)</strong> Next.js-এর জন্য সবচেয়ে জনপ্রিয় authentication solution।</p>
@@ -498,9 +506,16 @@ async function DashboardPage() {
     id: "next-11",
     category: "Next.js",
     difficulty: "Intermediate",
-    tags: ["Dynamic Routes", "Params", "Catch-all"],
+    tags: ["Dynamic Routes","Params","Catch-all"],
     question: "Next.js-এ Dynamic Routes কীভাবে কাজ করে? Catch-all এবং Optional Catch-all routes কী?",
     answer: `
+      <p>Next.js ফোল্ডারের নাম দেখেই রুট তৈরি করে। ডায়নামিক অংশের জন্য তিনটি সিনট্যাক্স আছে:</p>
+      <ul>
+        <li><strong><code>[id]</code> — Dynamic Segment:</strong> ঠিক একটি সেগমেন্ট মেলায়। <code>/blog/hello</code> → <code>params.id = 'hello'</code>।</li>
+        <li><strong><code>[...slug]</code> — Catch-all:</strong> এক বা একাধিক সেগমেন্ট মেলায় (অ্যারে হিসেবে)। <code>/docs/a/b</code> → <code>['a','b']</code>। কিন্তু <code>/docs</code> মেলাবে না।</li>
+        <li><strong><code>[[...slug]]</code> — Optional Catch-all:</strong> উপরেরটির মতোই, তবে <em>শূন্য</em> সেগমেন্টও মেলায় — অর্থাৎ <code>/docs</code>-ও ধরবে।</li>
+      </ul>
+      <p><code>generateStaticParams()</code> দিয়ে বিল্ড টাইমে কোন কোন পাথ প্রি-রেন্ডার হবে তা জানানো যায় — এটি SSG-র মূল চাবি।</p>
       <div class="code-box">
         <div class="code-header"><span>text</span><button class="copy-btn">Copy</button></div>
         <pre><code>// 1. Single dynamic segment
@@ -543,7 +558,7 @@ export async function generateMetadata({ params }) {
     id: "next-12",
     category: "Next.js",
     difficulty: "Advanced",
-    tags: ["Error Handling", "Loading", "Not Found"],
+    tags: ["Error Handling","Loading","Not Found"],
     question: "Next.js-এ Error Handling, Loading States এবং Not Found pages কীভাবে manage করবেন?",
     answer: `
       <p>App Router-এ special files দিয়ে error, loading, এবং 404 states handle করা হয়।</p>
@@ -586,9 +601,17 @@ async function UserPage({ params }) {
     id: "next-13",
     category: "Next.js",
     difficulty: "Advanced",
-    tags: ["Metadata", "SEO", "OpenGraph"],
+    tags: ["Metadata","SEO","OpenGraph"],
     question: "Next.js-ে SEO optimization এবং Metadata কীভাবে manage করবেন?",
     answer: `
+      <p>App Router-এ SEO মেটাডেটা দুইভাবে দেওয়া যায়: স্ট্যাটিক <code>metadata</code> অবজেক্ট এক্সপোর্ট করে, অথবা ডায়নামিক ডেটার জন্য <code>generateMetadata()</code> ফাংশন দিয়ে।</p>
+      <p>Next.js এই মেটাডেটা সার্ভারেই <code>&lt;head&gt;</code>-এ বসিয়ে দেয়, তাই ক্রলার ও সোশ্যাল মিডিয়ার প্রিভিউ বট সঠিক টাইটেল/ছবি পায় — ক্লায়েন্ট-সাইড JavaScript চালানোর অপেক্ষা করতে হয় না।</p>
+      <h4>গুরুত্বপূর্ণ</h4>
+      <ul>
+        <li><code>generateMetadata</code>-এর ভেতরের <code>fetch</code> পেজের fetch-এর সাথে <strong>ডিডুপ্লিকেট</strong> হয় — একই ডেটা দুবার আনা হয় না।</li>
+        <li><code>metadataBase</code> সেট করুন, নাহলে OG ছবির আপেক্ষিক URL ভাঙবে।</li>
+        <li>প্রতিটি পেজে ইউনিক <code>title</code> ও <code>description</code> দিন; layout-এ <code>title.template</code> ব্যবহার করলে ধারাবাহিকতা বজায় থাকে।</li>
+      </ul>
       <div class="code-box">
         <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
         <pre><code>// Static Metadata — app/layout.tsx
@@ -623,7 +646,7 @@ export default async function sitemap() {
     id: "next-14",
     category: "Next.js",
     difficulty: "Advanced",
-    tags: ["Deployment", "Vercel", "Docker", "Standalone"],
+    tags: ["Deployment","Vercel","Docker","Standalone"],
     question: "Next.js app কীভাবে deploy করবেন? Vercel vs Self-hosted (Docker) — কোনটি কখন?",
     answer: `
       <div class="code-box">
@@ -670,7 +693,7 @@ module.exports = { output: 'standalone' };
     id: "next-15",
     category: "Next.js",
     difficulty: "Advanced",
-    tags: ["Parallel Routes", "Intercepting Routes", "Modal"],
+    tags: ["Parallel Routes","Intercepting Routes","Modal"],
     question: "Next.js Parallel Routes এবং Intercepting Routes কী? Modal pattern কীভাবে implement করবেন?",
     answer: `
       <p>এগুলো Next.js-ের advanced routing features যা complex UI patterns (modals, split views) সমাধান করে।</p>
@@ -715,7 +738,7 @@ export default function Layout({ children, analytics, team }) {
     id: "next-16",
     category: "Next.js",
     difficulty: "Intermediate",
-    tags: ["Environment Variables", "Config", "Security"],
+    tags: ["Environment Variables","Config","Security"],
     question: "Next.js-এ Environment Variables কীভাবে কাজ করে? NEXT_PUBLIC_ prefix কেন দরকার?",
     answer: `
       <h4>Environment Variable Rules:</h4>
@@ -739,7 +762,7 @@ NEXT_PUBLIC_API_URL="https://api.myapp.com"</code></pre>
     id: "next-17",
     category: "Next.js",
     difficulty: "Advanced",
-    tags: ["Internationalization", "i18n", "Routing"],
+    tags: ["Internationalization","i18n","Routing"],
     question: "Next.js App Router-ে Internationalization (i18n) কীভাবে implement করবেন?",
     answer: `
       <p>App Router-ে built-in i18n routing নেই। Manual middleware-based approach নিতে হয়।</p>
@@ -779,9 +802,15 @@ export const getDictionary = async (locale) => dictionaries[locale]();</code></p
     id: "next-18",
     category: "Next.js",
     difficulty: "Intermediate",
-    tags: ["Link", "Navigation", "useRouter"],
+    tags: ["Link","Navigation","useRouter"],
     question: "Next.js-ে Navigation কীভাবে করবেন? Link, useRouter, redirect — কখন কোনটি?",
     answer: `
+      <p>Next.js-এ নেভিগেশনের তিনটি উপায় আছে, এবং কোনটি কখন ব্যবহার করবেন তা পরিষ্কার:</p>
+      <ul>
+        <li><strong><code>&lt;Link&gt;</code>:</strong> ডিফল্ট পছন্দ। এটি ক্লায়েন্ট-সাইড নেভিগেশন করে এবং ভিউপোর্টে এলে রুট <strong>প্রিফেচ</strong> করে রাখে, তাই ক্লিক করলে প্রায় তাৎক্ষণিক লোড হয়। আসল <code>&lt;a&gt;</code> ট্যাগ রেন্ডার করে বলে SEO ও মিডল-ক্লিক ঠিক থাকে।</li>
+        <li><strong><code>useRouter()</code>:</strong> শুধু ইভেন্টের প্রতিক্রিয়ায় প্রোগ্রাম্যাটিক নেভিগেশনে (ফর্ম সাবমিটের পর <code>router.push()</code>)। মনে রাখবেন — App Router-এ এটি <code>next/navigation</code> থেকে আসে, <code>next/router</code> থেকে নয়।</li>
+        <li><strong><code>redirect()</code>:</strong> সার্ভার কম্পোনেন্ট বা Server Action-এ ব্যবহার হয়, যেমন অনুমতি না থাকলে সরিয়ে দেওয়া। এটি ভেতরে একটি এরর থ্রো করে, তাই <code>try/catch</code>-এর ভেতরে রাখবেন না — নাহলে রিডাইরেক্ট গিলে ফেলবে।</li>
+      </ul>
       <div class="code-box">
         <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
         <pre><code>import Link from 'next/link';
@@ -816,7 +845,7 @@ async function ProfilePage() {
     id: "next-19",
     category: "Next.js",
     difficulty: "Advanced",
-    tags: ["Database", "Prisma", "ORM"],
+    tags: ["Database","Prisma","ORM"],
     question: "Next.js-ে Database connection কীভাবে manage করবেন? Prisma ORM best practices কী?",
     answer: `
       <p>Next.js serverless environment-এ চলে, তাই database connection pooling গুরুত্বপূর্ণ।</p>
@@ -843,7 +872,7 @@ if (process.env.NODE_ENV !== 'production') {
     id: "next-20",
     category: "Next.js",
     difficulty: "Advanced",
-    tags: ["Performance", "Bundle", "Analytics"],
+    tags: ["Performance","Bundle","Analytics"],
     question: "Next.js app-ের performance কীভাবে measure এবং optimize করবেন?",
     answer: `
       <h4>Optimization Techniques:</h4>
@@ -871,9 +900,16 @@ export function reportWebVitals(metric) {
     id: "next-21",
     category: "Next.js",
     difficulty: "Advanced",
-    tags: ["Testing", "Jest", "Playwright", "E2E"],
+    tags: ["Testing","Jest","Playwright","E2E"],
     question: "Next.js app কীভাবে test করবেন? Unit, Integration এবং E2E testing setup কী?",
     answer: `
+      <p>Next.js অ্যাপে তিন স্তরে টেস্ট করা হয়, এবং প্রতিটির খরচ ও উপযোগিতা আলাদা:</p>
+      <ul>
+        <li><strong>Unit (Jest/Vitest):</strong> বিশুদ্ধ ফাংশন, ইউটিলিটি, হুক। দ্রুত ও সস্তা — সবচেয়ে বেশি সংখ্যায় থাকবে।</li>
+        <li><strong>Integration (React Testing Library):</strong> কম্পোনেন্ট আচরণ ইউজারের দৃষ্টিকোণ থেকে। ইমপ্লিমেন্টেশন নয়, আচরণ পরীক্ষা করুন।</li>
+        <li><strong>E2E (Playwright/Cypress):</strong> আসল ব্রাউজারে সম্পূর্ণ ফ্লো — লগইন, চেকআউট। ধীর ও ভঙ্গুর, তাই শুধু গুরুত্বপূর্ণ পথে।</li>
+      </ul>
+      <p><strong>সতর্কতা:</strong> <code>async</code> Server Component সরাসরি RTL দিয়ে টেস্ট করা এখনও সীমিত। বাস্তবে সেগুলোর ডেটা-ফেচিং লজিক আলাদা ফাংশনে সরিয়ে সেটিকে unit-test করুন, আর রেন্ডারিং E2E দিয়ে যাচাই করুন।</p>
       <div class="code-box">
         <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
         <pre><code>// jest.config.js — Next.js setup
@@ -901,50 +937,115 @@ test('homepage loads', async ({ page }) => {
     id: "next-22",
     category: "Next.js",
     difficulty: "Intermediate",
-    tags: ["Styling", "CSS Modules", "Tailwind", "Global CSS"],
+    tags: ["Styling","CSS Modules","Tailwind","Global CSS"],
     question: "Next.js-ে Styling options কী কী? CSS Modules vs Tailwind — কোনটি recommended?",
     answer: `
-      <h4>Next.js Styling Options:</h4>
-      <ol>
-        <li><strong>CSS Modules</strong> — .module.css (built-in, scoped)</li>
-        <li><strong>Tailwind CSS</strong> — Utility-first (official support, recommended)</li>
-        <li><strong>Global CSS</strong> — layout.tsx/globals.css-এ import</li>
-        <li><strong>CSS-in-JS</strong> — Styled Components (⚠️ Server Components-এ limitation, 'use client' লাগে)</li>
-      </ol>
+      <p>Next.js একাধিক স্টাইলিং পদ্ধতিকে বিল্ট-ইন সাপোর্ট দেয় — কোনো একক "সঠিক" উত্তর নেই, তবে প্রজেক্টের প্রকৃতির উপর ভিত্তি করে একটি স্পষ্ট সুপারিশ দেওয়া যায়।</p>
+      <h4>উপলব্ধ অপশন</h4>
+      <table>
+        <tr><th>পদ্ধতি</th><th>Server Component সাপোর্ট</th><th>বৈশিষ্ট্য</th></tr>
+        <tr><td><strong>CSS Modules</strong></td><td>✅ পূর্ণ</td><td>বিল্ট-ইন, জিরো কনফিগ, স্কোপড ক্লাসনাম</td></tr>
+        <tr><td><strong>Tailwind CSS</strong></td><td>✅ পূর্ণ</td><td>utility-first, বিল্ড টাইমে purge, অফিসিয়ালি সুপারিশকৃত</td></tr>
+        <tr><td><strong>Styled Components / Emotion</strong></td><td>⚠️ আংশিক, অতিরিক্ত কনফিগ প্রয়োজন</td><td>runtime CSS-in-JS, Server Component-এর সাথে ঘর্ষণ</td></tr>
+        <tr><td><strong>Sass</strong></td><td>✅ পূর্ণ</td><td>বিল্ট-ইন সাপোর্ট, CSS Modules-এর সাথেও কম্বাইন করা যায়</td></tr>
+      </table>
+      <h4>CSS Modules — App Router-এ ডিফল্ট পছন্দ</h4>
+      <div class="code-box">
+        <div class="code-header"><span>tsx</span><button class="copy-btn">Copy</button></div>
+        <pre><code>// Button.module.css
+.button { padding: 8px 16px; border-radius: 4px; }
+
+// Button.tsx — Server Component-এও ঝামেলাহীনভাবে কাজ করে
+import styles from './Button.module.css';
+export default function Button() {
+  return <button className={styles.button}>জমা দিন</button>;
+}</code></pre>
+      </div>
+      <h4>Tailwind CSS — কেন Next.js-এর সাথে বিশেষভাবে ভালো মানায়</h4>
+      <div class="code-box">
+        <div class="code-header"><span>tsx</span><button class="copy-btn">Copy</button></div>
+        <pre><code>export default function Button() {
+  return <button className="px-4 py-2 rounded bg-indigo-500 text-white">জমা দিন</button>;
+}
+// create-next-app -e ফ্ল্যাগে Tailwind ডিফল্টভাবে অফার করা হয়</code></pre>
+      </div>
+      <p>Tailwind সম্পূর্ণভাবে বিল্ড-টাইম টুল — কোনো runtime JavaScript ওভারহেড নেই, তাই Server Component-এর সাথে ঘর্ষণহীনভাবে কাজ করে। এই কারণে Next.js টিম Tailwind-কে ডিফল্ট স্টার্টার অপশন হিসেবে অফার করে।</p>
+      <h4>কেন Styled Components-এর মতো Runtime CSS-in-JS-এ সমস্যা হয়</h4>
+      <p>App Router-এ Server Component ব্রাউজারে কোনো JavaScript পাঠায় না — সরাসরি HTML রেন্ডার হয়। কিন্তু Styled Components-এর মতো লাইব্রেরি রানটাইমে (ব্রাউজারে) CSS তৈরি করে <code>&lt;style&gt;</code> ট্যাগ ইনজেক্ট করে — এই প্রক্রিয়া <code>useContext</code>/client-side JavaScript-এর উপর নির্ভরশীল, যা Server Component-এ পাওয়া যায় না। ফলে Styled Components ব্যবহার করতে হলে সংশ্লিষ্ট কম্পোনেন্টকে <code>'use client'</code> দিয়ে Client Component বানাতে হয় — যা Server Component-এর পারফরম্যান্স সুবিধা হারায়।</p>
+      <h4>ব্যবহারিক সুপারিশ</h4>
+      <ul>
+        <li><strong>নতুন প্রজেক্ট, App Router:</strong> Tailwind CSS — Server Component-বান্ধব, দ্রুত ডেভেলপমেন্ট, কোনো runtime খরচ নেই।</li>
+        <li><strong>টিম CSS Module-এর সিনট্যাক্স পছন্দ করে:</strong> CSS Modules — একই সুবিধা (zero-runtime, Server Component সাপোর্ট), শুধু utility class নয়, ঐতিহ্যবাহী CSS।</li>
+        <li><strong>জটিল ডায়নামিক থিমিং প্রয়োজন এবং Client Component-এই থাকবে:</strong> Styled Components গ্রহণযোগ্য, কিন্তু সচেতনভাবে সেই কম্পোনেন্টগুলোকে Client Component হিসেবে চিহ্নিত করুন।</li>
+      </ul>
+      <h4>Follow-up প্রশ্ন</h4>
+      <ul>
+        <li>vanilla-extract-এর মতো zero-runtime CSS-in-JS Server Component-এর সাথে কীভাবে কাজ করে?</li>
+        <li>Tailwind-এর JIT (Just-In-Time) কম্পাইলার কীভাবে কাজ করে বিল্ড টাইমে?</li>
+      </ul>
     `
   },
   {
     id: "next-23",
     category: "Next.js",
     difficulty: "Advanced",
-    tags: ["Edge Runtime", "Serverless", "Node"],
+    tags: ["Edge Runtime","Serverless","Node"],
     question: "Next.js Edge Runtime vs Node.js Runtime — পার্থক্য কী? কখন কোনটি ব্যবহার করবেন?",
     answer: `
-      <h4>Runtime Options:</h4>
-      <table style="width:100%; border-collapse:collapse; margin:1rem 0;">
-        <tr style="border-bottom:1px solid #ccc;">
-          <th style="text-align:left; padding:8px;">Feature</th>
-          <th style="text-align:left; padding:8px;">Node.js Runtime</th>
-          <th style="text-align:left; padding:8px;">Edge Runtime</th>
-        </tr>
-        <tr style="border-bottom:1px solid #ccc;">
-          <td style="padding:8px;">Cold Start</td><td style="padding:8px;">ধীর (~250ms)</td><td style="padding:8px;">দ্রুত (~0ms)</td>
-        </tr>
-        <tr style="border-bottom:1px solid #ccc;">
-          <td style="padding:8px;">APIs Available</td><td style="padding:8px;">সব Node.js APIs</td><td style="padding:8px;">Web APIs only (limited)</td>
-        </tr>
-        <tr>
-          <td style="padding:8px;">Location</td><td style="padding:8px;">Single region</td><td style="padding:8px;">Global CDN edge</td>
-        </tr>
+      <p>Next.js দুটি ভিন্ন রানটাইম-এ কোড এক্সিকিউট করতে পারে — <strong>Node.js Runtime</strong> (পূর্ণাঙ্গ Node.js এনভায়রনমেন্ট) এবং <strong>Edge Runtime</strong> (একটি সীমিত, V8-ভিত্তিক লাইটওয়েট রানটাইম যা CDN-এর কাছাকাছি চলে) — এই দুইয়ের মধ্যে সিদ্ধান্ত পারফরম্যান্স ও ক্ষমতার মধ্যে একটি ট্রেড-অফ।</p>
+      <h4>মূল পার্থক্য</h4>
+      <table>
+        <tr><th></th><th>Node.js Runtime</th><th>Edge Runtime</th></tr>
+        <tr><td><strong>এক্সিকিউশন লোকেশন</strong></td><td>একটি নির্দিষ্ট সার্ভার/রিজিয়ন</td><td>ব্যবহারকারীর কাছাকাছি CDN edge location</td></tr>
+        <tr><td><strong>কোল্ড স্টার্ট</strong></td><td>ধীর (পুরো Node.js প্রসেস স্পিন আপ)</td><td>প্রায় তাৎক্ষণিক (হালকা V8 isolate)</td></tr>
+        <tr><td><strong>Node.js API</strong></td><td>সম্পূর্ণ (fs, net, crypto সম্পূর্ণ)</td><td>সীমিত (fs নেই, কিছু API-এর ওয়েব-স্ট্যান্ডার্ড ভার্সন)</td></tr>
+        <tr><td><strong>মেমরি/টাইমআউট সীমা</strong></td><td>বড়, নমনীয়</td><td>ছোট, কঠোর সীমা (সাধারণত কয়েক MB, কয়েক সেকেন্ড)</td></tr>
+        <tr><td><strong>Database ড্রাইভার</strong></td><td>সব সমর্থিত (pg, mongoose ইত্যাদি)</td><td>সীমিত — HTTP-ভিত্তিক ড্রাইভার প্রয়োজন (Neon, PlanetScale HTTP API)</td></tr>
       </table>
-      <p><strong>Use Edge for:</strong> Middleware, simple API responses, auth token verification, redirects।<br><strong>Use Node.js for:</strong> Database operations (Prisma), file system access, heavy computation।</p>
+      <h4>কেন Edge Runtime দ্রুত — ভেতরের কারণ</h4>
+      <p>Edge Runtime সম্পূর্ণ Node.js প্রসেস চালু করে না — এটি <strong>V8 isolate</strong> ব্যবহার করে (Cloudflare Workers-এর মতো একই ধারণা), যা মিলিসেকেন্ডে চালু হতে পারে কারণ এটি একটি পূর্ণাঙ্গ প্রসেস নয়, শুধু একটি লাইটওয়েট স্যান্ডবক্স। এবং যেহেতু এটি বিশ্বজুড়ে বহু CDN লোকেশনে ডিপ্লয় হয়, ব্যবহারকারীর <strong>ভৌগোলিকভাবে নিকটতম</strong> সার্ভার থেকে রেসপন্স আসে — নেটওয়ার্ক ল্যাটেন্সি কমে যায়।</p>
+      <div class="code-box">
+        <div class="code-header"><span>typescript</span><button class="copy-btn">Copy</button></div>
+        <pre><code>// middleware.ts — সবসময় Edge Runtime-এ চলে (বাধ্যতামূলক)
+export function middleware(request: NextRequest) {
+  const country = request.geo?.country;   // দ্রুত, geolocation-ভিত্তিক redirect
+  if (country === 'BD') return NextResponse.redirect(new URL('/bn', request.url));
+}
+
+// একটি নির্দিষ্ট Route Handler-কে Edge Runtime-এ চালানো
+export const runtime = 'edge';
+
+export async function GET(request: Request) {
+  // ⚠️ এখানে Node.js-নির্দিষ্ট API (fs, path, বেশিরভাগ npm প্যাকেজ) ব্যবহার করা যাবে না
+  const data = await fetch('https://api.example.com/data');
+  return Response.json(await data.json());
+}</code></pre>
+      </div>
+      <h4>কখন Edge Runtime ব্যবহার করবেন</h4>
+      <ul>
+        <li><strong>Middleware:</strong> Authentication চেক, A/B টেস্টিং, geolocation redirect — প্রতিটি রিকোয়েস্টে চলে, তাই দ্রুত হওয়া জরুরি।</li>
+        <li><strong>সরল, দ্রুত API রুট:</strong> যেগুলো Node.js-নির্দিষ্ট প্যাকেজের উপর নির্ভর করে না (যেমন সাধারণ প্রক্সি, header ম্যানিপুলেশন)।</li>
+        <li><strong>বৈশ্বিকভাবে ছড়ানো ব্যবহারকারীর জন্য ল্যাটেন্সি-সংবেদনশীল ফিচার।</strong></li>
+      </ul>
+      <h4>কখন Node.js Runtime বাধ্যতামূলক</h4>
+      <ul>
+        <li><strong>ডাটাবেজ ড্রাইভার</strong> যা raw TCP সংযোগ ব্যবহার করে (যেমন <code>pg</code>, <code>mysql2</code>) — Edge Runtime raw TCP সাপোর্ট করে না।</li>
+        <li><strong>ফাইল সিস্টেম অ্যাক্সেস</strong> (<code>fs</code> মডিউল) — Edge-এ সম্পূর্ণ অনুপস্থিত।</li>
+        <li><strong>ভারী npm প্যাকেজ</strong> যা Node.js-নির্দিষ্ট বাইনারি বা native addon ব্যবহার করে (image processing লাইব্রেরি, বেশিরভাগ ORM)।</li>
+        <li><strong>দীর্ঘ-চলমান প্রসেস</strong> যা Edge Runtime-এর কঠোর সময়/মেমরি সীমার বাইরে যায়।</li>
+      </ul>
+      <h4>Follow-up প্রশ্ন</h4>
+      <ul>
+        <li>Edge Runtime-এ ডাটাবেজে কানেক্ট করতে হলে কী পদ্ধতি ব্যবহার করবেন (HTTP-ভিত্তিক ড্রাইভার)?</li>
+        <li>Middleware কেন সবসময় Edge Runtime-এ চলতে বাধ্য — Node.js Runtime middleware-এ কেন সমর্থিত নয়?</li>
+      </ul>
     `
   },
   {
     id: "next-24",
     category: "Next.js",
     difficulty: "Intermediate",
-    tags: ["Static Export", "SPA", "Output"],
+    tags: ["Static Export","SPA","Output"],
     question: "Next.js Static Export কী? কখন ব্যবহার করবেন এবং কী limitation আছে?",
     answer: `
       <p><strong>Static Export</strong> পুরো Next.js app-কে static HTML/CSS/JS-ে রূপান্তর করে। কোনো Node.js server দরকার হয় না।</p>
@@ -970,9 +1071,23 @@ module.exports = {
     id: "next-25",
     category: "Next.js",
     difficulty: "Advanced",
-    tags: ["Caching", "unstable_cache", "Tags"],
+    tags: ["Caching","unstable_cache","Tags"],
     question: "Next.js-ের Caching মেকানিজম গভীরভাবে ব্যাখ্যা করুন। Cache invalidation strategies কী কী?",
     answer: `
+      <p>App Router-এ চারটি আলাদা ক্যাশিং স্তর আছে — বেশিরভাগ বিভ্রান্তি হয় কারণ ডেভেলপাররা এগুলোকে একটি জিনিস ভাবেন:</p>
+      <ol>
+        <li><strong>Request Memoization:</strong> একই রেন্ডার পাসে একই <code>fetch</code> একাধিকবার কল করলে একবারই যায়। শুধু একটি রিকোয়েস্টের জীবনকালের জন্য।</li>
+        <li><strong>Data Cache:</strong> <code>fetch</code>-এর ফল সার্ভারে রিকোয়েস্ট ও ডিপ্লয়ের মধ্যেও টিকে থাকে। <code>revalidate</code> দিয়ে নিয়ন্ত্রিত।</li>
+        <li><strong>Full Route Cache:</strong> বিল্ড টাইমে রেন্ডার করা HTML ও RSC পেলোড।</li>
+        <li><strong>Router Cache:</strong> ব্রাউজারে ক্লায়েন্ট-সাইড ক্যাশ, যাতে back/forward তাৎক্ষণিক হয়।</li>
+      </ol>
+      <h4>Invalidation</h4>
+      <ul>
+        <li><code>revalidatePath('/blog')</code> — নির্দিষ্ট রুটের ক্যাশ বাতিল।</li>
+        <li><code>revalidateTag('posts')</code> — ট্যাগযুক্ত সব fetch একসাথে বাতিল (সবচেয়ে নমনীয়)।</li>
+        <li><code>cache: 'no-store'</code> — একদম ক্যাশ না করা (ডায়নামিক ডেটা)।</li>
+      </ul>
+      <p><strong>মনে রাখবেন:</strong> Next.js 15 থেকে <code>fetch</code> ডিফল্টে আর ক্যাশ হয় না (<code>no-store</code> ডিফল্ট) — ১৪ থেকে আপগ্রেড করলে এটি বড় আচরণগত পরিবর্তন।</p>
       <div class="code-box">
         <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
         <pre><code>// 1. fetch() caching
@@ -1009,7 +1124,7 @@ export const dynamic = 'force-dynamic'; // Force SSR</code></pre>
     id: "next-26",
     category: "Next.js",
     difficulty: "Advanced",
-    tags: ["Multi-zone", "Micro-frontend", "Architecture"],
+    tags: ["Multi-zone","Micro-frontend","Architecture"],
     question: "Next.js Multi-zone Architecture কী? বড় organization-ে কীভাবে ব্যবহার করবেন?",
     answer: `
       <p><strong>Multi-zone</strong> হলো একাধিক Next.js app-কে একটি domain-ে serve করার পদ্ধতি। প্রতিটি zone আলাদাভাবে develop ও deploy হয়।</p>
@@ -1036,9 +1151,20 @@ module.exports = { basePath: '/blog' };</code></pre>
     id: "next-27",
     category: "Next.js",
     difficulty: "Intermediate",
-    tags: ["File Upload", "Server Action", "FormData"],
+    tags: ["File Upload","Server Action","FormData"],
     question: "Next.js-ে File Upload কীভাবে implement করবেন?",
     answer: `
+      <p>Next.js-এ ফাইল আপলোডের দুটি পথ আছে, এবং প্রোডাকশনে পছন্দটি গুরুত্বপূর্ণ:</p>
+      <ul>
+        <li><strong>সার্ভারের মধ্য দিয়ে:</strong> ফাইল Route Handler/Server Action-এ যায়, তারপর স্টোরেজে। সহজ, কিন্তু সার্ভারের মেমরি ও ব্যান্ডউইথ খরচ হয়। Vercel-এ সার্ভারলেস বডি সাইজের সীমাও (৪.৫MB) আছে।</li>
+        <li><strong>Presigned URL (প্রস্তাবিত):</strong> সার্ভার শুধু একটি স্বল্পমেয়াদি আপলোড URL তৈরি করে দেয়; ব্রাউজার ফাইলটি <strong>সরাসরি</strong> S3/R2-তে পাঠায়। বড় ফাইলেও সার্ভারে কোনো চাপ পড়ে না।</li>
+      </ul>
+      <h4>নিরাপত্তা</h4>
+      <ul>
+        <li>MIME টাইপ ও সাইজ <strong>সার্ভারে</strong> যাচাই করুন — ক্লায়েন্টের <code>accept</code> অ্যাট্রিবিউট কেবল UX।</li>
+        <li>ফাইলের নাম কখনও সরাসরি ব্যবহার করবেন না (path traversal ঝুঁকি) — নতুন UUID নাম দিন।</li>
+        <li>আপলোড করা ফাইল অ্যাপের ডোমেইন থেকে সার্ভ করলে stored-XSS হতে পারে; আলাদা ডোমেইন বা <code>Content-Disposition: attachment</code> ব্যবহার করুন।</li>
+      </ul>
       <div class="code-box">
         <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
         <pre><code>// Server Action for file upload
@@ -1068,9 +1194,16 @@ export async function uploadFile(formData) {
     id: "next-28",
     category: "Next.js",
     difficulty: "Advanced",
-    tags: ["Rate Limiting", "Security", "Headers"],
+    tags: ["Rate Limiting","Security","Headers"],
     question: "Next.js API-তে Rate Limiting, CORS, এবং Security Headers কীভাবে configure করবেন?",
     answer: `
+      <p>Next.js-এ API সুরক্ষার তিনটি স্তর সাধারণত একসাথে লাগে:</p>
+      <ul>
+        <li><strong>Security Headers:</strong> <code>next.config.js</code>-এর <code>headers()</code> দিয়ে সব রুটে একবারে প্রয়োগ করুন — HSTS, X-Frame-Options, X-Content-Type-Options, CSP। CSP প্রথমে <code>Report-Only</code> মোডে চালিয়ে দেখুন কী ভাঙে।</li>
+        <li><strong>CORS:</strong> শুধু আপনার নিজের ফ্রন্টএন্ড API কল করলে CORS হেডারের দরকারই নেই (same-origin)। থার্ড-পার্টি ক্লায়েন্ট থাকলে নির্দিষ্ট origin-এর তালিকা দিন, <code>*</code> নয়।</li>
+        <li><strong>Rate Limiting:</strong> সার্ভারলেস পরিবেশে ইন-মেমোরি কাউন্টার কাজ করে না, কারণ প্রতিটি ইনভোকেশন আলাদা ইনস্ট্যান্স হতে পারে। তাই Redis (Upstash ইত্যাদি) দিয়ে শেয়ার্ড কাউন্টার রাখতে হবে।</li>
+      </ul>
+      <p><strong>Middleware-এর সীমা:</strong> <code>middleware.ts</code> Edge রানটাইমে চলে — Node.js API বা ভারী লাইব্রেরি সেখানে পাবেন না। ভারী যাচাই Route Handler-এ করুন।</p>
       <div class="code-box">
         <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
         <pre><code>// next.config.js — Security Headers
@@ -1108,7 +1241,7 @@ export async function POST(request) {
     id: "next-29",
     category: "Next.js",
     difficulty: "Intermediate",
-    tags: ["Loading", "Streaming", "Suspense"],
+    tags: ["Loading","Streaming","Suspense"],
     question: "Next.js-ে Loading UI এবং Streaming কীভাবে কাজ করে? User experience কীভাবে উন্নত করে?",
     answer: `
       <p>Streaming দিয়ে page-ের দ্রুত parts আগে দেখানো যায়, ধীর parts পরে load হলে replace হয়।</p>
@@ -1138,9 +1271,16 @@ async function DashboardPage() {
     id: "next-30",
     category: "Next.js",
     difficulty: "Advanced",
-    tags: ["Monorepo", "Turborepo", "Shared"],
+    tags: ["Monorepo","Turborepo","Shared"],
     question: "Next.js প্রজেক্টে Turborepo Monorepo কীভাবে সেটআপ করবেন?",
     answer: `
+      <p><strong>Turborepo</strong> একাধিক অ্যাপ ও শেয়ার্ড প্যাকেজকে একটি রিপোজিটরিতে রাখতে সাহায্য করে, এবং সবচেয়ে বড় সুবিধা হলো এর <strong>ক্যাশিং</strong>: যে প্যাকেজে কোনো পরিবর্তন হয়নি, তার build/test আবার চালানো হয় না।</p>
+      <ul>
+        <li><strong>apps/</strong> — ডিপ্লয়যোগ্য অ্যাপ (web, admin, docs)।</li>
+        <li><strong>packages/</strong> — শেয়ার্ড কোড (ui, config, types, api-client)।</li>
+        <li><strong>Remote cache:</strong> CI ও টিমের সবার মধ্যে বিল্ড ক্যাশ শেয়ার হয় — বড় টিমে বিল্ড টাইম নাটকীয়ভাবে কমে।</li>
+      </ul>
+      <p><code>turbo.json</code>-এ <code>dependsOn: ["^build"]</code> লিখলে Turborepo নিজেই নির্ভরতার ক্রম বুঝে আগে প্যাকেজ, পরে অ্যাপ বিল্ড করে।</p>
       <div class="code-box">
         <div class="code-header"><span>text</span><button class="copy-btn">Copy</button></div>
         <pre><code>my-turborepo/
@@ -1173,7 +1313,7 @@ async function DashboardPage() {
     id: "next-31",
     category: "Next.js",
     difficulty: "Intermediate",
-    tags: ["Redirects", "Rewrites", "Config"],
+    tags: ["Redirects","Rewrites","Config"],
     question: "Next.js-ে Redirects এবং Rewrites কীভাবে configure করবেন? পার্থক্য কী?",
     answer: `
       <ul>
@@ -1203,7 +1343,7 @@ module.exports = {
     id: "next-32",
     category: "Next.js",
     difficulty: "Advanced",
-    tags: ["WebSocket", "Real-time", "Socket.io"],
+    tags: ["WebSocket","Real-time","Socket.io"],
     question: "Next.js-ে Real-time features (WebSocket, Server-Sent Events) কীভাবে implement করবেন?",
     answer: `
       <p>Next.js-ের serverless nature-এ persistent WebSocket connections চ্যালেঞ্জিং। বিভিন্ন approach আছে।</p>
@@ -1232,7 +1372,7 @@ export async function GET() {
     id: "next-33",
     category: "Next.js",
     difficulty: "Advanced",
-    tags: ["Migration", "Pages to App Router"],
+    tags: ["Migration","Pages to App Router"],
     question: "Next.js Pages Router থেকে App Router-ে কীভাবে migrate করবেন? Step-by-step strategy কী?",
     answer: `
       <h4>Incremental Migration Strategy:</h4>
@@ -1262,7 +1402,7 @@ export default async function BlogPost({ params }) {
     id: "next-34",
     category: "Next.js",
     difficulty: "Advanced",
-    tags: ["State Management", "Server State", "Client State"],
+    tags: ["State Management","Server State","Client State"],
     question: "Next.js App Router-ে State Management strategy কী হওয়া উচিত? Server State vs Client State কীভাবে handle করবেন?",
     answer: `
       <h4>State Categories in Next.js:</h4>
@@ -1289,9 +1429,16 @@ const useUIStore = create((set) => ({
     id: "next-35",
     category: "Next.js",
     difficulty: "Beginner",
-    tags: ["Setup", "Create Next App", "Project Structure"],
+    tags: ["Setup","Create Next App","Project Structure"],
     question: "নতুন Next.js প্রজেক্ট কীভাবে শুরু করবেন? Recommended project structure কী?",
     answer: `
+      <p>নতুন প্রজেক্ট <code>create-next-app</code> দিয়ে শুরু করাই সবচেয়ে নিরাপদ — এটি TypeScript, ESLint, Tailwind ও App Router একসাথে সঠিকভাবে কনফিগার করে দেয়।</p>
+      <p>নিচের ফোল্ডার কাঠামোটি বেশিরভাগ প্রোডাকশন প্রজেক্টে ভালো কাজ করে। মূল নীতি — <strong>ফিচার অনুযায়ী ভাগ করুন, ফাইলের ধরন অনুযায়ী নয়</strong>।</p>
+      <ul>
+        <li><strong>Route Group <code>(auth)</code>:</strong> বন্ধনীর ফোল্ডার URL-এ যুক্ত হয় না, শুধু সংগঠনের জন্য এবং আলাদা layout দিতে কাজে লাগে।</li>
+        <li><strong><code>lib/</code>:</strong> ডাটাবেজ ক্লায়েন্ট, auth কনফিগ — যা UI নয়।</li>
+        <li><strong><code>components/ui</code> বনাম <code>components/features</code>:</strong> পুনঃব্যবহারযোগ্য ডাম্ব কম্পোনেন্ট আলাদা রাখলে ফিচার বাড়লেও কাঠামো এলোমেলো হয় না।</li>
+      </ul>
       <div class="code-box">
         <div class="code-header"><span>bash</span><button class="copy-btn">Copy</button></div>
         <pre><code>npx create-next-app@latest my-app \\
@@ -1319,7 +1466,7 @@ const useUIStore = create((set) => ({
     id: "next-36",
     category: "Next.js",
     difficulty: "Intermediate",
-    tags: ["Route Groups", "Organization"],
+    tags: ["Route Groups","Organization"],
     question: "Next.js Route Groups কী? কীভাবে URL-এ প্রভাব না ফেলে routes organize করবেন?",
     answer: `
       <p><strong>Route Groups</strong> <code>(parentheses)</code> দিয়ে তৈরি হয় এবং URL path-ে include হয় না। Routes organize করতে এবং আলাদা layouts দিতে ব্যবহৃত হয়।</p>
@@ -1343,9 +1490,17 @@ const useUIStore = create((set) => ({
     id: "next-37",
     category: "Next.js",
     difficulty: "Advanced",
-    tags: ["next.config", "Configuration", "Plugins"],
+    tags: ["next.config","Configuration","Plugins"],
     question: "next.config.js-ের গুরুত্বপূর্ণ configuration options কী কী?",
     answer: `
+      <p><code>next.config.js</code> হলো বিল্ড ও রানটাইম আচরণ নিয়ন্ত্রণের কেন্দ্রীয় জায়গা। প্রোডাকশনে যেগুলো সবচেয়ে বেশি দরকার হয়:</p>
+      <ul>
+        <li><strong><code>images.remotePatterns</code>:</strong> কোন ডোমেইন থেকে ছবি অপ্টিমাইজ করা যাবে তার শ্বেততালিকা। না দিলে বাইরের ছবিতে <code>next/image</code> এরর দেবে।</li>
+        <li><strong><code>headers()</code>:</strong> নিরাপত্তা হেডার সব রুটে একবারে বসানো।</li>
+        <li><strong><code>redirects()</code> / <code>rewrites()</code>:</strong> redirect ইউজারের URL বদলায় (SEO-তে দৃশ্যমান), rewrite ভেতরে ভেতরে প্রক্সি করে (URL অপরিবর্তিত থাকে)।</li>
+        <li><strong><code>output: 'standalone'</code>:</strong> Docker ইমেজের জন্য ন্যূনতম বিল্ড তৈরি করে — ইমেজ সাইজ অনেক কমে।</li>
+      </ul>
+      <p><strong>সতর্কতা:</strong> <code>typescript.ignoreBuildErrors</code> বা <code>eslint.ignoreDuringBuilds</code> দিয়ে এরর চাপা দেবেন না — এগুলো প্রোডাকশনে বাগ পার করে দেয়।</p>
       <div class="code-box">
         <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
         <pre><code>/** @type {import('next').NextConfig} */
@@ -1374,7 +1529,7 @@ module.exports = nextConfig;</code></pre>
     id: "next-38",
     category: "Next.js",
     difficulty: "Intermediate",
-    tags: ["Dynamic Import", "Client Only", "SSR"],
+    tags: ["Dynamic Import","Client Only","SSR"],
     question: "Next.js-ে Dynamic Import এবং Client-only components কীভাবে handle করবেন?",
     answer: `
       <div class="code-box">
@@ -1403,9 +1558,16 @@ function ClientOnly({ children }) {
     id: "next-39",
     category: "Next.js",
     difficulty: "Advanced",
-    tags: ["Email", "Notification", "Background Jobs"],
+    tags: ["Email","Notification","Background Jobs"],
     question: "Next.js-ে Email পাঠানো, Background Jobs এবং Cron Jobs কীভাবে implement করবেন?",
     answer: `
+      <p>এখানে মূল স্থাপত্যগত নীতিটি হলো: <strong>দীর্ঘ বা অনির্ভরযোগ্য কাজ কখনও রিকোয়েস্ট সাইকেলের ভেতরে করবেন না</strong>। ইউজারের রেসপন্স আটকে রেখে ইমেইল পাঠানো মানে SMTP ধীর হলে আপনার পেজও ধীর।</p>
+      <ul>
+        <li><strong>Email:</strong> Resend/SendGrid-এর মতো সার্ভিস ব্যবহার করুন। Server Action থেকে কল করলে অন্তত <code>await</code> না করে কিউতে পাঠানোই ভালো।</li>
+        <li><strong>Background Jobs:</strong> সার্ভারলেস ফাংশন টাইমআউটের (সাধারণত ১০–৬০ সেকেন্ড) মধ্যেই শেষ হতে হয়, তাই ভারী কাজের জন্য আলাদা ওয়ার্কার বা Inngest/Trigger.dev-এর মতো সার্ভিস দরকার।</li>
+        <li><strong>Cron Jobs:</strong> <code>vercel.json</code>-এ শিডিউল দিয়ে একটি Route Handler কল করানো যায়। সেই এন্ডপয়েন্ট অবশ্যই একটি সিক্রেট হেডার দিয়ে সুরক্ষিত করুন — নাহলে যে কেউ কল করতে পারবে।</li>
+      </ul>
+      <p><strong>Idempotency:</strong> ক্রন বা কিউ একই জব দুবার চালাতে পারে। তাই "এই ইউজারকে আজ ইমেইল পাঠানো হয়েছে কি না" ডাটাবেজে চিহ্নিত রাখুন।</p>
       <div class="code-box">
         <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
         <pre><code>// Email — Resend (recommended)
@@ -1435,9 +1597,21 @@ export async function GET(request) {
     id: "next-40",
     category: "Next.js",
     difficulty: "Advanced",
-    tags: ["Observability", "Logging", "Monitoring"],
+    tags: ["Observability","Logging","Monitoring"],
     question: "Production Next.js app-ে Logging, Error Tracking এবং Monitoring কীভাবে সেটআপ করবেন?",
     answer: `
+      <p>প্রোডাকশনে তিনটি আলাদা জিনিস দরকার, এবং একটি অন্যটির বিকল্প নয়:</p>
+      <ul>
+        <li><strong>Error Tracking (Sentry):</strong> স্ট্যাক ট্রেস, রিলিজ ভার্সন ও ইউজার কনটেক্সটসহ এক্সেপশন ধরে। সোর্স ম্যাপ আপলোড করুন, নাহলে minified কোডে ট্রেস অপাঠ্য থাকবে।</li>
+        <li><strong>Structured Logging:</strong> <code>console.log</code>-এর বদলে JSON লগ (pino ইত্যাদি) — ফিল্টার ও কুয়েরি করা যায়। প্রতিটি লগে <code>requestId</code> রাখুন।</li>
+        <li><strong>Monitoring / RUM:</strong> Core Web Vitals ও আসল ইউজারের latency। ল্যাব ডেটা (Lighthouse) আর বাস্তব ডেটা প্রায়ই আলাদা হয়।</li>
+      </ul>
+      <h4>Next.js-নির্দিষ্ট বিষয়</h4>
+      <ul>
+        <li><code>error.tsx</code> ও <code>global-error.tsx</code> দিয়ে UI ক্র্যাশ ধরুন এবং সেখান থেকেই রিপোর্ট পাঠান।</li>
+        <li>সার্ভার ও ক্লায়েন্ট — দুই দিকেই আলাদা করে ইনস্ট্রুমেন্ট করতে হয়।</li>
+        <li>লগে কখনও টোকেন, পাসওয়ার্ড বা সম্পূর্ণ রিকোয়েস্ট বডি রাখবেন না।</li>
+      </ul>
       <div class="code-box">
         <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
         <pre><code>// 1. Sentry — Error tracking
@@ -1465,7 +1639,7 @@ export async function GET() {
     id: "next-41",
     category: "Next.js",
     difficulty: "Intermediate",
-    tags: ["Cookies", "Headers", "Request"],
+    tags: ["Cookies","Headers","Request"],
     question: "Next.js Server Components-ে cookies এবং headers কীভাবে access ও modify করবেন?",
     answer: `
       <div class="code-box">
@@ -1500,9 +1674,19 @@ export async function setTheme(theme) {
     id: "next-42",
     category: "Next.js",
     difficulty: "Advanced",
-    tags: ["Stripe", "Payment", "E-commerce"],
+    tags: ["Stripe","Payment","E-commerce"],
     question: "Next.js-ে Payment Integration (Stripe) কীভাবে করবেন?",
     answer: `
+      <p>Stripe ইন্টিগ্রেশনের সবচেয়ে গুরুত্বপূর্ণ নিয়ম: <strong>পেমেন্ট সফল হয়েছে কি না তা কখনও ব্রাউজারের রিডাইরেক্ট দেখে সিদ্ধান্ত নেবেন না</strong>। ইউজার সফল পেজে পৌঁছানোর আগেই ব্রাউজার বন্ধ করতে পারেন, আবার সেই URL সরাসরি খুলেও ফেলতে পারেন।</p>
+      <p>সত্যের একমাত্র উৎস হলো <strong>Webhook</strong> — Stripe সার্ভার-টু-সার্ভার আপনাকে জানায় পেমেন্ট সম্পন্ন হয়েছে।</p>
+      <h4>অপরিহার্য নিয়মগুলো</h4>
+      <ul>
+        <li><strong>Webhook signature যাচাই করুন</strong> (<code>stripe.webhooks.constructEvent</code>) — নাহলে যে কেউ ভুয়া "পেমেন্ট সফল" পাঠাতে পারবে।</li>
+        <li>Signature যাচাইয়ের জন্য <strong>raw body</strong> দরকার — Next.js-এ বডি পার্স হওয়ার আগেই নিতে হয়।</li>
+        <li><strong>Idempotent থাকুন:</strong> Stripe একই ইভেন্ট একাধিকবার পাঠাতে পারে। <code>event.id</code> সংরক্ষণ করে ডুপ্লিকেট প্রসেসিং এড়ান।</li>
+        <li>দাম <strong>সবসময় সার্ভারে</strong> নির্ধারণ করুন — ক্লায়েন্টের পাঠানো amount কখনও বিশ্বাস করবেন না।</li>
+        <li>দ্রুত <code>200</code> ফেরত দিন; ভারী কাজ কিউতে পাঠান, নাহলে Stripe রিট্রাই করতে থাকবে।</li>
+      </ul>
       <div class="code-box">
         <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
         <pre><code>// Server Action — Checkout session create
@@ -1540,9 +1724,16 @@ export async function POST(request) {
     id: "next-43",
     category: "Next.js",
     difficulty: "Advanced",
-    tags: ["Pagination", "Infinite Scroll", "searchParams"],
+    tags: ["Pagination","Infinite Scroll","searchParams"],
     question: "Next.js App Router-ে Server-side Pagination এবং Infinite Scroll কীভাবে implement করবেন?",
     answer: `
+      <p>সার্ভার-সাইড পেজিনেশনে দুটি কৌশল আছে, এবং বড় ডেটাসেটে পছন্দটি গুরুত্বপূর্ণ:</p>
+      <ul>
+        <li><strong>Offset pagination</strong> (<code>LIMIT 20 OFFSET 10000</code>): সহজ ও পেজ নম্বর দেখানো যায়। কিন্তু ডাটাবেজকে ১০,০২০টি সারি পড়ে প্রথম ১০,০০০টি ফেলে দিতে হয় — গভীর পেজে ক্রমশ ধীর।</li>
+        <li><strong>Cursor pagination</strong> (<code>WHERE id &lt; lastId LIMIT 20</code>): সবসময় দ্রুত, কারণ ইনডেক্স দিয়ে সরাসরি জায়গায় চলে যায়। ইনফিনিট স্ক্রলের জন্য এটিই সঠিক পছন্দ। তাছাড়া নতুন আইটেম যোগ হলেও আইটেম <em>দুবার দেখানো বা বাদ পড়ার</em> সমস্যা হয় না।</li>
+      </ul>
+      <p>App Router-এ পেজ নম্বর <code>searchParams</code>-এ রাখলে URL শেয়ারযোগ্য ও bookmarkable থাকে, এবং সার্ভার কম্পোনেন্ট সরাসরি সেই অনুযায়ী ডেটা আনতে পারে।</p>
+      <p><strong>ইনফিনিট স্ক্রলের সতর্কতা:</strong> এটি SEO ও অ্যাক্সেসিবিলিটির জন্য খারাপ হতে পারে — ফুটার অগম্য হয়ে যায়। তাই "Load more" বোতাম বা পেজিনেশন fallback রাখা ভালো।</p>
       <div class="code-box">
         <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
         <pre><code>// Server-side Pagination with searchParams
@@ -1579,7 +1770,7 @@ function InfiniteProductList({ initialProducts }) {
     id: "next-44",
     category: "Next.js",
     difficulty: "Intermediate",
-    tags: ["Error", "Validation", "Zod"],
+    tags: ["Error","Validation","Zod"],
     question: "Next.js Server Actions-ে input validation এবং error handling কীভাবে করবেন?",
     answer: `
       <div class="code-box">
@@ -1619,7 +1810,7 @@ export async function createUser(prevState, formData) {
     id: "next-45",
     category: "Next.js",
     difficulty: "Advanced",
-    tags: ["Architecture", "Clean Code", "Best Practices"],
+    tags: ["Architecture","Clean Code","Best Practices"],
     question: "Senior/Lead Developer হিসেবে Next.js প্রজেক্টের Architecture best practices কী কী?",
     answer: `
       <h4>Architecture Principles:</h4>
@@ -1643,9 +1834,17 @@ export async function createUser(prevState, formData) {
     id: "next-46",
     category: "Next.js",
     difficulty: "Intermediate",
-    tags: ["usePathname", "useSearchParams", "Hooks"],
+    tags: ["usePathname","useSearchParams","Hooks"],
     question: "Next.js App Router-ের নতুন navigation hooks কী কী এবং কীভাবে ব্যবহার করবেন?",
     answer: `
+      <p>App Router-এ নেভিগেশন হুকগুলো <code>next/navigation</code> থেকে আসে (পুরনো <code>next/router</code> নয়)। এগুলো কেবল <strong>Client Component</strong>-এ ব্যবহারযোগ্য:</p>
+      <ul>
+        <li><strong><code>useRouter()</code>:</strong> <code>push</code>, <code>replace</code>, <code>refresh</code>, <code>back</code>। <code>router.refresh()</code> সার্ভার কম্পোনেন্ট পুনরায় ফেচ করে <em>ক্লায়েন্ট state না হারিয়ে</em> — মিউটেশনের পর খুব কাজে লাগে।</li>
+        <li><strong><code>usePathname()</code>:</strong> বর্তমান পাথ — অ্যাক্টিভ নেভিগেশন লিংক হাইলাইট করতে।</li>
+        <li><strong><code>useSearchParams()</code>:</strong> কুয়েরি স্ট্রিং পড়া (read-only)।</li>
+        <li><strong><code>useParams()</code>:</strong> ডায়নামিক রুটের প্যারামিটার।</li>
+      </ul>
+      <p><strong>জরুরি:</strong> <code>useSearchParams()</code> ব্যবহারকারী কম্পোনেন্ট স্ট্যাটিক রেন্ডারিং থেকে বাদ পড়ে যায়। পুরো পেজ ডায়নামিক হয়ে যাওয়া ঠেকাতে সেটিকে <code>&lt;Suspense&gt;</code> দিয়ে মুড়ে দিন।</p>
       <div class="code-box">
         <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
         <pre><code>'use client';
@@ -1675,9 +1874,18 @@ function NavigationExample() {
     id: "next-47",
     category: "Next.js",
     difficulty: "Advanced",
-    tags: ["PWA", "Service Worker", "Offline"],
+    tags: ["PWA","Service Worker","Offline"],
     question: "Next.js-কে Progressive Web App (PWA) কীভাবে বানাবেন?",
     answer: `
+      <p>PWA বানাতে মূলত দুটি জিনিস লাগে: একটি <strong>Web App Manifest</strong> (অ্যাপের নাম, আইকন, ডিসপ্লে মোড) এবং একটি <strong>Service Worker</strong> (অফলাইন ক্যাশিং ও ব্যাকগ্রাউন্ড কাজ)।</p>
+      <p>Next.js 13+ থেকে <code>app/manifest.ts</code> ফাইল এক্সপোর্ট করলেই ম্যানিফেস্ট তৈরি হয়ে যায়। Service Worker-এর জন্য <code>next-pwa</code> ব্যবহার করা যায়, যা ভেতরে Workbox দিয়ে ক্যাশিং কৌশল প্রয়োগ করে।</p>
+      <h4>বাস্তব সতর্কতা</h4>
+      <ul>
+        <li>ডেভেলপমেন্টে Service Worker <strong>বন্ধ রাখুন</strong> — নাহলে পুরনো ক্যাশ করা ফাইল দেখে ঘণ্টার পর ঘণ্টা বিভ্রান্ত হবেন।</li>
+        <li>SSR পেজ আক্রমণাত্মকভাবে ক্যাশ করলে ইউজার পুরনো ডেটা দেখবে — API কলে <code>NetworkFirst</code>, স্ট্যাটিক অ্যাসেটে <code>CacheFirst</code> ব্যবহার করুন।</li>
+        <li>PWA শুধু HTTPS-এ কাজ করে (localhost ব্যতিক্রম)।</li>
+        <li>iOS-এ PWA সাপোর্ট সীমিত — push notification ও ইনস্টল অভিজ্ঞতা Android-এর মতো নয়।</li>
+      </ul>
       <div class="code-box">
         <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
         <pre><code>// Install: npm install next-pwa
@@ -1707,9 +1915,16 @@ export default function manifest() {
     id: "next-48",
     category: "Next.js",
     difficulty: "Intermediate",
-    tags: ["Sitemap", "Robots", "SEO"],
+    tags: ["Sitemap","Robots","SEO"],
     question: "Next.js-ে Sitemap, Robots.txt এবং OpenGraph images কীভাবে generate করবেন?",
     answer: `
+      <p>Next.js এই তিনটি SEO ফাইলই কনভেনশন-ভিত্তিক ফাইল দিয়ে তৈরি করতে পারে — আলাদা কোনো লাইব্রেরি লাগে না:</p>
+      <ul>
+        <li><strong><code>app/sitemap.ts</code>:</strong> একটি অ্যারে রিটার্ন করলেই <code>/sitemap.xml</code> তৈরি হয়। ডাটাবেজ থেকে ডায়নামিক URL আনতে পারেন। ৫০,০০০-এর বেশি URL হলে sitemap index-এ ভাগ করতে হবে।</li>
+        <li><strong><code>app/robots.ts</code>:</strong> ক্রলারদের নিয়ম। স্টেজিং পরিবেশে অবশ্যই <code>disallow: '/'</code> দিন — নাহলে টেস্ট সাইট গুগলে ইনডেক্স হয়ে যাবে।</li>
+        <li><strong><code>opengraph-image.tsx</code>:</strong> <code>ImageResponse</code> দিয়ে সোশ্যাল শেয়ারের ছবি <em>রানটাইমে</em> তৈরি হয় — প্রতিটি ব্লগ পোস্টের জন্য হাতে ছবি বানাতে হয় না।</li>
+      </ul>
+      <p><strong>মনে রাখবেন:</strong> OG ছবির URL অবশ্যই সম্পূর্ণ (absolute) হতে হবে, তাই layout-এ <code>metadataBase</code> সেট করা জরুরি। সোশ্যাল ক্রলার JavaScript চালায় না — তাই মেটা ট্যাগ সার্ভার-সাইডেই থাকতে হবে।</p>
       <div class="code-box">
         <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
         <pre><code>// app/sitemap.ts
@@ -1739,7 +1954,7 @@ export default async function OGImage() {
     id: "next-49",
     category: "Next.js",
     difficulty: "Advanced",
-    tags: ["Interview", "System Design", "Architecture"],
+    tags: ["Interview","System Design","Architecture"],
     question: "Next.js দিয়ে E-commerce platform-ের System Design কীভাবে করবেন? (Senior/Lead Interview Question)",
     answer: `
       <h4>Rendering Strategy per Page:</h4>
@@ -1769,7 +1984,7 @@ export default async function OGImage() {
     id: "next-50",
     category: "Next.js",
     difficulty: "Advanced",
-    tags: ["Turbopack", "Compiler", "Future"],
+    tags: ["Turbopack","Compiler","Future"],
     question: "Next.js Turbopack কী? Webpack-এর চেয়ে কেন দ্রুত? Next.js-ের ভবিষ্যৎ কোথায় যাচ্ছে?",
     answer: `
       <p><strong>Turbopack</strong> হলো Vercel-এর তৈরি Rust-based bundler যা Webpack-কে replace করতে চায়।</p>
