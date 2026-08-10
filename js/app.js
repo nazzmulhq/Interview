@@ -133,17 +133,15 @@ function renderSidebarCategories() {
     { name: "Frontend", label: "🎨 Frontend" },
     { name: "Backend", label: "⚙️ Backend" },
     { name: "Full-Stack", label: "🌐 Full-Stack" },
-    { name: "System Design", label: "🏗️ System Design" },
-    { name: "Nginx", label: "🌐 Nginx & Load Balancer" },
-    { name: "RabbitMQ & Kafka", label: "🐇 RabbitMQ & Kafka" },
-    { name: "gRPC", label: "⚡ gRPC & Protocols" },
-    { name: "Elasticsearch", label: "🔍 Elasticsearch" },
-    { name: "Redis", label: "🔴 Redis & Caching" }
+    { name: "System Design", label: "🏗️ System Design" }
   ];
 
   sidebarList.innerHTML = categories.map(cat => {
     const isAll = cat.name === "All";
     const catQuestions = isAll ? allQuestions : allQuestions.filter(q => {
+      if (cat.name === "System Design") {
+        return ["System Design", "Nginx", "RabbitMQ & Kafka", "gRPC", "Elasticsearch", "Redis"].includes(q.category) || q.category.startsWith("System Design");
+      }
       if (cat.name === "Database") {
         return q.category === "Database" || q.category.startsWith("Database");
       }
