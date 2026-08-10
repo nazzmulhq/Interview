@@ -1054,7 +1054,7 @@ flushSync(() => setCount(c => c + 1)); // Immediate re-render</code></pre>
       <h4>React কীভাবে XSS ঠেকায় — ডিফল্ট আচরণ</h4>
       <div class="code-box">
         <div class="code-header"><span>jsx</span><button class="copy-btn">Copy</button></div>
-        <pre><code>const userInput = "<img src=x onerror='alert(1)'>";
+        <pre><code>const userInput = "&lt;img src=x onerror='alert(1)'&gt;";
 
 // ✅ নিরাপদ — React স্বয়ংক্রিয়ভাবে escape করে
 function Comment({ text }) {
