@@ -1153,7 +1153,7 @@ WHERE attributes->'address'->>'city' = 'Dhaka';</code></pre>
       <ul>
         <li><strong>Correlated Subquery (ঝুঁকিপূর্ণ):</strong> যে Subquery ভেতরের কোয়েরি চালানোর জন্য বাইরের ক্যোয়ারীর রো-এর ওপর নির্ভর করে। এটি বাইরের প্রতি সারির জন্য পুনরায় চালিত হতে পারে ($O(N \times M)$)। এটি সবচেয়ে ধীরগতির কৌশল।</li>
         <li><strong>JOINs (সর্বোত্তম পারফরম্যান্স):</strong> ক্যোয়ারী প্ল্যানারদের (Postgres/MySQL) জন্য অপটিমাইজ করা সবচেয়ে সহজ। Hash Join বা Merge Join ব্যবহার করে একবারে পুরো ডেটাসেট ইন-মেমোরিতে প্রসেস করে।</li>
-        <li><strong>CTE (WITH Clause - Readability & Modularization):</strong> কোড সুন্দর ও মডুলার করে। <strong>PostgreSQL 12-এর পর থেকে</strong> ক্যোয়ারী প্ল্যানার CTE-কে স্বয়ংক্রিয়ভাবে Inline Query হিসেবে জেনারেট করে JOIN-এর সমান স্পিড দেয়। তবে `MATERIALIZED` কি-ওয়ার্ড দিলে CTE রেজাল্ট ইন-মেমোরি টেম্প টেবিলে সেভ করে রাখা হয়।</li>
+        <li><strong>CTE (WITH Clause - Readability & Modularization):</strong> কোড সুন্দর ও মডুলার করে। <strong>PostgreSQL 12-এর পর থেকে</strong> ক্যোয়ারী প্ল্যানার CTE-কে স্বয়ংক্রিয়ভাবে Inline Query হিসেবে জেনারেট করে JOIN-এর সমান স্পিড দেয়। তবে <code>MATERIALIZED</code> কি-ওয়ার্ড দিলে CTE রেজাল্ট ইন-মেমোরি টেম্প টেবিলে সেভ করে রাখা হয়।</li>
       </ul>
 
       <h4>২. কখন কোনটি বেছে নেবেন?</h4>
@@ -1336,7 +1336,7 @@ ORDER BY breadcrumb_path;
       <ul>
         <li><strong>Session Pooling:</strong> ক্লায়েন্ট কানেক্ট করার পর ডিসকানেক্ট না করা পর্যন্ত ডাটাবেজ কানেকশন ধরে রাখে। (কম ইফিসিয়েন্ট)।</li>
         <li><strong>Transaction Pooling (সর্বোত্তম):</strong> ক্লায়েন্ট কেবল একটি ট্রানজেকশন (<code>BEGIN</code> to <code>COMMIT</code>) চলার সময় ডাটাবেজ কানেকশন পায়। ট্রানজেকশন শেষ হওয়ামাত্র কানেকশন পুলে ফিরে যায়। হাজার হাজার অ্যাপ কানেকশনকে মাত্র ৫০টি মূল ডাটাবেজ কানেকশন দিয়ে হ্যান্ডেল করা যায়।</li>
-        <li><strong>Statement Pooling:</strong> প্রতিটি এক��রে, তখন মূল ডাটা পেজ সরাসরি ডিস্কে রাইট হয় না—বরং মেমোরির **Buffer Pool**-এ পরিবর্তন হয় (Dirty Pages)। কিন্তু ডিস্কে ডাটা স্থায়ী করতে **Checkpointer** এবং **WAL Logger** সাহায্য করে।</p>
+        <li><strong>Statement Pooling:</strong> প্রতিটি এক��রে, তখন মূল ডাটা পেজ সরাসরি ডিস্কে রাইট হয় না—বরং মেমোরির **Buffer Pool**-এ পরিবর্তন হয় (Dirty Pages)। কিন্তু ডিস্কে ডাটা স্থায়ী করতে **Checkpointer** এবং **WAL Logger** সাহায্য করে।</p>
       
       <h4>১. Checkpoint প্রসেস কী?</h4>
       <p><strong>Checkpoint</strong> হলো ব্যাকগ্রাউন্ডে ঘটা একটি নির্দিষ্ট সময়পরপর ঘটনা, যেখানে PostgreSQL মেমোরিতে জমে থাকা সকল Dirty Pages-কে ডিস্কের মূল ফাইলগুলোতে (Heap Files) সিঙ্ক করে লিখে দেয় এবং WAL ফাইলের ভেতরে একটি সেভপয়েন্ট রেকর্ড (Checkpoint LSN) চিহ্নিত করে।</p>
@@ -1993,118 +1993,6 @@ CREATE TABLE orders (
     tags: ["Joins", "Nested Loop", "Hash Join", "Merge Join"],
     question: "Database Join Algorithms: Nested Loop Join vs Hash Join vs Merge Join কীভাবে কাজ করে?",
     answer: `
-      <p>ডাটাবেজ ক্যোয়ারী অপটিমাইজার (Query Optimizer) টেবিলগুলোর সাইজ, ইনডেক্সের উপস্থিতি এবং ডাটা সর্টিং স্ট্যাটাসের ওপর ভিত্তি করে সবচেয়ে কার্যকর <strong>Join Algorithm</strong> স্বয়ংক্রিয়ভাবে সিলেক্ট করে। ৩টি প্রধান অ্যালগরিদমের অভ্যন্তরীণ মেকানিজম নিম্নে আলোচনা করা হলো:</p>
-      
-      <h4>১. Nested Loop Join (ছোট ডাটা ও ইনডেক্স ভিত্তিক):</h4>
-      <p>এটি সাধারণ ব্রুট-ফোর্স (Loop inside Loop) পদ্ধতির মতো কাজ করে। বাইরের টেবিলের (Outer Table / Driving Table) প্রতিটি সারির জন্য ভিতরের টেবিলের (Inner Table) সব সারি স্ক্যান করা হয়।</p>
-      <ul>
-        <li><strong>টাইম কমপ্লেক্সিটি:</strong> $O(N \times M)$ — কিন্তু ভিতরের টেবিলে B-Tree Index থাকলে তা কমে দাঁড়ায় $O(N \log M)$।</li>
-        <li><strong>কখন ব্যবহৃত হয়:</strong> যখন Outer Table খুব ছোট হয় এবং Inner Table-এর Join-Key তে উপযুক্ত Index থাকে।</li>
-      </ul>
-
-      <h4>২. Hash Join (বড় আন-সর্টেড ডাটার জন্য সেরা):</h4>
-      <p>এটি ২টি ধাপে কাজ করে: **Build Phase** এবং **Probe Phase**।</p>
-      <ul>
-        <li><strong>Build Phase:</strong> ছোট টেবিলটিকে রিড করে মেমোরিতে (Work Memory) Join-Key এর ওপর ভিত্তি করে একটি <strong>In-Memory Hash Table</strong> তৈরি করে।</li>
-        <li><strong>Probe Phase:</strong> বড় টেবিলটি স্ক্যান করা হয় এবং প্রতিটি সারির Join-Key কে হ্যাশ ফাংশনে পাঠিয়ে মেমোরিতে থাকা Hash Table-এর সাথে দ্রুত ম্যাচিং খুঁজে বের করা হয়।</li>
-        <li><strong>টাইম কমপ্লেক্সিটি:</strong> $O(N + M)$ — অত্যন্ত ফাস্ট।</li>
-        <li><strong>কখন ব্যবহৃত হয়:</strong> যখন উভয় টেবিল অনেক বড়, জয়েন কলামে কোনো ইনডেক্স নেই এবং পর্যাপ্ত RAM মেমোরি বিদ্যমান।</li>
-      </ul>
-
-      <h4>৩. Merge Join / Sort-Merge Join (সর্টেড ডাটার জন্য সেরা):</h4>
-      <p>যদি দুটি টেবিলই Join-Key অনুযায়ী আগে থেকেই সর্টেড (Sorted) থাকে, তবে ২টি পয়েন্টার ব্যবহার করে সমান্তরালভাবে ১ পাসে ডাটা মার্জ করা হয় (ঠিক Merge Sort-এর মতোই)।</p>
-      <ul>
-        <li><strong>টাইম কমপ্লেক্সিটি:</strong> সর্ট করা থাকলে $O(N + M)$। সর্ট করা না থাকলে $O(N \log N + M \log M)$।</li>
-        <li><strong>কখন ব্যবহৃত হয়:</strong> যখন উভয় টেবিলের Join-Key তে B-Tree Index থাকে (যা আগে থেকেই সর্টেড) অথবা ক্যোয়ারীতে <code>ORDER BY</code> জয়েন কী-এর সাথে মিলে যায়।</li>
-      </ul>
-
-      <h4>অ্যালগরিদম সমূহের তুলনা ও ভিজ্যুয়াল ফ্লো:</h4>
-      <div class="code-box">
-        <div class="code-header"><span>text</span><button class="copy-btn">Copy</button></div>
-        <pre><code>[ Hash Join Algorithm ]
-Step 1 (Build):  Small Table A ──(Hash Function)──► [ In-Memory Hash Table ]
-Step 2 (Probe):  Large Table B ──(Hash Lookup)────► Match Found! ──► Result Set
-
-[ Merge Join Algorithm ]
-Sorted Table A: [10, 20, 30, 40] ──┐
-                                   ├──► (Dual Pointer Scan) ──► Joined Output
-Sorted Table B: [10, 25, 30, 50] ──┘</code></pre>
-      </div>
-
-      <div class="code-box">
-        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
-        <pre><code>-- Forcing/Observing Join Algorithms in PostgreSQL via EXPLAIN ANALYZE
-EXPLAIN ANALYZE 
-SELECT o.id, u.name 
-FROM orders o 
-JOIN users u ON o.user_id = u.id;
-
-/* Planner Decision Breakdown:
-   - If 'users' has B-Tree index on 'id' & 'orders' is small -> Uses Nested Loop Join
-   - If both tables are huge with no indexes -> Uses Hash Join
-   - If both tables are sorted by user_id via Index -> Uses Merge Join
-*/</code></pre>
-      </div>
-    `
-  },
-  {
-    id: "db-42",
-    category: "Database",
-    difficulty: "Intermediate",
-    tags: ["PostgreSQL", "pg_stat_activity", "pg_stat_statements", "Slow Queries"],
-    question: "PostgreSQL pg_stat_activity এবং pg_stat_statements দিয়ে স্লো কোয়েরি ও ডেডলক কীভাবে চিহ্নিত করবেন?",
-    answer: `
-      <p>প্রোডাকশন PostgreSQL সার্ভারে ডাটাবেজের হেলথ মনিটরিং, ডেডলক ট্রাবলশুটিং এবং স্লো কোয়েরি পারফরম্যান্স টিউনিং করার জন্য ২টি বিল্ট-ইন ভিউ ব্যবহার করা হয়: <code>pg_stat_activity</code> এবং <code>pg_stat_statements</code>।</p>
-      
-      <h4>১. pg_stat_activity (রিয়েল-টাইম কানেকশন ও লক মনিটরিং):</h4>
-      <p>এটি ডাটাবেজের লাইভ স্ট্যাটাস দেখায়। বর্তমানে কোন প্রসেস (PID) কোন কোয়েরি রান করছে, কত সময় ধরে রান করছে এবং কোন কোয়েরি অন্য কোয়েরিকে লকিং করে আটকে রেখেছে তা এখান থেকে সরাসরি দেখা যায়।</p>
-
-      <h4>২. pg_stat_statements (ঐতিহাসিক পারফরম্যান্স মেট্রিক্স):</h4>
-      <p>এটি ডাটাবেজে চালিত সমস্ত কোয়েরির ঐতিহাসিক পরিসংখ্যান (Aggregated Historical Metrics) জমিয়ে রাখে। সবচেয়ে বেশি সময় নেওয়া কোয়েরি, সবচেয়ে বেশি CPU/Disk I/O ব্যবহার করা কোয়েরি চিহ্নিত করতে এটি অপরিহার্য।</p>
-
-      <h4>প্র্যাকটিক্যাল মনিটরিং SQL স্নিপেটস:</h4>
-      <div class="code-box">
-        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
-        <pre><code>-- 1. Identify Currently Running Slow Queries (> 5 Seconds)
-SELECT 
-    pid, 
-    usename, 
-    client_addr, 
-    now() - query_start AS duration, 
-    state, 
-    query 
-FROM pg_stat_activity 
-WHERE state != 'idle' AND (now() - query_start) > interval '5 seconds'
-ORDER BY duration DESC;
-
--- 2. Identify Deadlocks and Blocked Queries (Lock Tree)
-SELECT
-    blocked_locks.pid     AS blocked_pid,
-    blocked_activity.usename  AS blocked_user,
-    blocking_locks.pid    AS blocking_pid,
-    blocking_activity.usename AS blocking_user,
-    blocked_activity.query    AS blocked_statement,
-    blocking_activity.query   AS blocking_statement
-FROM  pg_catalog.pg_locks         blocked_locks
-JOIN pg_catalog.pg_stat_activity blocked_activity ON blocked_activity.pid = blocked_locks.pid
-JOIN pg_catalog.pg_locks         blocking_locks 
-    ON blocking_locks.locktype = blocked_locks.locktype
-    AND blocking_locks.database IS NOT DISTINCT FROM blocked_locks.database
-    AND blocking_locks.relation IS NOT DISTINCT FROM blocked_locks.relation
-    AND blocking_locks.page IS NOT DISTINCT FROM blocked_locks.page
-    AND blocking_locks.tuple IS NOT DISTINCT FROM blocked_locks.tuple
-    AND blocking_locks.virtualxid IS NOT DISTINCT FROM blocked_locks.virtualxid
-    AND blocking_locks.transactionid IS NOT DISTINCT FROM blocked_locks.transactionid
-    AND blocking_locks.classid IS NOT DISTINCT FROM blocked_locks.classid
-    ```javascript
-const databaseQuestions = [
-  {
-    id: "db-41",
-    category: "Database",
-    difficulty: "Advanced",
-    tags: ["Joins", "Nested Loop", "Hash Join", "Merge Join"],
-    question: "Database Join Algorithms: Nested Loop Join vs Hash Join vs Merge Join কীভাবে কাজ করে?",
-    answer: `
       <p>SQL ক্যোয়ারী রান করার সময় ডাটাবেজ ক্যোয়ারী প্ল্যানার (Query Planner) টেবিলের ডাটা সাইজ, ইনডেক্সিং এবং memory limits-এর ওপর ভিত্তি করে ৩টি মূল অভ্যন্তরীণ অ্যালগরিদমের একটি বেছে নিয়ে টেবিল জয়েন সম্পন্ন করে।</p>
       
       <h4>১. অ্যালগরিদমসমূহের অভ্যন্তরীণ মেকানিজম ও তুলনা:</h4>
@@ -2321,7 +2209,7 @@ ORDER BY avg_salary DESC;                 -- 4. Sorts final result set</code></p
         <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
         <pre><code>// ❌ VULNERABLE CODE: Direct String Interpolation
 const userInput = "' OR '1'='1"; 
-const query = `SELECT * FROM users WHERE email = '${userInput}' AND password = '${password}'`;
+const query = 'SELECT * FROM users WHERE email = '\${userInput}' AND password = '\${password}'';
 
 // Resulting Executed SQL AST Parser Tree:
 // SELECT * FROM users WHERE email = '' OR '1'='1' AND password = '...'
