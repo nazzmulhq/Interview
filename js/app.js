@@ -140,7 +140,7 @@ function renderSidebarCategories() {
     const isAll = cat.name === "All";
     const catQuestions = isAll ? allQuestions : allQuestions.filter(q => {
       if (cat.name === "System Design") {
-        return ["System Design", "Nginx", "RabbitMQ & Kafka", "gRPC", "Elasticsearch", "Redis"].includes(q.category) || q.category.startsWith("System Design");
+        return ["System Design"].includes(q.category) || q.category.startsWith("System Design");
       }
       if (cat.name === "Database") {
         return q.category === "Database" || q.category.startsWith("Database");
