@@ -25,6 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (typeof databaseQuestions !== 'undefined') allQuestions.push(...databaseQuestions);
   if (typeof systemDesignInfraQuestions !== 'undefined') allQuestions.push(...systemDesignInfraQuestions);
   if (typeof seniorFullstackQuestions !== 'undefined') allQuestions.push(...seniorFullstackQuestions.map(q => ({...q, category: `Full-Stack - ${q.category}`})));
+  if (typeof pythonQuestions !== 'undefined') allQuestions.push(...pythonQuestions);
 
   // Initialize UI & Sidebar Sublists
   initTheme();
@@ -126,6 +127,7 @@ function renderSidebarCategories() {
     { name: "Database", label: "🛢️ Database (SQL)" },
     { name: "React.js", label: "⚛️ React.js" },
     { name: "Next.js", label: "▲ Next.js" },
+    { name: "Python", label: "🐍 Python" },
     { name: "Full-Stack", label: "🌐 Full-Stack" },
     { name: "System Design", label: "🏗️ System Design" }
   ];
