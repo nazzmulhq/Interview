@@ -1,7 +1,7 @@
 const nodejsQuestions = [
   {
     id: "node-1",
-    category: "Node.js Architecture & Execution Engine",
+    category: "Node.js",
     difficulty: "Advanced",
     tags: ["Execution Flow", "V8 Engine", "Libuv", "Event Loop", "Call Stack"],
     question: "How does the Node.js execution process work under the hood from startup to process termination?",
@@ -48,7 +48,7 @@ const nodejsQuestions = [
   },
   {
     id: "node-2",
-    category: "Event Loop & Control Flow",
+    category: "Node.js",
     difficulty: "Advanced",
     tags: ["process.nextTick", "Event Loop Starvation", "Microtasks", "Macrotasks"],
     question: "What is Event Loop Starvation, and how can recursive calls to process.nextTick() cause it?",
@@ -95,7 +95,7 @@ recursiveTick(); // Starts starving the Event Loop immediately</code></pre>
   },
   {
     id: "node-3",
-    category: "Event Loop & Timers Execution",
+    category: "Node.js",
     difficulty: "Intermediate",
     tags: ["setImmediate", "setTimeout", "Poll Phase", "I/O Callbacks"],
     question: "Why is the execution order between setTimeout(fn, 0) and setImmediate(fn) non-deterministic in the global scope, but deterministic inside an I/O callback?",
@@ -145,7 +145,7 @@ fs.readFile(__filename, () => {
   },
   {
     id: "node-4",
-    category: "Memory Management & Garbage Collection",
+    category: "Node.js",
     difficulty: "Advanced",
     tags: ["V8 Heap", "Garbage Collection", "Generational GC", "Scavenger", "Mark-Sweep"],
     question: "How is the V8 Heap Memory structured in Node.js, and how do the Scavenger and Mark-Sweep-Compact algorithms manage it?",
@@ -194,7 +194,7 @@ fs.readFile(__filename, () => {
   },
   {
     id: "node-5",
-    category: "Memory Management & Profiling",
+    category: "Node.js",
     difficulty: "Advanced",
     tags: ["Memory Leak", "v8.getHeapSnapshot", "Chrome DevTools", "Debugging"],
     question: "What are the primary causes of Memory Leaks in Node.js, and how do you diagnose and debug them in a production environment?",
@@ -216,8 +216,8 @@ fs.readFile(__filename, () => {
       <div class="code-box">
         <div class="code-header"><span>javascript</span></div>
         <pre><code>const mem = process.memoryUsage();
-console.log(`Heap Used: ${(mem.heapUsed / 1024 / 1024).toFixed(2)} MB`);
-console.log(`External (Off-Heap Buffers): ${(mem.external / 1024 / 1024).toFixed(2)} MB`);</code></pre>
+console.log(\`Heap Used: \${(mem.heapUsed / 1024 / 1024).toFixed(2)} MB\`);
+console.log(\`External (Off-Heap Buffers): \${(mem.external / 1024 / 1024).toFixed(2)} MB\`);</code></pre>
       </div>
 
       <h5>Step 2: Generate Heap Snapshots in Production</h5>
@@ -234,7 +234,7 @@ function captureHeapSnapshot(filename) {
 }
 
 // Capture baseline snapshot at startup, and another during high memory stress
-captureHeapSnapshot(`./snapshot-${Date.now()}.heapsnapshot`);</code></pre>
+captureHeapSnapshot(\`./snapshot-\${Date.now()}.heapsnapshot\`);</code></pre>
       </div>
 
       <h5>Step 3: Analyze via Chrome DevTools</h5>
@@ -249,7 +249,7 @@ captureHeapSnapshot(`./snapshot-${Date.now()}.heapsnapshot`);</code></pre>
   },
   {
     id: "node-6",
-    category: "Multiprocessing & Concurrency",
+    category: "Node.js",
     difficulty: "Advanced",
     tags: ["Cluster", "Worker Threads", "Child Process", "Architecture Comparison"],
     question: "Compare Cluster Module, Worker Threads, and Child Process (fork). Which one should be selected for scaling HTTP servers vs CPU-intensive tasks?",
@@ -317,7 +317,7 @@ captureHeapSnapshot(`./snapshot-${Date.now()}.heapsnapshot`);</code></pre>
   },
   {
     id: "node-7",
-    category: "Libuv Architecture & Thread Pool",
+    category: "Node.js",
     difficulty: "Advanced",
     tags: ["Libuv", "UV_THREADPOOL_SIZE", "Asynchronous I/O", "Concurrency Bottlenecks"],
     question: "What is UV_THREADPOOL_SIZE, which operations rely on Libuv's thread pool, and how do you diagnose thread pool bottlenecks?",
@@ -357,7 +357,7 @@ node server.js</code></pre>
   },
   {
     id: "node-8",
-    category: "Streams & Memory Optimization",
+    category: "Node.js",
     difficulty: "Advanced",
     tags: ["Streams", "Backpressure", "highWaterMark", "stream.pipeline"],
     question: "What is Backpressure in Node.js Streams, why does highWaterMark matter, and how does stream.pipeline() prevent memory leaks?",
@@ -412,7 +412,7 @@ async function compressFileSecurely() {
   },
   {
     id: "node-9",
-    category: "Microservices Architecture & Messaging",
+    category: "Node.js",
     difficulty: "Advanced",
     tags: ["Event-Driven Architecture", "Microservices", "Message Broker", "Decoupling"],
     question: "How do you design an Event-Driven Layered Microservices Architecture using Node.js and Message Brokers?",
@@ -474,7 +474,7 @@ messageBroker.subscribe('order.events', async (event) => {
   },
   {
     id: "node-10",
-    category: "Production Hardening & System Resilience",
+    category: "Node.js",
     difficulty: "Advanced",
     tags: ["Graceful Shutdown", "SIGTERM", "Kubernetes", "Production Readiness"],
     question: "Why is handling SIGTERM/SIGINT signals critical in containerized Node.js environments (Docker/Kubernetes), and how do you implement a production-grade Graceful Shutdown?",
@@ -520,7 +520,7 @@ app.get('/health/readiness', (req, res) => {
 });
 
 async function gracefulShutdown(signal) {
-  console.log(`[${signal}] Received. Initiating graceful shutdown...`);
+  console.log(\`[\${signal}] Received. Initiating graceful shutdown...\`);
   isShuttingDown = true;
 
   // 1. Force kill timeout fallback if cleanup gets stuck
@@ -561,7 +561,7 @@ process.on('SIGINT', () => gracefulShutdown('SIGINT'));</code></pre>
   },
   {
     id: "node-11",
-    category: "Security & Hardening",
+    category: "Node.js",
     difficulty: "Advanced",
     tags: ["ReDoS", "Regular Expressions", "Event Loop Blocking", "CPU Starvation"],
     question: "What is Regular Expression Denial of Service (ReDoS), how does Catastrophic Backtracking block the Event Loop, and how do you prevent it?",
@@ -606,7 +606,7 @@ console.timeEnd('ReDoS'); // Takes several SECONDS of 100% CPU utilization on th
   },
   {
     id: "node-12",
-    category: "Diagnostics & Observability",
+    category: "Node.js",
     difficulty: "Advanced",
     tags: ["AsyncLocalStorage", "async_hooks", "Context Propagation", "Distributed Tracing"],
     question: "How does AsyncLocalStorage work under the hood, and how do you use it for request context propagation without drilling parameters?",
@@ -646,7 +646,7 @@ async function executeDatabaseQuery() {
   const store = asyncLocalStorage.getStore();
   const requestId = store ? store.requestId : 'N/A';
   
-  console.log(`[ReqID: ${requestId}] Executing SQL query for user ${store?.userId}`);
+  console.log(\`[ReqID: \${requestId}] Executing SQL query for user \${store?.userId}\`);
   // Database execution logic...
 }</code></pre>
       </div>
@@ -660,7 +660,7 @@ async function executeDatabaseQuery() {
   },
   {
     id: "node-13",
-    category: "HTTP Architecture & Networking",
+    category: "Node.js",
     difficulty: "Intermediate",
     tags: ["HTTP Keep-Alive", "Socket Reuse", "http.Agent", "Connection Pooling"],
     question: "How does HTTP Keep-Alive connection pooling work in Node.js client agents, and how does it reduce external API latency?",
@@ -709,7 +709,7 @@ async function fetchOrders() {
   },
   {
     id: "node-14",
-    category: "Diagnostics & Performance Measurement",
+    category: "Node.js",
     difficulty: "Advanced",
     tags: ["perf_hooks", "PerformanceObserver", "Event Loop Delay", "Sub-millisecond Timing"],
     question: "How do you measure high-precision latency and monitor Event Loop Delay using node:perf_hooks?",
@@ -729,7 +729,7 @@ async function fetchOrders() {
 const obs = new PerformanceObserver((items) => {
   const entries = items.getEntries();
   entries.forEach((entry) => {
-    console.log(`[METRIC] ${entry.name}: ${entry.duration.toFixed(3)} ms`);
+    console.log(\`[METRIC] \${entry.name}: \${entry.duration.toFixed(3)} ms\`);
   });
 });
 
@@ -761,9 +761,9 @@ h.enable();
 
 // Periodically export latency percentiles to monitoring systems (e.g., Prometheus)
 setInterval(() => {
-  console.log(`Event Loop Delay - Mean: ${(h.mean / 1e6).toFixed(2)} ms`);
-  console.log(`Event Loop Delay - P95: ${(h.percentile(95) / 1e6).toFixed(2)} ms`);
-  console.log(`Event Loop Delay - P99: ${(h.percentile(99) / 1e6).toFixed(2)} ms`);
+  console.log(\`Event Loop Delay - Mean: \${(h.mean / 1e6).toFixed(2)} ms\`);
+  console.log(\`Event Loop Delay - P95: \${(h.percentile(95) / 1e6).toFixed(2)} ms\`);
+  console.log(\`Event Loop Delay - P99: \${(h.percentile(99) / 1e6).toFixed(2)} ms\`);
   h.reset();
 }, 5000);</code></pre>
       </div>
@@ -771,7 +771,7 @@ setInterval(() => {
   },
   {
     id: "node-15",
-    category: "Cryptography & Security",
+    category: "Node.js",
     difficulty: "Intermediate",
     tags: ["Crypto", "AES-256-GCM", "Scrypt", "Authenticated Encryption"],
     question: "How do you securely hash passwords and perform authenticated symmetric encryption (AES-256-GCM) using Node.js's native crypto module?",
@@ -795,7 +795,7 @@ async function hashPassword(password) {
   // Derive a 64-byte key using scrypt
   const derivedKey = await scryptAsync(password, salt, 64);
   
-  return `${salt}:${derivedKey.toString('hex')}`;
+  return \`\${salt}:\${derivedKey.toString('hex')}\`;
 }
 
 async function verifyPassword(password, storedHash) {
@@ -854,7 +854,7 @@ function decrypt(encryptedObj) {
   },
   {
     id: "node-16",
-    category: "Networking & DNS Resolution",
+    category: "Node.js",
     difficulty: "Advanced",
     tags: ["dns.lookup", "dns.resolve", "Libuv Thread Pool Bottlenecks", "c-ares"],
     question: "What is the critical implementation difference between dns.lookup() and dns.resolve(), and how can dns.lookup() cause production performance degradation?",
@@ -914,7 +914,7 @@ function decrypt(encryptedObj) {
   },
   {
     id: "node-17",
-    category: "Module System & Internals",
+    category: "Node.js",
     difficulty: "Intermediate",
     tags: ["require.cache", "CommonJS", "ES Modules", "Singleton Pattern"],
     question: "How does require.cache work in CommonJS, how does it enforce module singletons, and how do you clear it safely?",
@@ -973,7 +973,7 @@ console.log(require.cache[absolutePath]);
   },
   {
     id: "node-18",
-    category: "Security & Sandbox",
+    category: "Node.js",
     difficulty: "Advanced",
     tags: ["Security", "eval", "RCE", "VM Module", "isolated-vm"],
     question: "Why are eval() and new Function() catastrophic security risks in Node.js, and how do you execute untrusted user code safely?",
@@ -1003,11 +1003,11 @@ app.post('/calculate', (req, res) => {
         <pre><code>const vm = require('vm');
 
 // Malicious payload escaping the vm context
-const untrustedCode = `
+const untrustedCode = \`
   const ForeignConstructor = this.constructor.constructor;
   const processObj = ForeignConstructor('return process')();
   processObj.mainModule.require('child_process').execSync('whoami').toString();
-`;
+\`;
 
 // Executes malicious host process commands despite vm context!
 vm.runInNewContext(untrustedCode);</code></pre>
@@ -1023,7 +1023,7 @@ vm.runInNewContext(untrustedCode);</code></pre>
   },
   {
     id: "node-19",
-    category: "Process Management & Deployment",
+    category: "Node.js",
     difficulty: "Intermediate",
     tags: ["PM2", "Zero-Downtime Reload", "Cluster Mode", "State Management"],
     question: "How does PM2 achieve Zero-Downtime Reloads in Cluster Mode, and what is the difference between reload and restart?",
@@ -1064,7 +1064,7 @@ pm2 reload core-api</code></pre>
   },
   {
     id: "node-20",
-    category: "Diagnostics & Crash Analysis",
+    category: "Node.js",
     difficulty: "Advanced",
     tags: ["process.report", "Diagnostic Reports", "Crash Dumps", "Post-Mortem Analysis"],
     question: "What are Node.js Diagnostic Reports (process.report), and how do you use them for post-mortem analysis of production crashes?",
@@ -1116,7 +1116,7 @@ kill -USR2 <pid></code></pre>
   },
   {
     id: "node-21",
-    category: "Modern Node.js Features & Web APIs",
+    category: "Node.js",
     difficulty: "Intermediate",
     tags: ["Native Testing", "node:test", "Mocking", "Assertions"],
     question: "How do you use Node.js's native test runner (node:test) and built-in mocking API without third-party frameworks like Jest or Mocha?",
@@ -1185,7 +1185,7 @@ node --test --watch</code></pre>
   },
   {
     id: "node-22",
-    category: "Modern Node.js Features & Security",
+    category: "Node.js",
     difficulty: "Advanced",
     tags: ["Permission Model", "Sandboxing", "--experimental-permission", "Security Hardening"],
     question: "How does Node.js's Permission Model work, and how do you restrict system resources like file access and child processes?",
@@ -1216,7 +1216,7 @@ node --experimental-permission \
         <pre><code>if (process.permission) {
   // Returns true if read access to specific directory is explicitly granted
   const canReadData = process.permission.has('fs.read', '/app/data/users.json');
-  console.log(`Read Permission: ${canReadData}`);
+  console.log(\`Read Permission: \${canReadData}\`);
 
   // Check if spawning child processes is allowed
   const canSpawnProcess = process.permission.has('child-process');
@@ -1235,7 +1235,7 @@ node --experimental-permission \
   },
   {
     id: "node-23",
-    category: "Architecture & Dependency Management",
+    category: "Node.js",
     difficulty: "Intermediate",
     tags: ["Monorepo", "pnpm Workspaces", "Hoisting", "Phantom Dependencies"],
     question: "How do Workspace Package Managers (like pnpm) resolve Phantom Dependencies and Symlink strictness in Monorepo architectures?",
@@ -1289,7 +1289,7 @@ packages:
   },
   {
     id: "node-24",
-    category: "HTTP Architecture & Compression",
+    category: "Node.js",
     difficulty: "Intermediate",
     tags: ["Response Compression", "Gzip", "Brotli", "CPU Overhead", "Reverse Proxy"],
     question: "How does dynamic response compression work in Node.js, and why should compression be offloaded to reverse proxies (Nginx/CDN)?",
@@ -1335,7 +1335,7 @@ app.use(compression({
   },
   {
     id: "node-25",
-    category: "System Monitoring & Observability",
+    category: "Node.js",
     difficulty: "Advanced",
     tags: ["diagnostics_channel", "Telemetry", "OpenTelemetry", "Zero-Invasive Monitoring"],
     question: "How does the node:diagnostics_channel API work, and how does it enable zero-overhead telemetry without monkey-patching?",
@@ -1359,8 +1359,8 @@ const dbQueryChannel = diagnostics_channel.channel('db:query:execution');
 
 // 2. Subscriber Layer (e.g., APM or Telemetry Collector)
 diagnostics_channel.subscribe('db:query:execution', (message, name) => {
-  console.log(`[TELEMETRY] Channel: ${name}`);
-  console.log(`Query: ${message.query} | Duration: ${message.duration}ms | Success: ${message.success}`);
+  console.log(\`[TELEMETRY] Channel: \${name}\`);
+  console.log(\`Query: \${message.query} | Duration: \${message.duration}ms | Success: \${message.success}\`);
 });
 
 // 3. Publisher Layer (Inside a Database Client or ORM)
@@ -1392,7 +1392,7 @@ async function executeDatabaseQuery(sqlQuery) {
   },
   {
     id: "node-26",
-    category: "Security & Path Traversal",
+    category: "Node.js",
     difficulty: "Intermediate",
     tags: ["Path Traversal", "path.normalize", "Directory Climbing", "FS Security"],
     question: "What is a Path Traversal vulnerability in Node.js file system handling, and how do you sanitize user inputs using path.resolve()?",
@@ -1440,7 +1440,7 @@ app.get('/download', (req, res) => {
 
   // 2. Strict Prefix Verification (Ensure target directory is still inside public folder)
   if (!safeTargetPath.startsWith(PUBLIC_BASE_DIR + path.sep)) {
-    console.warn(`[SECURITY ALERT] Path traversal attempt detected: ${userInputFile}`);
+    console.warn(\`[SECURITY ALERT] Path traversal attempt detected: \${userInputFile}\`);
     return res.status(403).send('Access Denied: Invalid file path.');
   }
 
@@ -1452,7 +1452,7 @@ app.get('/download', (req, res) => {
   },
   {
     id: "node-27",
-    category: "Real-Time Communications & Networking",
+    category: "Node.js",
     difficulty: "Advanced",
     tags: ["WebSockets", "Sticky Sessions", "Socket.io", "Load Balancing"],
     question: "Why are Sticky Sessions required when running Socket.io across a clustered Node.js environment, and how do you scale WebSockets horizontally?",
@@ -1498,7 +1498,7 @@ io.emit('chat:message', { text: 'Global broadcast across all server nodes' });</
   },
   {
     id: "node-28",
-    category: "Real-Time Communications & Dead Sockets",
+    category: "Node.js",
     difficulty: "Intermediate",
     tags: ["WebSockets", "ws Library", "Heartbeat", "Ping/Pong", "Half-Open Connections"],
     question: "How do you implement a robust Ping/Pong Heartbeat mechanism in the ws library to detect and terminate Dead Sockets?",
@@ -1550,7 +1550,7 @@ wss.on('close', () => clearInterval(interval));</code></pre>
   },
   {
     id: "node-29",
-    category: "Modern Node.js Features & Utilities",
+    category: "Node.js",
     difficulty: "Intermediate",
     tags: ["util.promisify", "Custom Promisify Symbol", "Async/Await Integration"],
     question: "How does util.promisify work, and how do you implement a custom promisify function using util.promisify.custom?",
@@ -1607,14 +1607,14 @@ const getCoordinatesAsync = util.promisify(legacyGetCoordinates);
 
 async function fetchLocation() {
   const coords = await getCoordinatesAsync('New York');
-  console.log(`Lat: ${coords.lat}, Lng: ${coords.lng}`);
+  console.log(\`Lat: \${coords.lat}, Lng: \${coords.lng}\`);
 }</code></pre>
       </div>
     `
   },
   {
     id: "node-30",
-    category: "Modern Node.js Features & Configuration",
+    category: "Node.js",
     difficulty: "Beginner",
     tags: ["Native Env Files", "--env-file", "Configuration Management", "Zero Dependencies"],
     question: "How does Node.js's native --env-file flag work, and how does it replace third-party dependencies like dotenv?",
@@ -1645,7 +1645,7 @@ node --env-file=.env --env-file=.env.local server.js</code></pre>
 const port = process.env.PORT || 3000;
 const dbUrl = process.env.DATABASE_URL;
 
-console.log(`Server starting on port ${port} connected to ${dbUrl}`);</code></pre>
+console.log(\`Server starting on port \${port} connected to \${dbUrl}\`);</code></pre>
       </div>
 
       <h4>3. Key Comparisons: Native --env-file vs dotenv Package</h4>
@@ -1679,7 +1679,7 @@ console.log(`Server starting on port ${port} connected to ${dbUrl}`);</code></pr
   },
   {
     id: "node-31",
-    category: "Modern Node.js Features & Deployment",
+    category: "Node.js",
     difficulty: "Advanced",
     tags: ["Single Executable Applications", "SEA", "Binary Bundling", "Deployment"],
     question: "What are Node.js Single Executable Applications (SEA), and how do you bundle a Node.js project into a single standalone binary executable?",
@@ -1731,7 +1731,7 @@ npx postject my-app-binary NODE_SEA_BLOB sea-prep.blob \
   },
   {
     id: "node-32",
-    category: "Modern Node.js Features & Data Access",
+    category: "Node.js",
     difficulty: "Intermediate",
     tags: ["node:sqlite", "Embedded Database", "Synchronous I/O", "Zero Dependencies"],
     question: "How does the native node:sqlite module work, and when should you choose embedded SQLite over external drivers or ORMs?",
@@ -1755,13 +1755,13 @@ npx postject my-app-binary NODE_SEA_BLOB sea-prep.blob \
 const db = new DatabaseSync(':memory:');
 
 // 1. Execute DDL statements
-db.exec(`
+db.exec(\`
   CREATE TABLE users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL
   )
-`);
+\`);
 
 // 2. Prepared Statements for safe Insertion
 const insertStmt = db.prepare('INSERT INTO users (name, email) VALUES (?, ?)');
@@ -1807,7 +1807,7 @@ console.log('Retrieved User:', user);
   },
   {
     id: "node-33",
-    category: "Performance Tuning & Engine Internals",
+    category: "Node.js",
     difficulty: "Advanced",
     tags: ["Compile Cache", "V8 Code Caching", "Cold Start Optimization", "Serverless"],
     question: "How does module.enableCompileCache() work, and how does V8 Code Caching reduce cold-start latency?",
@@ -1844,7 +1844,7 @@ import { AWS } from 'aws-sdk';</code></pre>
   },
   {
     id: "node-34",
-    category: "Global Error Handling & Process Lifecycle",
+    category: "Node.js",
     difficulty: "Intermediate",
     tags: ["uncaughtException", "unhandledRejection", "Process Crashes", "Error Recovery"],
     question: "What is the difference between uncaughtException and unhandledRejection, and why should you restart the process after an uncaughtException?",
@@ -1884,9 +1884,9 @@ setTimeout(() => {
       <div class="code-box">
         <div class="code-header"><span>javascript</span></div>
         <pre><code>process.on('uncaughtException', (err, origin) => {
-  console.error(`[CRITICAL ERROR] Uncaught Exception: ${err.message}`);
-  console.error(`Stack: ${err.stack}`);
-  console.error(`Origin: ${origin}`);
+  console.error(\`[CRITICAL ERROR] Uncaught Exception: \${err.message}\`);
+  console.error(\`Stack: \${err.stack}\`);
+  console.error(\`Origin: \${origin}\`);
 
   // Perform emergency logging/telemetry flush
   logger.fatal({ err, origin }, 'Process state corrupted. Forcing shutdown.');
@@ -1904,7 +1904,7 @@ process.on('unhandledRejection', (reason, promise) => {
   },
   {
     id: "node-35",
-    category: "Microservice Resilience & Fault Tolerance",
+    category: "Node.js",
     difficulty: "Advanced",
     tags: ["Circuit Breaker", "Resilience", "Cascading Failures", "Microservices"],
     question: "How do you implement the Circuit Breaker Pattern in Node.js microservices to prevent cascading system outages?",
@@ -1965,7 +1965,7 @@ app.post('/checkout', async (req, res) => {
   },
   {
     id: "node-36",
-    category: "C++ Addons & Native Binding",
+    category: "Node.js",
     difficulty: "Advanced",
     tags: ["Node-API", "N-API", "C++ Addons", "ABI Stability"],
     question: "What is Node-API (N-API), how does Application Binary Interface (ABI) stability work, and when should you write a native C++ addon?",
@@ -2024,7 +2024,7 @@ console.log(nativeAddon.addFast(15.5, 24.5)); // Output: 40</code></pre>
   },
   {
     id: "node-37",
-    category: "Database Engineering & Optimization",
+    category: "Node.js",
     difficulty: "Intermediate",
     tags: ["Connection Pooling", "PostgreSQL", "Transaction Leaks", "Database Resilience"],
     question: "How do you manage Database Connection Pooling in Node.js, and how do you prevent connection starvation and query leaks?",
@@ -2077,7 +2077,7 @@ async function executeTransaction(accountFrom, accountTo, amount) {
   },
   {
     id: "node-38",
-    category: "Streams & Data Transformation",
+    category: "Node.js",
     difficulty: "Advanced",
     tags: ["Transform Stream", "_transform", "Object Mode Streams", "ETL Pipelines"],
     question: "How do you implement a custom Transform Stream using _transform and _flush methods for ETL data processing pipelines?",
@@ -2128,7 +2128,7 @@ class CsvToUserTransform extends Transform {
   }
 
   _flush(callback) {
-    console.log(`[ETL PIPELINE] Completed processing total ${this.processedCount} records.`);
+    console.log(\`[ETL PIPELINE] Completed processing total \${this.processedCount} records.\`);
     callback();
   }
 }
@@ -2145,7 +2145,7 @@ transformer.end();</code></pre>
   },
   {
     id: "node-39",
-    category: "Multithreading & Zero-Copy Memory",
+    category: "Node.js",
     difficulty: "Advanced",
     tags: ["SharedArrayBuffer", "Atomics", "Worker Threads", "Zero-Copy Memory"],
     question: "How do SharedArrayBuffer and Atomics enable zero-copy concurrency across Worker Threads in Node.js?",
@@ -2199,7 +2199,7 @@ setTimeout(() => {
   },
   {
     id: "node-40",
-    category: "System Design & Distributed Rate Limiting",
+    category: "Node.js",
     difficulty: "Advanced",
     tags: ["Rate Limiting", "Sliding Window", "Redis Lua Scripts", "API Security"],
     question: "How do you implement a distributed Sliding Window Rate Limiter using Node.js and Redis Atomic Lua Scripts?",
@@ -2221,7 +2221,7 @@ setTimeout(() => {
 const redis = new Redis();
 
 // Redis Lua Script for Atomic Sliding Window Rate Limiting
-const slidingWindowLuaScript = `
+const slidingWindowLuaScript = \`
   local key = KEYS[1]
   local now = tonumber(ARGV[1])
   local window = tonumber(ARGV[2])
@@ -2243,7 +2243,7 @@ const slidingWindowLuaScript = `
   else
     return {0, 0} -- Blocked (0)
   end
-`;
+\`;
 
 // Define custom Redis command
 redis.defineCommand('rateLimitSlidingWindow', {
@@ -2254,7 +2254,7 @@ redis.defineCommand('rateLimitSlidingWindow', {
 // Express Middleware
 async function slidingWindowMiddleware(req, res, next) {
   const userIp = req.ip;
-  const key = `ratelimit:${userIp}`;
+  const key = \`ratelimit:\${userIp}\`;
   const now = Date.now();
   const windowMs = 60000; // 1 minute window
   const maxLimit = 100;    // Max 100 requests per minute
@@ -2275,7 +2275,7 @@ async function slidingWindowMiddleware(req, res, next) {
   },
   {
     id: "node-41",
-    category: "Framework Architecture & Internals",
+    category: "Node.js",
     difficulty: "Advanced",
     tags: ["Express vs Fastify", "Radix Tree", "JIT Compilation", "JSON Serialization"],
     question: "How do Fastify internals differ from Express.js architectural patterns, and why is Fastify significantly faster?",
@@ -2355,7 +2355,7 @@ await fastify.listen({ port: 3000 });</code></pre>
   },
   {
     id: "node-42",
-    category: "Observability & Distributed Tracing",
+    category: "Node.js",
     difficulty: "Advanced",
     tags: ["OpenTelemetry", "Distributed Tracing", "Trace Context", "Microservices"],
     question: "How do you implement OpenTelemetry Distributed Tracing in Node.js microservices to track asynchronous request flow across network boundaries?",
@@ -2410,7 +2410,7 @@ node --import ./tracing.js server.js</code></pre>
   },
   {
     id: "node-43",
-    category: "Security & Input Sanitization",
+    category: "Node.js",
     difficulty: "Advanced",
     tags: ["Prototype Pollution", "Object.prototype", "Security Hardening", "CVE Prevention"],
     question: "What is Prototype Pollution in JavaScript/Node.js, how does it lead to Remote Code Execution (RCE), and how do you protect application state?",
@@ -2470,7 +2470,7 @@ console.log(newEmptyUser.isAdmin); // Returns true! All objects inherit this pro
   },
   {
     id: "node-44",
-    category: "Real-Time Communications & WebSockets",
+    category: "Node.js",
     difficulty: "Advanced",
     tags: ["Server-Sent Events", "SSE", "WebSockets vs SSE", "HTTP Streaming"],
     question: "When should you choose Server-Sent Events (SSE) over WebSockets in Node.js, and how do you build a resilient SSE streaming endpoint?",
@@ -2529,15 +2529,15 @@ console.log(newEmptyUser.isAdmin); // Returns true! All objects inherit this pro
   // 2. Extract Last-Event-ID if browser reconnected
   const lastEventId = req.headers['last-event-id'];
   if (lastEventId) {
-    console.log(`Client reconnected. Resuming events from ID: ${lastEventId}`);
+    console.log(\`Client reconnected. Resuming events from ID: \${lastEventId}\`);
     // Query missed events from cache/DB and catch up client...
   }
 
   // Helper function to format SSE frame
   const sendEvent = (id, eventType, data) => {
-    res.write(`id: ${id}\n`);
-    res.write(`event: ${eventType}\n`);
-    res.write(`data: ${JSON.stringify(data)}\n\n`); // Double newline ends SSE frame
+    res.write(\`id: \${id}\n\`);
+    res.write(\`event: \${eventType}\n\`);
+    res.write(\`data: \${JSON.stringify(data)}\n\n\`); // Double newline ends SSE frame
   };
 
   let eventId = Number(lastEventId || 0);
@@ -2558,7 +2558,7 @@ console.log(newEmptyUser.isAdmin); // Returns true! All objects inherit this pro
   },
   {
     id: "node-45",
-    category: "Diagnostics & Garbage Collection Hooks",
+    category: "Node.js",
     difficulty: "Advanced",
     tags: ["perf_hooks", "GC Tracing", "Memory Allocation", "Garbage Collection"],
     question: "How do you trace V8 Garbage Collection events programmatically using perf_hooks PerformanceObserver to identify GC pauses?",
@@ -2595,9 +2595,9 @@ const gcObserver = new PerformanceObserver((list) => {
 
     // Alert on long Major GC pauses that block the Event Loop
     if (entry.detail?.kind === constants.NODE_PERFORMANCE_GC_MAJOR && entry.duration > 50) {
-      console.warn(`[WARNING] Long GC Pause Detected! Type: ${gcType} | Duration: ${durationMs} ms`);
+      console.warn(\`[WARNING] Long GC Pause Detected! Type: \${gcType} | Duration: \${durationMs} ms\`);
     } else {
-      console.log(`[GC Metric] Type: ${gcType} | Duration: ${durationMs} ms`);
+      console.log(\`[GC Metric] Type: \${gcType} | Duration: \${durationMs} ms\`);
     }
   }
 });
@@ -2616,7 +2616,7 @@ gcObserver.observe({ entryTypes: ['gc'] });</code></pre>
   },
   {
     id: "node-46",
-    category: "System Design & Distributed Lock",
+    category: "Node.js",
     difficulty: "Advanced",
     tags: ["Redlock", "Distributed Locks", "Redis", "Race Conditions"],
     question: "How do you implement a Distributed Lock using Redis (Redlock algorithm) to prevent race conditions in clustered Node.js microservices?",
@@ -2645,26 +2645,26 @@ const redlock = new Redlock([redisClient1, redisClient2], {
 });
 
 async function processExclusiveTask(orderId) {
-  const resourceKey = `locks:order:process:${orderId}`;
+  const resourceKey = \`locks:order:process:\${orderId}\`;
   const ttl = 5000; // Lock auto-expires after 5 seconds to avoid deadlock if worker crashes
 
   let lock;
   try {
     // 1. Acquire Distributed Lock
     lock = await redlock.acquire([resourceKey], ttl);
-    console.log(`Acquired lock for Order: ${orderId}. Executing critical section...`);
+    console.log(\`Acquired lock for Order: \${orderId}. Executing critical section...\`);
 
     // --- CRITICAL SECTION BEGIN ---
     await executeDatabasePayment(orderId);
     // --- CRITICAL SECTION END ---
 
   } catch (err) {
-    console.warn(`Could not acquire lock for Order: ${orderId}. Task already being executed by another worker.`);
+    console.warn(\`Could not acquire lock for Order: \${orderId}. Task already being executed by another worker.\`);
   } finally {
     // 2. Safely release lock using atomic script verification
     if (lock) {
       await lock.release();
-      console.log(`Released lock for Order: ${orderId}`);
+      console.log(\`Released lock for Order: \${orderId}\`);
     }
   }
 }</code></pre>
@@ -2678,7 +2678,7 @@ async function processExclusiveTask(orderId) {
   },
   {
     id: "node-47",
-    category: "Networking & Protocol Layer",
+    category: "Node.js",
     difficulty: "Advanced",
     tags: ["HTTP/2", "Multiplexing", "Server Push", "gRPC"],
     question: "How does HTTP/2 Multiplexing differ from HTTP/1.1 Pipelining, and how do you implement a native HTTP/2 server in Node.js?",
@@ -2708,7 +2708,7 @@ server.on('stream', (stream, headers) => {
   const path = headers[':path'];
   const method = headers[':method'];
 
-  console.log(`Incoming HTTP/2 Stream: ${method} ${path}`);
+  console.log(\`Incoming HTTP/2 Stream: \${method} \${path}\`);
 
   if (path === '/api/data') {
     // Respond over multiplexed stream
@@ -2733,7 +2733,7 @@ server.listen(8443, () => console.log('HTTP/2 Secure Server running on port 8443
   },
   {
     id: "node-48",
-    category: "Concurrency & Event Loop Mechanics",
+    category: "Node.js",
     difficulty: "Advanced",
     tags: ["unref()", "ref()", "Event Loop Lifecycles", "Libuv Handles"],
     question: "What do timer.unref() and timer.ref() do under the hood, and how do they control Node.js Event Loop process termination?",
@@ -2791,7 +2791,7 @@ server.listen(8443, () => console.log('HTTP/2 Secure Server running on port 8443
   },
   {
     id: "node-49",
-    category: "Architecture & Code Design Patterns",
+    category: "Node.js",
     difficulty: "Intermediate",
     tags: ["EventEmitter", "Memory Leaks", "Observer Pattern", "MaxListeners"],
     question: "How do you prevent EventEmitter Memory Leaks, and what is the internal consequence of MaxListenersExceededWarning?",
@@ -2821,7 +2821,7 @@ app.get('/data', (req, res) => {
   // MEMORY LEAK: Attaches a new closure listener on EVERY request!
   // The closure retains references to 'req' and 'res', preventing Garbage Collection!
   globalMetrics.on('metric_tick', () => {
-    console.log(`Processing for request: ${req.url}`);
+    console.log(\`Processing for request: \${req.url}\`);
   });
 
   res.send('OK');
@@ -2841,7 +2841,7 @@ globalMetrics.once('metric_tick', () => { ... });</code></pre>
       <div class="code-box">
         <div class="code-header"><span>javascript</span></div>
         <pre><code>app.get('/data', (req, res) => {
-  const onMetricTick = () => console.log(`Processing: ${req.url}`);
+  const onMetricTick = () => console.log(\`Processing: \${req.url}\`);
 
   globalMetrics.on('metric_tick', onMetricTick);
 
@@ -2857,7 +2857,7 @@ globalMetrics.once('metric_tick', () => { ... });</code></pre>
   },
   {
     id: "node-50",
-    category: "Asynchronous Mechanics & V8 Optimization",
+    category: "Node.js",
     difficulty: "Advanced",
     tags: ["Async/Await", "Promise Internals", "V8 Optimization", "Unhandled Rejections"],
     question: "How does V8 optimize Async/Await under the hood compared to raw Promise chains, and why is top-level await safe in ES Modules?",
