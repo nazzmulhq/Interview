@@ -6,12 +6,13 @@ let selectedDifficulty = "All";
 let selectedStatus = "All";
 let allExpanded = false;
 
+let currentLanguage = 'bn'; // 'bn' or 'en'
+
 // LocalStorage State Management
 let userProgress = {
   mastered: JSON.parse(localStorage.getItem('interview_mastered')) || [],
   review: JSON.parse(localStorage.getItem('interview_review')) || [],
-  bookmarks: JSON.parse(localStorage.getItem('interview_bookmarks')) || [],
-  theme: localStorage.getItem('interview_theme') || 'dark'
+  bookmarks: JSON.parse(localStorage.getItem('interview_bookmarks')) || []
 };
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -28,7 +29,6 @@ document.addEventListener("DOMContentLoaded", () => {
   if (typeof pythonQuestions !== 'undefined') allQuestions.push(...pythonQuestions);
 
   // Initialize UI & Sidebar Sublists
-  initTheme();
   initMermaid();
   initVoices();
   renderSidebarCategories();
@@ -43,26 +43,17 @@ function initVoices() {
   // No dynamic population needed since we use SoundOfText API
 }
 
-// Initialize Theme
-function initTheme() {
-  document.documentElement.setAttribute('data-theme', userProgress.theme);
-  const themeBtn = document.getElementById('theme-toggle');
-  if (themeBtn) {
-    themeBtn.innerHTML = userProgress.theme === 'dark' 
-      ? '☀️ <span>Light Mode</span>' 
-      : '🌙 <span>Dark Mode</span>';
+// Toggle Language (EN/BN)
+function toggleLanguage() {
+  currentLanguage = currentLanguage === 'bn' ? 'en' : 'bn';
+  const langBtn = document.getElementById('lang-toggle');
+  if (langBtn) {
+    langBtn.innerHTML = currentLanguage === 'bn' 
+      ? '🌐 <span>English</span>' 
+      : '🌐 <span>বাংলা</span>';
   }
-}
-
-// Toggle Theme
-function toggleTheme() {
-  userProgress.theme = userProgress.theme === 'dark' ? 'light' : 'dark';
-  localStorage.setItem('interview_theme', userProgress.theme);
-  initTheme();
-  // Diagrams are baked as SVG with theme colours, so redraw them on theme switch
-  initMermaid();
-  resetMermaidDiagrams(document);
-  renderMermaidIn(document);
+  // Re-render questions with new language
+  renderQuestions();
 }
 
 /* =========================================================
@@ -77,7 +68,7 @@ function initMermaid() {
   mermaid.initialize({
     startOnLoad: false,
     securityLevel: 'loose',
-    theme: userProgress.theme === 'dark' ? 'dark' : 'default',
+    theme: 'default',
     fontFamily: 'inherit',
     flowchart: { htmlLabels: true, curve: 'basis', useMaxWidth: true },
     sequence: { useMaxWidth: true, wrap: true },
@@ -294,12 +285,15 @@ function renderQuestions() {
     const isBookmarked = userProgress.bookmarks.includes(q.id);
     const diffClass = q.difficulty === 'Beginner' ? 'badge-easy' : (q.difficulty === 'Intermediate' ? 'badge-medium' : 'badge-hard');
 
+    const displayQuestion = currentLanguage === 'en' ? (q.question_en || q.question) : q.question;
+    const displayAnswer = currentLanguage === 'en' ? (q.answer_en || q.answer) : q.answer;
+
     return `
       <div class="question-card ${allExpanded ? 'open' : ''}" id="card-${q.id}">
         <div class="question-header" onclick="toggleQuestion('${q.id}')">
           <span class="q-number">#${index + 1}</span>
           <div class="q-title-wrapper">
-            <h3 class="q-title">${q.question}</h3>
+            <h3 class="q-title">${displayQuestion}</h3>
             <div class="q-meta">
               <span class="badge ${diffClass}">${q.difficulty}</span>
               <span class="tag">${q.category}</span>
@@ -323,7 +317,7 @@ function renderQuestions() {
 
         <div class="question-body">
           <div class="answer-content">
-            ${q.answer}
+            ${displayAnswer}
           </div>
           <div class="status-bar">
             <div class="status-btns">
@@ -422,9 +416,9 @@ function setupCodeCopyButtons() {
 
 // Event Listeners setup
 function setupEventListeners() {
-  // Theme Toggle Button
-  const themeBtn = document.getElementById('theme-toggle');
-  if (themeBtn) themeBtn.addEventListener('click', toggleTheme);
+  // Language Toggle Button
+  const langBtn = document.getElementById('lang-toggle');
+  if (langBtn) langBtn.addEventListener('click', toggleLanguage);
 
   // Expand All Button
   const expandAllBtn = document.getElementById('btn-expand-all');
@@ -517,7 +511,12 @@ const TTSManager = {
     try {
       // Get selected Bengali voice from dropdown (bn-BD or bn-IN)
       const voiceSelect = document.getElementById('voice-select');
-      const selectedVoice = (voiceSelect && voiceSelect.value) ? voiceSelect.value : 'bn-BD';
+      let selectedVoice = (voiceSelect && voiceSelect.value) ? voiceSelect.value : 'bn-BD';
+      
+      // Override to English voice if reading English text
+      if (currentLanguage === 'en') {
+        selectedVoice = 'en-US';
+      }
 
       // Request audio from SoundOfText API (uses real Google Bengali TTS)
       const res = await fetch('https://api.soundoftext.com/sounds', {
@@ -634,12 +633,19 @@ const TTSManager = {
 
 function prepareTextForReading(q) {
   const tempDiv = document.createElement("div");
-  tempDiv.innerHTML = q.answer;
+  const ans = currentLanguage === 'en' ? (q.answer_en || q.answer) : q.answer;
+  const quest = currentLanguage === 'en' ? (q.question_en || q.question) : q.question;
+  
+  tempDiv.innerHTML = ans;
   const codeBlocks = tempDiv.querySelectorAll('pre, code');
   codeBlocks.forEach(block => block.remove());
   let cleanAnswerText = tempDiv.textContent || tempDiv.innerText || "";
   cleanAnswerText = cleanAnswerText.replace(/।/g, '.');
-  return "প্রশ্ন: " + q.question + " উত্তর: " + cleanAnswerText;
+  
+  if (currentLanguage === 'en' && q.question_en) {
+    return "Question: " + quest + ". Answer: " + cleanAnswerText;
+  }
+  return "প্রশ্ন: " + quest + " উত্তর: " + cleanAnswerText;
 }
 
 function readAloud(qId) {
