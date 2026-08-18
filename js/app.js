@@ -297,7 +297,8 @@ function renderQuestions() {
     const diffClass = q.difficulty === 'Beginner' ? 'badge-easy' : (q.difficulty === 'Intermediate' ? 'badge-medium' : 'badge-hard');
 
     const displayQuestion = currentLanguage === 'en' ? (q.question_en || q.question) : q.question;
-    const displayAnswer = currentLanguage === 'en' ? (q.answer_en || q.answer) : q.answer;
+    const rawAnswer = currentLanguage === 'en' ? (q.answer_en || q.answer) : q.answer;
+    const displayAnswer = formatAnswerToHTML(rawAnswer);
 
     return `
       <div class="question-card ${allExpanded ? 'open' : ''}" id="card-${q.id}">
@@ -315,6 +316,11 @@ function renderQuestions() {
             <button class="btn-icon read-btn" id="read-btn-${q.id}" title="Read Aloud (Text to Speech)" onclick="event.stopPropagation(); readAloud('${q.id}')">
               <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M17.95 6.05a8 8 0 010 11.9M11 5L6 9H2v6h4l5 4V5z"></path>
+              </svg>
+            </button>
+            <button class="btn-icon copy-qa-btn" id="copy-btn-${q.id}" title="Copy Question & Answer" onclick="event.stopPropagation(); copyQuestionAndAnswer('${q.id}')">
+              <svg width="19" height="19" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10a2 2 0 00-2 2v6a2 2 0 002 2h8a2 2 0 002-2v-6a2 2 0 00-2-2z"></path>
               </svg>
             </button>
             <button class="btn-icon ${isBookmarked ? 'bookmarked' : ''}" title="Bookmark" onclick="event.stopPropagation(); toggleBookmark('${q.id}')">
@@ -339,6 +345,9 @@ function renderQuestions() {
                 ${isReview ? '⚠️ Needs Revision' : 'Needs Revision'}
               </button>
             </div>
+            <button class="btn-status btn-copy-qa" id="status-copy-btn-${q.id}" title="Copy Question & Answer" onclick="copyQuestionAndAnswer('${q.id}')">
+              📋 Copy Q&amp;A
+            </button>
           </div>
         </div>
       </div>
@@ -423,6 +432,69 @@ function setupCodeCopyButtons() {
       });
     };
   });
+}
+
+// Copy full Question & Answer to Clipboard
+function copyQuestionAndAnswer(id) {
+  const q = allQuestions.find(item => item.id === id);
+  if (!q) return;
+
+  const quest = currentLanguage === 'en' ? (q.question_en || q.question) : q.question;
+  const rawAns = currentLanguage === 'en' ? (q.answer_en || q.answer) : q.answer;
+
+  // Clean answer text by stripping HTML tags if present
+  const tempDiv = document.createElement("div");
+  tempDiv.innerHTML = rawAns;
+  const cleanAns = (tempDiv.innerText || tempDiv.textContent || "").trim();
+
+  const formattedCopyText = `Q: ${quest}\n\nAnswer:\n${cleanAns}\n\n[Category: ${q.category} | Difficulty: ${q.difficulty}]`;
+
+  navigator.clipboard.writeText(formattedCopyText).then(() => {
+    // Header icon feedback
+    const headerBtn = document.getElementById(`copy-btn-${id}`);
+    if (headerBtn) {
+      headerBtn.classList.add('copied');
+      headerBtn.innerHTML = `<svg width="19" height="19" fill="none" stroke="#22c55e" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`;
+      setTimeout(() => {
+        headerBtn.classList.remove('copied');
+        headerBtn.innerHTML = `<svg width="19" height="19" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10a2 2 0 00-2 2v6a2 2 0 002 2h8a2 2 0 002-2v-6a2 2 0 00-2-2z"></path></svg>`;
+      }, 2000);
+    }
+
+    // Status bar button feedback
+    const statusBtn = document.getElementById(`status-copy-btn-${id}`);
+    if (statusBtn) {
+      statusBtn.innerHTML = '✓ Copied!';
+      statusBtn.style.color = '#22c55e';
+      statusBtn.style.borderColor = '#22c55e';
+      setTimeout(() => {
+        statusBtn.innerHTML = '📋 Copy Q&amp;A';
+        statusBtn.style.color = '';
+        statusBtn.style.borderColor = '';
+      }, 2000);
+    }
+
+    showToast('Question & Answer copied to clipboard!');
+  }).catch(err => {
+    console.error('Failed to copy text: ', err);
+  });
+}
+
+// Floating Toast Notification
+function showToast(message) {
+  let toast = document.getElementById('portal-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'portal-toast';
+    toast.className = 'toast-notification';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = message;
+  toast.classList.add('show');
+  clearTimeout(toast._timeout);
+  toast._timeout = setTimeout(() => {
+    toast.classList.remove('show');
+  }, 2500);
 }
 
 // Event Listeners setup
@@ -710,3 +782,118 @@ function updateReadButtonIcon(qId, playing) {
 window.addEventListener('beforeunload', () => {
   TTSManager.stop();
 });
+
+// ----------------------------------------------------
+// UI Formatter for Plaintext & HTML Answers
+// ----------------------------------------------------
+function formatAnswerToHTML(rawText) {
+  if (!rawText) return "";
+  const trimmed = rawText.trim();
+  
+  // If the answer is already structured HTML (e.g. system_design_infrastructure.js, fullstack.js)
+  if (/^<(p|div|ul|ol|h[1-6]|table|blockquote|pre)\b/i.test(trimmed)) {
+    return rawText;
+  }
+
+  // Escape HTML entities to prevent accidental tag evaluation
+  let escaped = rawText
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+
+  // Inline markdown support: `code` and **bold**
+  escaped = escaped.replace(/`([^`]+)`/g, '<code>$1</code>');
+  escaped = escaped.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+
+  // Split into structural blocks separated by blank lines
+  const rawBlocks = escaped.split(/\n\s*\n/);
+  const resultBlocks = [];
+  let previousWasHeader = false;
+
+  for (let i = 0; i < rawBlocks.length; i++) {
+    const block = rawBlocks[i].trim();
+    if (!block) continue;
+
+    const lines = block.split('\n').map(l => l.trimEnd());
+
+    // 1. Flow / Architecture Diagrams (has down arrows ↓ or ASCII boxes)
+    if (block.includes('↓') || block.includes('|--') || (block.includes('+---') && block.includes('|'))) {
+      resultBlocks.push(`
+        <div class="code-box diagram-box">
+          <div class="code-header"><span>Flow / Architecture</span></div>
+          <pre><code>${block}</code></pre>
+        </div>
+      `.trim());
+      previousWasHeader = false;
+      continue;
+    }
+
+    // 2. Section Header (short line ending with a colon :)
+    if (lines.length === 1 && /^[^<\n]{2,80}:$/.test(block)) {
+      resultBlocks.push(`<h4>${block}</h4>`);
+      previousWasHeader = /^(example|code|syntax|output|উদাহরণ|আউটপুট|সিনট্যাক্স):/i.test(block);
+      continue;
+    }
+
+    // 3. Header followed by Bulleted List in same block (e.g. "var:\n- Function scoped\n- Re-declare...")
+    if (lines.length > 1 && /^[^<\n]{1,60}:$/.test(lines[0]) && lines.slice(1).every(l => /^[-*•→]\s+/.test(l.trim()) || l.trim() === '')) {
+      const header = lines[0];
+      const items = lines.slice(1)
+        .filter(l => l.trim())
+        .map(l => `<li>${l.replace(/^[-*•→]\s+/, '')}</li>`)
+        .join('\n');
+      resultBlocks.push(`<strong>${header}</strong>\n<ul>\n${items}\n</ul>`);
+      previousWasHeader = false;
+      continue;
+    }
+
+    // 4. Numbered List (1. ..., 2. ...)
+    if (lines.every(l => /^\d+\.\s+/.test(l.trim()) || l.trim() === '')) {
+      const items = lines
+        .filter(l => l.trim())
+        .map(l => `<li>${l.replace(/^\d+\.\s+/, '')}</li>`)
+        .join('\n');
+      resultBlocks.push(`<ol>\n${items}\n</ol>`);
+      previousWasHeader = false;
+      continue;
+    }
+
+    // 5. Bulleted List (- ..., * ..., • ..., → ...)
+    if (lines.every(l => /^[-*•]\s+/.test(l.trim()) || /^→\s+/.test(l.trim()) || l.trim() === '')) {
+      const items = lines
+        .filter(l => l.trim())
+        .map(l => `<li>${l.replace(/^[-*•→]\s+/, '')}</li>`)
+        .join('\n');
+      resultBlocks.push(`<ul>\n${items}\n</ul>`);
+      previousWasHeader = false;
+      continue;
+    }
+
+    // 6. Code Block Detection
+    const hasCodeKeywords = /^(\/\/|const |let |var |function|class |import |export |def |async def |SELECT |CREATE |INSERT |UPDATE |DELETE |router\.|app\.|@|from |public |private |interface |type |enum |try\s*\{|if\s*\(|for\s*\(|while\s*\(|return |yield |await )/m.test(block);
+    const hasCodeSymbols = /(\{|\}|=>|===|!==|;|\[\]|\(\);)/.test(block) && !/[অ-হ]/.test(block);
+    const isIndentedCode = lines.some(l => /^ {2,}|\t/.test(l));
+    const isExplicitCode = (previousWasHeader && !/[অ-হ]{3,}/.test(block)) || hasCodeKeywords || (hasCodeSymbols && lines.length > 1) || isIndentedCode;
+
+    if (isExplicitCode && lines.length > 0 && !block.startsWith('<')) {
+      resultBlocks.push(`
+        <div class="code-box">
+          <div class="code-header"><span>Code</span><button class="copy-btn">Copy</button></div>
+          <pre><code>${block}</code></pre>
+        </div>
+      `.trim());
+      previousWasHeader = false;
+      continue;
+    }
+
+    // 7. Regular Paragraph
+    let formattedText = block
+      .replace(/^([A-Za-z0-9\u0980-\u09FF\s_-]+):(?=\s|$)/gm, '<strong>$1:</strong>')
+      .replace(/\n/g, '<br>');
+
+    resultBlocks.push(`<p>${formattedText}</p>`);
+    previousWasHeader = false;
+  }
+
+  return resultBlocks.join('\n');
+}
