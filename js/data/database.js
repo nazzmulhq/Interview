@@ -1,2440 +1,5056 @@
-const databaseQuestions = [
-  {
-    id: "db-1",
-    category: "Database",
-    difficulty: "Intermediate",
-    tags: ["ACID", "Transactions", "Fundamentals"],
-    question: "Relational Database-এর ACID Properties (Atomicity, Consistency, Isolation, Durability) বিস্তারিত ব্যাখ্যা করুন।",
-    answer: `
-      <p>ডাটাবেজ ট্রানজেকশনের বিশ্বস্ততা, ডাটা ইন্টিগ্রিটি এবং ফল্ট-টলারেন্স বজায় রাখার জন্য **ACID** নীতি অনুসরণ করা হয়। এটি ৪টি মূল স্তম্ভের ওপর দাঁড়িয়ে আছে:</p>
-      
-      <h4>১. Atomicity (পারমাণবিকতা — "All or Nothing"):</h4>
-      <p>ট্রানজেকশনের ভেতরে একাধিক SQL স্টেটমেন্ট থাকলে, হয় সেগুলোর **সবকয়টি সফলভাবে এক্সিকিউট হবে**, অন্যথায় **১টি কোয়েরি ফেইল করলেই পুরো ট্রানজেকশন আগের অবস্থায় রোলব্যাক (Rollback) হবে**। কোনো মধ্যবর্তী বা আংশিক স্টেট (Partial State) ডাটাবেজে সংরক্ষিত হবে না।</p>
-      <ul>
-        <li><strong>মেকানিজম:</strong> ডাটাবেজ ইঞ্জিন এটি অর্জন করতে <strong>Undo Log</strong> ব্যবহার করে। কোনো ট্রানজেকশন ফেইল করলে Undo Log থেকে ডাটার আগের অবস্থা রি-স্টোর করা হয়।</li>
-      </ul>
+const databaseInterviewQuestionsPart1 = [
+	// ============================================================
+	// PART 1 — DATABASE FUNDAMENTALS
+	// ============================================================
 
-      <h4>২. Consistency (সঙ্গতি):</h4>
-      <p>ট্রানজেকশন শুরু হওয়ার আগে এবং শেষ হওয়ার পর ডাটাবেজ অবশ্যই সংজ্ঞায়িত সকল স্কিমা ইনভেরিয়েন্ট ও কনস্ট্রেইন্ট (Primary Key, Foreign Key, Unique, Check Constraints) মেনে চলবে। ডাটাবেজ কখনোই কোনো ইনভ্যালিড ডাটা স্টোর করতে দেবে না।</p>
-      <ul>
-        <li><strong>মেকানিজম:</strong> ডাটাবেজের কনস্ট্রেইন্ট চেকার এবং ক্যাসকেডিং রুলস ট্রানজেকশন কমিক হওয়ার ঠিক আগে এটি ভ্যালিডেট করে।</li>
-      </ul>
+	{
+		id: "db-1",
+		category: "Database",
+		difficulty: "Beginner",
+		tags: ["Database", "Fundamentals"],
+		question: "Database কী?",
+		answer: `Database হলো structuredভাবে data store, manage, retrieve এবং update করার system।
 
-      <h4>৩. Isolation (পৃথকীকরণ):</h4>
-      <p>একই সময়ে কনকারেন্টলি (Concurrently) একাধিক ট্রানজেকশন চললেও একটি ট্রানজেকশনের মধ্যবর্তী অসম্পূর্ণ কাজ অন্য ট্রানজেকশন দেখতে পারবে না। প্রতিটি ট্রানজেকশন এমনভাবে এক্সিকিউট হবে যেন সে ডাটাবেজে একাই কাজ করছে।</p>
-      <ul>
-        <li><strong>মেকানিজম:</strong> এটি নিয়ন্ত্রণ করা হয় <strong>Locks (Shared/Exclusive)</strong> এবং <strong>MVCC (Multi-Version Concurrency Control)</strong>-এর মাধ্যমে।</li>
-      </ul>
+উদাহরণ:
 
-      <h4>৪. Durability (স্থায়িত্ব):</h4>
-      <p>ট্রানজেকশন সফলভাবে <code>COMMIT</code> হয়ে গেলে পরবর্তীতে পাওয়ার কাট, সিস্টেম ক্র্যাশ বা ওএস ফেইলিয়র হলেও ডাটা স্থায়ীভাবে ডিস্কে সংরক্ষিত থাকবে।</p>
-      <ul>
-        <li><strong>মেকানিজম:</strong> ডাটাবেজ ইঞ্জিন মেমোরি থেকে মূল ডাটা ফাইলে লেখার আগেই <strong>WAL (Write-Ahead Log) / Redo Log</strong> সিঙ্ক্রোনাসলি ডিস্কে ফ্ল্যাশ করে।</li>
-      </ul>
+User:
+- id
+- name
+- email
 
-      <h4>ডাটাবেজ ইন্টারনালস ফ্লো (ASCII Architecture):</h4>
-      <div class="code-box">
-        <div class="code-header"><span>text</span><button class="copy-btn">Copy</button></div>
-        <pre><code>[ SQL Queries ] ──> [ RAM Buffer Pool ] ──(Sync Flush)──> [ WAL / Redo Log (Disk) ]
-                           │                                      │
-                   (Async Checkpoint)                     (Crash Recovery)
-                           ▼                                      ▼
-                  [ Main DB Data Files ] <─────────────────────────┘</code></pre>
-      </div>
+Product:
+- id
+- name
+- price
 
-      <h4>বাস্তব প্র্যাকটিক্যাল উদাহরণ (Bank Transfer):</h4>
-      <div class="code-box">
-        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
-        <pre><code>BEGIN TRANSACTION;
+Order:
+- id
+- user_id
+- total
 
--- Step 1: Deduct 500 BDT from Account A
-UPDATE accounts 
-SET balance = balance - 500 
-WHERE account_id = 'ACC_A' AND balance >= 500;
+Application
+    ↓
+Database
+    ↓
+Stored Data
 
--- Savepoint for partial safety
-SAVEPOINT debit_done;
+Database ব্যবহারের মূল উদ্দেশ্য:
 
--- Step 2: Add 500 BDT to Account B
-UPDATE accounts 
-SET balance = balance + 500 
-WHERE account_id = 'ACC_B';
+- Data persistence
+- Fast retrieval
+- Data consistency
+- Concurrent access
+- Security
+- Backup & recovery
 
--- Validation: Check constraint violation or unexpected error
-IF ERROR_OCCURRED THEN
-    ROLLBACK TO debit_done; -- Rollback to savepoint
-    ROLLBACK;               -- Abort full transaction (Atomicity)
-ELSE
-    COMMIT;                 -- Persist changes permanently (Durability via WAL)
-END IF;</code></pre>
-      </div>
+Common database types:
 
-      <p><em>ইন্টারভিউ টিপ:</em> আপনাকে প্রশ্ন করা হতে পারে "NoSQL ডাটাবেজ কেন ACID পুরোপুরি সাপোর্ট করে না?"—উত্তরে বলবেন, NoSQL ডাটাবেজ স্কেলেবিলিটি এবং Availability বাড়ানোর জন্য CAP Theorem অনুযায়ী Eventual Consistency গ্রহণ করে (BASE Architecture), ফলে multi-document ACID Isolation বিসর্জন দিতে হয়।</p>
-    `
-  },
-  {
-    id: "db-2",
-    category: "Database",
-    difficulty: "Advanced",
-    tags: ["Indexing", "B-Tree", "Performance"],
-    question: "Database Indexing কী? B-Tree Index কীভাবে কাজ করে এবং কী কী ধরনের Index থাকে?",
-    answer: `
-      <p><strong>Database Index</strong> হলো ডাটাবেজ টেবিলের একটি বিশেষ ডাটা স্ট্রাকচার (প্রধানত <strong>B-Tree / B+Tree</strong>) যা ফুল টেবিল স্ক্যান (Full Table Scan — $O(N)$) না করে খুব দ্রুত লগারিমিক টাইমে ($O(\log N)$) নির্দিষ্ট রো খুঁজে বের করতে সাহায্য করে।</p>
-      
-      <h4>B+Tree Index-এর অভ্যন্তরীণ মেکানিজম:</h4>
-      <p>আধুনিক রিলেশনাল ডাটাবেজ (PostgreSQL, MySQL InnoDB) B-Tree-এর উন্নত সংস্করণ <strong>B+Tree</strong> ব্যবহার করে। ডাটাগুলো ডিস্ক পেজে ব্লক আকারে নোড সাজানো থাকে:</p>
-      <ul>
-        <li><strong>Root & Internal Nodes:</strong> কেবল সার্চ কী (Search Keys) এবং চাইল্ড পেজের পয়েন্টার স্টোর করে।</li>
-        <li><strong>Leaf Nodes:</strong> মূল ডাটার পয়েন্টার বা ডাটা রো নিজেই ধারণ করে। সকল Leaf Node একটি **ডাবলি লিঙ্কড-লিস্ট (Doubly Linked List)** দিয়ে কানেক্টেড থাকে, যা Range Query (<code>BETWEEN</code>, <code>></code>, <code><</code>) দ্রুত সম্পন্ন করে।</li>
-      </ul>
+1. Relational Database
+   - MySQL
+   - PostgreSQL
+   - Oracle
+   - SQL Server
 
-      <div class="code-box">
-        <div class="code-header"><span>text</span><button class="copy-btn">Copy</button></div>
-        <pre><code>                    [ Root Node: 50 ]
-                   /                 \
-            [ Internal: 20 ]       [ Internal: 70 ]
-             /          \           /          \
-        [Leaf: 10,15] [Leaf: 20,30] [Leaf: 50,60] [Leaf: 70,80]
-          └───────────┴───────────┴───────────┴───────────► (Doubly Linked List)</code></pre>
-      </div>
+2. NoSQL
+   - MongoDB
+   - Redis
+   - Cassandra
+   - DynamoDB
 
-      <h4>ইনডেক্সের বিস্তারিত প্রকারভেদ:</h4>
-      <ul>
-        <li><strong>Primary / Clustered Index:</strong> টেবিলের ফিজিক্যাল ডাটা যেভাবে ডিস্কে সাজানো থাকে তার ওপর নির্ভর করে। প্রতি টেবিলে কেবল ১টি Clustered Index থাকতে পারে (যেমন: MySQL InnoDB Primary Key)।</li>
-        <li><strong>Secondary / Non-Clustered Index:</strong> এটি আলাদা একটি ইনডেক্স ট্রি তৈরি করে যেখানে ইনডেক্স কলাম এবং মূল ডাটার Primary Key / RowID জমা থাকে।</li>
-        <li><strong>Composite Index:</strong> একাধিক কলামের কম্বিনেশনে তৈরি ইনডেক্স। এটি <strong>Leftmost Prefix Rule</strong> কড়াভাবে মেনে চলে।</li>
-        <li><strong>Partial / Expression Index:</strong> নির্দিষ্ট শর্তে (<code>WHERE status = 'ACTIVE'</code>) বা কোনো ফাংশনের ফলাফলের ওপর (<code>LOWER(email)</code>) ইনডেক্স করা।</li>
-        <li><strong>Covering Index:</strong> ইনডেক্স B-Tree পাতাতেই <code>INCLUDE</code> ক্লজ দিয়ে অতিরিক্ত কলাম রাখা, যাতে মূল ডাটা পেজ (Heap Page) রিড করতেই না হয় (Index-Only Scan)।</li>
-      </ul>
+Relational database structured/tabular data এবং relationship-এর জন্য খুব শক্তিশালী।`,
+	},
 
-      <h4>প্র্যাকটিক্যাল SQL উদাহরণ ও Leftmost Prefix Rule:</h4>
-      <div class="code-box">
-        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
-        <pre><code>-- Composite Index Creation
-CREATE INDEX idx_users_country_city_status ON users(country, city, status);
+	{
+		id: "db-2",
+		category: "Database",
+		difficulty: "Very Important",
+		tags: ["SQL", "NoSQL"],
+		question: "SQL এবং NoSQL Database-এর মধ্যে পার্থক্য কী?",
+		answer: `SQL database সাধারণত relational এবং table-based।
 
--- ✅ OPTIMAL: Uses index fully (Follows Leftmost Prefix)
-SELECT * FROM users WHERE country = 'BD' AND city = 'Dhaka' AND status = 'ACTIVE';
+Example:
 
--- ✅ USES INDEX: Uses country & city prefix
-SELECT * FROM users WHERE country = 'BD' AND city = 'Dhaka';
+Users
+Orders
+Products
 
--- ❌ INDEX SKIP: Cannot use B-Tree index (Skipped leftmost column 'country')
-SELECT * FROM users WHERE city = 'Dhaka' AND status = 'ACTIVE';
+Relationship:
 
--- Expression Index Example
-CREATE INDEX idx_lower_email ON users(LOWER(email));
--- Query taking advantage of expression index:
-SELECT * FROM users WHERE LOWER(email) = 'user@example.com';</code></pre>
-      </div>
-    `
-  },
-  {
-    id: "db-3",
-    category: "Database",
-    difficulty: "Intermediate",
-    tags: ["Joins", "SQL", "Queries"],
-    question: "SQL Joins-এর বিভিন্ন ধরন (INNER, LEFT, RIGHT, FULL OUTER, CROSS, SELF) উদাহরণসহ বুঝিয়ে বলুন।",
-    answer: `
-      <p>একাধিক টেবিলের মধ্যে প্রাইমারি ও ফরেন কী-এর সম্পর্কের ওপর ভিত্তি করে ডাটা একত্রিত করতে <code>JOIN</code> ব্যবহৃত হয়।</p>
-      
-      <h4>JOIN-এর ধরন ও লজিক্যাল বিহেভিয়ার:</h4>
-      <ul>
-        <li><strong>INNER JOIN:</strong> শুধুমাত্র উভয় টেবিলেই ম্যাচিং কী (Matching Rows) থাকলে সেই রেকর্ডগুলো ফেরত দেয়।</li>
-        <li><strong>LEFT (OUTER) JOIN:</strong> বাম পাশের টেবিলের সব রেকর্ড এবং ডান পাশের টেবিলের কেবল ম্যাচিং রেকর্ড দেয়। না মিললে ডান পাশের কলামে <code>NULL</code> বসে।</li>
-        <li><strong>RIGHT (OUTER) JOIN:</strong> ডান পাশের টেবিলের সব রেকর্ড এবং বাম পাশের টেবিলের ম্যাচিং রেকর্ড ফেরত দেয়।</li>
-        <li><strong>FULL OUTER JOIN:</strong> দুটি টেবিলের সকল রেকর্ড নিয়ে আসে (অপ্রতুল তথ্যের ক্ষেত্রে <code>NULL</code> ধরে)।</li>
-        <li><strong>CROSS JOIN:</strong> Cartesian Product তৈরি করে ($A \times B$)। ১ম টেবিলের প্রতিটি রো-কে ২য় টেবিলের প্রতিটি রো-এর সাথে গুণ করে।</li>
-        <li><strong>SELF JOIN:</strong> যখন একটি টেবিলকে তার নিজের সাথেই জয়েন করা হয় (যেমন: Employee-Manager রিলেশন)।</li>
-      </ul>
+Users
+  ↓
+Orders
+  ↓
+Products
 
-      <h4>প্র্যাকটিক্যাল কোড ও উদাহরণ:</h4>
-      <div class="code-box">
-        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
-        <pre><code>-- 1. INNER JOIN Example
-SELECT u.name, o.total_amount 
+Examples:
+- MySQL
+- PostgreSQL
+- Oracle
+
+NoSQL database বিভিন্ন data model ব্যবহার করতে পারে।
+
+Examples:
+
+MongoDB → Document
+Redis → Key-Value
+Cassandra → Wide Column
+Neo4j → Graph
+
+SQL ভালো যখন:
+
+- Strong relationships
+- Transactions
+- Complex queries
+- ACID consistency
+- Structured schema
+
+NoSQL ভালো হতে পারে যখন:
+
+- Flexible schema
+- Massive scale
+- High throughput
+- Specific access patterns
+- Distributed architecture
+
+SQL বনাম NoSQL কোনো absolute winner নয়। Application requirement অনুযায়ী নির্বাচন করতে হয়।`,
+	},
+
+	{
+		id: "db-3",
+		category: "Database",
+		difficulty: "Very Important",
+		tags: ["RDBMS", "SQL"],
+		question: "RDBMS কী?",
+		answer: `RDBMS = Relational Database Management System।
+
+এখানে data table এবং relationship-এর মাধ্যমে store করা হয়।
+
+Example:
+
+users
+
+id | name | email
+---|------|------
+1  | A    | a@test.com
+2  | B    | b@test.com
+
+orders
+
+id | user_id | amount
+---|---------|-------
+1  | 1       | 500
+2  | 2       | 700
+
+users.id
+    ↓
+orders.user_id
+
+Popular RDBMS:
+
+- MySQL
+- PostgreSQL
+- Oracle
+- SQL Server
+
+RDBMS-এর গুরুত্বপূর্ণ features:
+
+- Tables
+- Primary Key
+- Foreign Key
+- Constraints
+- Transactions
+- Indexes
+- Joins`,
+	},
+
+	{
+		id: "db-4",
+		category: "Database",
+		difficulty: "Very Important",
+		tags: ["Schema", "Database Design"],
+		question: "Database Schema কী?",
+		answer: `Schema হলো database-এর logical structure।
+
+এতে define করা হয়:
+
+- Tables
+- Columns
+- Data types
+- Relationships
+- Constraints
+- Indexes
+- Views
+
+Example:
+
+users
+  ├── id INT
+  ├── name VARCHAR
+  ├── email VARCHAR
+  └── created_at DATETIME
+
+orders
+  ├── id INT
+  ├── user_id INT
+  └── total DECIMAL
+
+Schema application-এর data structure এবং relationship define করে।`,
+	},
+
+	{
+		id: "db-5",
+		category: "Database",
+		difficulty: "Very Important",
+		tags: ["Primary Key", "Constraints"],
+		question: "Primary Key কী?",
+		answer: `Primary Key হলো table-এর প্রতিটি row uniquely identify করার key।
+
+Example:
+
+users
+
+id | name
+---|-----
+1  | Nazmul
+2  | Rahim
+
+এখানে id হলো Primary Key।
+
+Primary Key-এর বৈশিষ্ট্য:
+
+- Unique
+- NULL হতে পারে না
+- প্রতিটি row uniquely identify করে
+- একটি table-এ সাধারণত একটি primary key constraint থাকে
+
+Primary key single column বা composite হতে পারে।`,
+	},
+
+	{
+		id: "db-6",
+		category: "Database",
+		difficulty: "Very Important",
+		tags: ["Foreign Key", "Relationship"],
+		question: "Foreign Key কী?",
+		answer: `Foreign Key একটি table-এর column যা অন্য table-এর primary/unique key reference করে।
+
+Example:
+
+users:
+id | name
+---|-----
+1  | A
+
+orders:
+id | user_id
+---|--------
+10 | 1
+
+orders.user_id
+      ↓
+users.id
+
+এটি referential integrity maintain করতে সাহায্য করে।
+
+Foreign Key নিশ্চিত করতে পারে যে order-এর user_id valid user-এর দিকে reference করছে।`,
+	},
+
+	{
+		id: "db-7",
+		category: "Database",
+		difficulty: "Very Important",
+		tags: ["Candidate Key", "Keys"],
+		question: "Primary Key, Candidate Key এবং Alternate Key কী?",
+		answer: `Candidate Key:
+
+যে column/column combination uniquely row identify করতে পারে।
+
+Example:
+
+users:
+
+id
+email
+phone
+
+যদি id, email এবং phone প্রত্যেকটি unique হয়, তাহলে এগুলো candidate key হতে পারে।
+
+Primary Key:
+
+Candidate key-গুলোর মধ্যে যেটিকে primary identifier হিসেবে select করা হয়।
+
+Alternate Key:
+
+যে candidate key primary key হিসেবে select হয়নি।
+
+Example:
+
+Candidate:
+- id
+- email
+
+Primary:
+- id
+
+Alternate:
+- email`,
+	},
+
+	{
+		id: "db-8",
+		category: "Database",
+		difficulty: "Important",
+		tags: ["Composite Key"],
+		question: "Composite Primary Key কী?",
+		answer: `একাধিক column মিলে primary key তৈরি হলে সেটি composite primary key।
+
+Example:
+
+order_items
+
+order_id
+product_id
+quantity
+
+Primary Key:
+
+(order_id, product_id)
+
+কারণ একই order-এর মধ্যে একই product একবারই থাকতে পারে।
+
+Composite key relationship/junction table-এ খুব common।`,
+	},
+
+	{
+		id: "db-9",
+		category: "Database",
+		difficulty: "Very Important",
+		tags: ["Constraints"],
+		question: "Database Constraint কী কী?",
+		answer: `Constraint data integrity enforce করে।
+
+Common constraints:
+
+1. PRIMARY KEY
+2. FOREIGN KEY
+3. UNIQUE
+4. NOT NULL
+5. CHECK
+6. DEFAULT
+
+Example:
+
+email VARCHAR(255) UNIQUE NOT NULL
+
+এতে:
+
+- NULL allow করবে না
+- Duplicate email allow করবে না
+
+Database-level constraint application bug-এর বিরুদ্ধেও data integrity protect করতে সাহায্য করে।`,
+	},
+
+	{
+		id: "db-10",
+		category: "Database",
+		difficulty: "Very Important",
+		tags: ["Normalization", "Design"],
+		question: "Database Normalization কী?",
+		answer: `Normalization হলো data redundancy এবং update anomaly কমানোর জন্য database structure organize করার process।
+
+ধরা যাক:
+
+orders
+
+order_id
+customer_name
+customer_phone
+product_name
+product_price
+
+একই customer information বারবার store হচ্ছে।
+
+Normalize করলে:
+
+customers
+orders
+products
+order_items
+
+এভাবে আলাদা entity তৈরি করা যায়।
+
+Benefits:
+
+- Duplicate data কমে
+- Update consistency বাড়ে
+- Insert anomaly কমে
+- Delete anomaly কমে
+
+Common normal forms:
+
+1NF
+2NF
+3NF
+BCNF`,
+	},
+
+	{
+		id: "db-11",
+		category: "Database",
+		difficulty: "Very Important",
+		tags: ["1NF", "Normalization"],
+		question: "1NF কী?",
+		answer: `1NF = First Normal Form।
+
+মূল ধারণা:
+
+- Atomic values
+- Repeating groups না থাকা
+- একটি cell-এ multiple values না রাখা
+
+Bad:
+
+user_id | phones
+--------|----------------
+1       | 017..., 018...
+
+Better:
+
+user_id | phone
+--------|---------
+1       | 017...
+1       | 018...
+
+অর্থাৎ একটি column-এর প্রতিটি cell-এ atomic value থাকা উচিত।`,
+	},
+
+	{
+		id: "db-12",
+		category: "Database",
+		difficulty: "Very Important",
+		tags: ["2NF", "Normalization"],
+		question: "2NF কী?",
+		answer: `2NF-এর জন্য:
+
+1. Table অবশ্যই 1NF-এ থাকতে হবে।
+2. Non-key attribute পুরো composite key-এর উপর depend করতে হবে।
+
+Partial dependency থাকতে পারবে না।
+
+এটি বিশেষ করে composite primary key-এর ক্ষেত্রে গুরুত্বপূর্ণ।
+
+যদি:
+
+(order_id, product_id)
+
+হয় primary key এবং product_name শুধু product_id-এর উপর depend করে, তাহলে product information আলাদা product table-এ রাখা উচিত।`,
+	},
+
+	{
+		id: "db-13",
+		category: "Database",
+		difficulty: "Very Important",
+		tags: ["3NF", "Normalization"],
+		question: "3NF কী?",
+		answer: `3NF-এর জন্য:
+
+- Table 2NF-এ থাকতে হবে
+- Transitive dependency avoid করতে হবে
+
+Example:
+
+employee_id
+department_id
+department_name
+
+এখানে:
+
+employee_id
+   ↓
+department_id
+   ↓
+department_name
+
+department_name employee_id-এর direct property নয়।
+
+Better:
+
+employees
+- employee_id
+- department_id
+
+departments
+- department_id
+- department_name`,
+	},
+
+	{
+		id: "db-14",
+		category: "Database",
+		difficulty: "Important",
+		tags: ["Denormalization", "Performance"],
+		question: "Denormalization কী এবং কখন ব্যবহার করবেন?",
+		answer: `Denormalization হলো performance বা read efficiency-এর জন্য intentionally কিছু redundant data রাখা।
+
+Normalized:
+
+Order
+ ↓
+Customer
+ ↓
+Address
+
+অনেক join লাগতে পারে।
+
+Denormalized:
+
+Order
+ ├── customer_name
+ ├── customer_phone
+ └── shipping_address
+
+Benefits:
+
+- Faster reads
+- Fewer joins
+- Better reporting performance
+
+Trade-off:
+
+- Duplicate data
+- More complex updates
+- Consistency risk
+
+High-read system বা reporting workload-এ carefully ব্যবহার করা যায়।`,
+	},
+
+	// ============================================================
+	// SQL BASICS
+	// ============================================================
+
+	{
+		id: "db-15",
+		category: "SQL",
+		difficulty: "Very Important",
+		tags: ["SELECT", "Query"],
+		question: "SQL SELECT কী?",
+		answer: `SELECT database থেকে data retrieve করার জন্য ব্যবহৃত হয়।
+
+Example:
+
+SELECT id, name, email
+FROM users;
+
+Specific condition:
+
+SELECT *
+FROM users
+WHERE status = 'active';
+
+SQL query সাধারণত declarative।
+
+আপনি কী result চান তা বলেন; database optimizer execution plan তৈরি করে।`,
+	},
+
+	{
+		id: "db-16",
+		category: "SQL",
+		difficulty: "Very Important",
+		tags: ["WHERE", "Filtering"],
+		question: "WHERE এবং HAVING-এর মধ্যে পার্থক্য কী?",
+		answer: `WHERE individual rows filter করে।
+
+HAVING grouped result filter করে।
+
+Example:
+
+SELECT department_id, COUNT(*)
+FROM employees
+WHERE status = 'active'
+GROUP BY department_id
+HAVING COUNT(*) > 10;
+
+Execution concept:
+
+FROM
+ ↓
+WHERE
+ ↓
+GROUP BY
+ ↓
+HAVING
+ ↓
+SELECT
+ ↓
+ORDER BY
+ ↓
+LIMIT
+
+WHERE aggregation-এর আগে filter করে।
+
+HAVING aggregation-এর পরে filter করে।`,
+	},
+
+	{
+		id: "db-17",
+		category: "SQL",
+		difficulty: "Very Important",
+		tags: ["GROUP BY", "Aggregation"],
+		question: "GROUP BY কী?",
+		answer: `GROUP BY একই ধরনের value অনুযায়ী rows group করে।
+
+Example:
+
+SELECT department_id, COUNT(*)
+FROM employees
+GROUP BY department_id;
+
+Result:
+
+department_id | count
+--------------|------
+1             | 20
+2             | 15
+3             | 30
+
+Common aggregate functions:
+
+- COUNT()
+- SUM()
+- AVG()
+- MIN()
+- MAX()`,
+	},
+
+	{
+		id: "db-18",
+		category: "SQL",
+		difficulty: "Very Important",
+		tags: ["JOIN", "SQL"],
+		question: "SQL JOIN কী?",
+		answer: `JOIN multiple table-এর related data combine করে।
+
+Example:
+
+users
+orders
+
+users.id = orders.user_id
+
+Common JOIN:
+
+- INNER JOIN
+- LEFT JOIN
+- RIGHT JOIN
+- FULL OUTER JOIN
+- CROSS JOIN
+
+Example:
+
+SELECT users.name, orders.total
+FROM users
+INNER JOIN orders
+ON users.id = orders.user_id;
+
+JOIN database design এবং interview-এর সবচেয়ে গুরুত্বপূর্ণ SQL topics-এর একটি।`,
+	},
+
+	{
+		id: "db-19",
+		category: "SQL",
+		difficulty: "Very Important",
+		tags: ["INNER JOIN"],
+		question: "INNER JOIN কী?",
+		answer: `INNER JOIN দুই table-এর matching rows return করে।
+
+Users:
+
+1 A
+2 B
+
+Orders:
+
+user_id = 1
+
+INNER JOIN করলে শুধু A-এর order result পাওয়া যাবে।
+
+অর্থাৎ:
+
+A → match
+B → no match → বাদ
+
+যখন দুই side-এই matching data দরকার তখন INNER JOIN ব্যবহার করা হয়।`,
+	},
+
+	{
+		id: "db-20",
+		category: "SQL",
+		difficulty: "Very Important",
+		tags: ["LEFT JOIN"],
+		question: "LEFT JOIN কী?",
+		answer: `LEFT JOIN left table-এর সব row রাখে।
+
+Example:
+
+users
+LEFT JOIN orders
+
+যে user-এর order নেই তার order columns NULL হবে।
+
+এটি useful:
+
+"সব user এবং তাদের order থাকলে order দেখাও"
+
+Example:
+
+SELECT u.name, o.id
 FROM users u
-INNER JOIN orders o ON u.id = o.user_id;
+LEFT JOIN orders o
+ON u.id = o.user_id;`,
+	},
 
--- 2. LEFT JOIN Example (Find users with or without orders)
-SELECT u.name, COALESCE(o.total_amount, 0) as total
-FROM users u
-LEFT JOIN orders o ON u.id = o.user_id;
+	{
+		id: "db-21",
+		category: "SQL",
+		difficulty: "Important",
+		tags: ["RIGHT JOIN", "FULL JOIN"],
+		question: "RIGHT JOIN এবং FULL OUTER JOIN কী?",
+		answer: `RIGHT JOIN right table-এর সব row রাখে।
 
--- 3. SELF JOIN Example (Hierarchical Employee Tree)
-SELECT 
-    e.name AS Employee, 
-    COALESCE(m.name, 'No Manager (CEO)') AS Manager
-FROM employees e
-LEFT JOIN employees m ON e.manager_id = m.id;
+FULL OUTER JOIN দুই table-এর সব row রাখে এবং match না হলে missing side NULL হয়।
 
--- 4. CROSS JOIN Example (Generating Product-Size Matrix)
-SELECT p.product_name, s.size_code
-FROM products p
-CROSS JOIN sizes s;</code></pre>
-      </div>
+তবে সব database একইভাবে FULL OUTER JOIN support করে না।
 
-      <p><em>পারফরম্যান্স নোট:</em> ডাটাবেজ ইঞ্জিন অভ্যন্তরীণভাবে ৩টি অ্যালগরিদম দিয়ে Join রান করে: <strong>Nested Loop Join</strong> (ছোট ডাটার জন্য), <strong>Hash Join</strong> (বড় আন-সর্টেড ডাটার জন্য) এবং <strong>Merge Join</strong> (সর্টেড ডাটার জন্য)।</p>
-    `
-  },
-  {
-    id: "db-4",
-    category: "Database",
-    difficulty: "Advanced",
-    tags: ["Isolation Levels", "Concurrency Anomalies", "MVCC"],
-    question: "Database Transaction Isolation Levels কী কী? Dirty Read, Non-repeatable Read, Phantom Read এবং Write Skew কী?",
-    answer: `
-      <p>কনকারেন্ট ট্রানজেকশনে সমসাময়িক রিড/রাইট অপারেশনের সময় ডাটাবেজে ৪টি প্রধান সমস্যা (Anomalies) তৈরি হতে পারে। এগুলো প্রতিরোধ করার জন্য ANSI SQL ৪টি <strong>Isolation Level</strong> সংজ্ঞায়িত করেছে।</p>
-      
-      <h4>Concurrency Anomalies (সমস্যাসমূহ):</h4>
-      <ul>
-        <li><strong>Dirty Read:</strong> ট্রানজেকশন A কোনো ডাটা আপডেট করল কিন্তু কমিট করেনি। ট্রানজেকশন B সেই আন-কমিটেড ডাটা রিড করে ফেলল। পরবর্তীতে A ট্রানজেকশন Rollback করলে B-এর রিড করা ডাটা অবৈধ (Dirty) হয়ে যায়।</li>
-        <li><strong>Non-repeatable Read:</strong> ট্রানজেকশন A একটি রো রিড করল। ট্রানজেকশন B সেই রো <code>UPDATE</code> বা <code>DELETE</code> করে Commit করল। A যদি একই ট্রানজেকশনে আবার রিড করে, সে ভিন্ন ভ্যালু পাবে।</li>
-        <li><strong>Phantom Read:</strong> ট্রানজেকশন A নির্দিষ্ট শর্তে (<code>WHERE salary > 50000</code>) কিছু রো রিড করল। ট্রানজেকশন B নতুন একটি রো <code>INSERT</code> করে Commit করল। A পুনরায় একই কোয়েরি চালালে নতুন 'ভূতুড়ে' (Phantom) রো দেখতে পাবে।</li>
-        <li><strong>Write Skew:</strong> Snapshot Isolation-এ দুটি কনকারেন্ট ট্রানজেকশন পৃথক কিন্তু সম্পর্কিত কন্ডিশনে ডাটা রাইট করার সময় ইনভেরিয়েন্ট ভেঙে ফেলা (যেমন: ২ জন অন-কল ডক্টর একই সাথে ডিউটি অফ রিকোয়েস্ট পাঠালে উভয়ই অফ হয়ে যাওয়া)।</li>
-      </ul>
+MySQL-এ FULL OUTER JOIN nativeভাবে নেই; UNION দিয়ে equivalent result তৈরি করা যায়।
 
-      <h4>Isolation Levels ও প্রটেকশন ম্যাট্রিক্স:</h4>
-      <div class="code-box">
-        <div class="code-header"><span>text</span><button class="copy-btn">Copy</button></div>
-        <pre><code>Isolation Level    | Dirty Read | Non-Repeatable Read | Phantom Read
-───────────────────────────────────────────────────────────────────
-Read Uncommitted   |    Yes     |         Yes         |     Yes
-Read Committed     |     No     |         Yes         |     Yes
-Repeatable Read    |     No     |          No         |  Yes (Postgres Exception: No)
-Serializable       |     No     |          No         |      No</code></pre>
-      </div>
+Practical application-এ INNER এবং LEFT JOIN সবচেয়ে বেশি ব্যবহৃত হয়।`,
+	},
 
-      <div class="code-box">
-        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
-        <pre><code>-- Set Isolation Level in PostgreSQL per transaction
-BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ;
+	{
+		id: "db-22",
+		category: "SQL",
+		difficulty: "Very Important",
+		tags: ["Subquery", "SQL"],
+		question: "Subquery কী?",
+		answer: `একটি SQL query-এর ভিতরে আরেকটি query থাকলে সেটি subquery।
 
-SELECT SUM(balance) FROM accounts WHERE user_id = 101;
--- Even if another transaction updates account 101 now, 
--- subsequent reads in this transaction will show consistent snapshot.
+Example:
 
-COMMIT;</code></pre>
-      </div>
-    `
-  },
-  {
-    id: "db-5",
-    category: "Database",
-    difficulty: "Advanced",
-    tags: ["Window Functions", "SQL"],
-    question: "SQL Window Functions কী? ROW_NUMBER(), RANK(), DENSE_RANK() এবং NTILE()-এর পার্থক্য কী?",
-    answer: `
-      <p><strong>Window Function</strong> প্রচলিত <code>GROUP BY</code>-এর মতো সারির গ্রুপিংকে ভেঙে ১টি মাত্র রো-তে সংকুচিত না করে, প্রতিটি মূল রো অক্ষুণ্ণ রেখেই একটি নির্দিষ্ট উইন্ডো বা সাবসেটের সাপেক্ষে গণনা (Aggregation / Ranking) করার সুযোগ দেয়।</p>
-      
-      <h4>র্যাঙ্কিং উইন্ডো ফাংশনের তুলনা (ধরা যাক স্কোর সমান: 100, 100, 90):</h4>
-      <ul>
-        <li><code>ROW_NUMBER():</code> ১, ২, ৩ (টাই থাকলেও প্রতিটি রো-কে কড়া সিকুয়েনশিয়াল ইউনিক নম্বর দেয়)।</li>
-        <li><code>RANK():</code> ১, ১, ৩ (টাই থাকলে একই নম্বর দেয় কিন্তু পরবর্তী র্যাঙ্ক স্কিপ করে চলে যায়)।</li>
-        <li><code>DENSE_RANK():</code> ১, ১, ২ (টাই থাকলেও র্যাঙ্ক স্কিপ না করে পরপর সংখ্যা বসায়)।</li>
-        <li><code>NTILE(N):</code> মোট রেজাল্ট সেটকে সমান N সংখ্যক গ্রুপে/কোয়ার্টাইলে ভাগ করে এনটি নম্বর অ্যাসাইন করে।</li>
-      </ul>
-
-      <h4>প্র্যাকটিক্যাল কোড (প্রতি ডিপার্টমেন্টের ২য় সর্বোচ্চ স্যালারি বের করার কৌশল):</h4>
-      <div class="code-box">
-        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
-        <pre><code>WITH RankedEmployees AS (
-    SELECT 
-        id,
-        name,
-        department_id,
-        salary,
-        DENSE_RANK() OVER (
-            PARTITION BY department_id 
-            ORDER BY salary DESC
-        ) as salary_rank
-    FROM employees
-)
-SELECT id, name, department_id, salary
-FROM RankedEmployees
-WHERE salary_rank = 2; -- Exactly 2nd highest salary per department</code></pre>
-      </div>
-    `
-  },
-  {
-    id: "db-6",
-    category: "Database",
-    difficulty: "Intermediate",
-    tags: ["Normalization", "1NF 2NF 3NF BCNF"],
-    question: "Database Normalization কী? 1NF, 2NF, 3NF এবং BCNF-এর নিয়মগুলো বুঝিয়ে বলুন।",
-    answer: `
-      <p><strong>Normalization</strong> হলো ডাটাবেজ টেবিল ডিজাইনের একটি সিস্টেমিক রিফাইনমেন্ট প্রসেস যা ডাটা রিডানডেন্সি (অনাবশ্যক পুনরাবৃত্তি) কমায় এবং ইনসার্ট, আপডেট ও ডিলিট অ্যানোমালি প্রতিরোধ করে ডাটা ইন্টিগ্রিটি বজায় রাখে।</p>
-      
-      <h4>নরম্যালাইজেশনের ধাপসমূহ:</h4>
-      <ul>
-        <li><strong>1NF (First Normal Form):</strong> টেবিলে প্রতিটি কলামের ভ্যালু পারমাণবিক (Atomic / Single scalar value) হতে হবে। কোনো রিপিটিং গ্রুপ, ডুপ্লিকেট কলাম বা অ্যারে থাকা যাবে না।</li>
-        <li><strong>2NF (Second Normal Form):</strong> 1NF পূরণ করতে হবে এবং কোনো <em>Partial Dependency</em> থাকা যাবে না (নন-প্রাইম কলাম কম্পোজিট প্রাইমারি কী-এর আংশিক অংশের ওপর নির্ভর করতে পারবে না, পুরো কী-এর ওপর নির্ভর করতে হবে)।</li>
-        <li><strong>3NF (Third Normal Form):</strong> 2NF পূরণ করতে হবে এবং কোনো <em>Transitive Dependency</em> থাকা যাবে না (নন-প্রাইম কলাম থেকে অন্য নন-প্রাইম কলামে নির্ভরতা রিমুভ করা: $A \to B \to C$ রিমুভ করা)।</li>
-        <li><strong>BCNF (Boyce-Codd Normal Form):</strong> 3NF-এর কড়া সংস্করণ। সকল ফাংশনাল ডিপেন্ডেন্সি $X \to Y$-এর ক্ষেত্রে $X$-কে অবশ্যই একটি Super Key হতে হবে।</li>
-      </ul>
-
-      <h4>ভিজ্যুয়াল স্কিমা রিফ্যাক্টরিং:</h4>
-      <div class="code-box">
-        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
-        <pre><code>-- ❌ Bad Schema (Violates 1NF - Array in single column):
--- Student(id, name, courses: "Math, Physics, CS")
-
--- ✅ 1NF Compliant Normalized Schema:
-CREATE TABLE student_courses (
-    student_id INT,
-    course_name VARCHAR(50),
-    PRIMARY KEY (student_id, course_name),
-    FOREIGN KEY (student_id) REFERENCES students(id)
-);</code></pre>
-      </div>
-    `
-  },
-  {
-    id: "db-7",
-    category: "Database",
-    difficulty: "Advanced",
-    tags: ["Query Optimization", "EXPLAIN ANALYZE"],
-    question: "Slow SQL Query কীভাবে অপ্টিমাইজ করবেন? EXPLAIN বা EXPLAIN ANALYZE দিয়ে কীভাবে Index verify করবেন?",
-    answer: `
-      <p>SQL Performance Tuning-এর জন্য পদ্ধতিগত সমাধান কৌশল:</p>
-      <ol>
-        <li><code>EXPLAIN (ANALYZE, BUFFERS)</code> প্রয়োগ: কুয়েরির প্ল্যানার স্টেপ, আসল এক্সিকিউশন টাইম, মোট কস্ট এবং বাফার হিট দেখা।</li>
-        <li><strong>কুয়েরি প্ল্যান আউটপুট ডিকোডিং:</strong>
-          <ul>
-            <li><code>Seq Scan</code> / <code>Table Scan</code>: ইনডেক্স মিসিং নির্দেশ করে (খারাপ)।</li>
-            <li><code>Index Scan</code> / <code>Index Only Scan</code>: ইনডেক্স সঠিক ব্যবহার হচ্ছে (ভালো)।</li>
-            <li><code>Bitmap Index Scan</code>: একাধিক ইনডেক্স কন্ডিশন একসাথে মেলাচ্ছে।</li>
-          </ul>
-        </li>
-        <li><strong>কলাম ফিল্টারে ফাংশন এড়ানো:</strong> <code>WHERE UPPER(email) = 'X'</code> না লিখে Expression Index ব্যবহার করা।</li>
-        <li><code>SELECT *</code> এর পরিবর্তে নির্দিষ্ট কলাম সিলেক্ট করে Covering Index সুবিধা নিশ্চিত করা।</li>
-      </ol>
-
-      <div class="code-box">
-        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
-        <pre><code>-- Step 1: Analyze slow query
-EXPLAIN (ANALYZE, BUFFERS) 
-SELECT id, name FROM users WHERE email = 'test@example.com';
-
--- Output Output Example (Bad - Sequential Scan):
--- Seq Scan on users  (cost=0.00..35.50 rows=1 width=16) (actual time=14.210..14.212 rows=1 loops=1)
--- Buffers: shared read=120
-
--- Step 2: Add Index
-CREATE INDEX idx_users_email ON users(email);
-
--- Step 3: Verify optimization
--- Index Scan using idx_users_email on users  (cost=0.28..8.29 rows=1 width=16) (actual time=0.035..0.036 rows=1 loops=1)
--- Buffers: shared hit=3</code></pre>
-      </div>
-    `
-  },
-  {
-    id: "db-8",
-    category: "Database",
-    difficulty: "Advanced",
-    tags: ["Locking", "Deadlocks", "Optimistic Pessimistic"],
-    question: "Pessimistic Locking এবং Optimistic Locking-এর পার্থক্য কী? Deadlock কী এবং কীভাবে এড়ানো যায়?",
-    answer: `
-      <p>কনকারেন্ট রাইট অপারেশনে রেস কন্ডিশন ঠেকাতে ২ প্রকার লকিং মেকানিজম ব্যবহার করা হয়:</p>
-      <ul>
-        <li><strong>Pessimistic Locking:</strong> ধরে নেওয়া হয় সংঘাত ঘটবেই। তাই ডাটা রিড করার সময়ই সারিতে <code>SELECT ... FOR UPDATE</code> চালিয়ে এক্সক্লুসিভ লক বসানো হয়। অন্যদের অপেক্ষা করতে হয়। (উচ্চ কনফ্লিক্ট এরিয়া যেমন: ব্যাংকিং ট্রান্সফার, ইনভেন্টরি স্টক বাইং)।</li>
-        <li><strong>Optimistic Locking:</strong> ধরে নেওয়া হয় সংঘাত কম হবে। তাই লক না বসিয়ে একটি <code>version</code> বা <code>updated_at</code> কলাম ট্র্যাক রাখা হয়। আপডেটের সময় ভার্সন চেক করে আপডেট করা হয়। (কম কনফ্লিক্ট এরিয়া যেমন: ইউজার প্রোফাইল আপডেট)।</li>
-      </ul>
-
-      <h4>Deadlock কী এবং কীভাবে এড়াবেন?</h4>
-      <p>যখন ২ বা ততধিক ট্রানজেকশন একে অপরের লক করা রিসোর্সের জন্য অনির্দিষ্টকালের জন্য সাইক্লিক অপেক্ষায় (Circular Wait) আটকে থাকে, তাকে Deadlock বলে।</p>
-
-      <div class="code-box">
-        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
-        <pre><code>-- Optimistic Locking Query Pattern
-UPDATE products 
-SET stock = stock - 1, version = version + 1
-WHERE id = 101 AND version = 5; 
--- If affected rows = 0, application handles retry logic.
-
--- Preventing Deadlock: Maintain strict identical lock acquisition order across transactions
--- Transaction A & B must update 'accounts' first, then 'orders' (Never reverse order).</code></pre>
-      </div>
-    `
-  },
-  {
-    id: "db-9",
-    category: "Database",
-    difficulty: "Intermediate",
-    tags: ["Connection Pooling", "Performance"],
-    question: "Database Connection Pooling কী এবং ব্যাকএন্ডে এটি কেন অত্যন্ত গুরুত্বপূর্ণ?",
-    answer: `
-      <p>ডাটাবেজ কানেকশন তৈরি করা (TCP 3-Way Handshake, SSL/TLS, Authentication, Session Memory Allocation) অত্যন্ত ব্যয়বহুল (Costly) অপারেশন।</p>
-      <p><strong>Connection Pool</strong> হলো আগে থেকে তৈরি করে রাখা পুনর্ব্যবহারযোগ্য (Reusable) ডাটাবেজ সকেটের একটি সেট। ব্যাকএন্ড অ্যাপ যখন কোনো কোয়েরি করতে চায়, সে কানেকশন পুল থেকে একটি কানেকশন ধার নেয় এবং কাজ শেষে পুলে ফেরত দেয়।</p>
-
-      <h4>সুবিধাসমূহ & Sizing Formula:</h4>
-      <ul>
-        <li><strong>ল্যাটেন্সি হ্রাস:</strong> প্রতিটি রিকোয়েস্টে নতুন কানেকশন তৈরি ও বন্ধের ওভারহেড পুরোপুরি দূর হয়।</li>
-        <li><strong>Resource Protection:</strong> ডাটাবেজ সার্ভারের ওপর অতিরিক্ত লাইভ কানেকশনের প্রেশার পড়ে ক্র্যাশ করা ঠেকায় (<code>max_connections</code> এর ভয় থাকে না)।</li>
-        <li><strong>Pool Sizing Formula (HikariCP Benchmark):</strong> $Connections = (CPU\ cores \times 2) + Effective\ Spindle\ Count$</li>
-      </ul>
-
-      <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>// Node.js pg pool configuration
-const { Pool } = require('pg');
-
-const pool = new Pool({
-  host: 'db.internal',
-  user: 'app_user',
-  database: 'prod_db',
-  max: 20,                  // Max 20 sockets in pool
-  idleTimeoutMillis: 30000, // Close idle socket after 30s
-  connectionTimeoutMillis: 2000 // Error if connection not acquired in 2s
-});
-
-module.exports = pool;</code></pre>
-      </div>
-    `
-  },
-  {
-    id: "db-10",
-    category: "Database",
-    difficulty: "Advanced",
-    tags: ["Database", "Replication", "Consistency", "Senior"],
-    question: "Read Replica Lag থাকা অবস্থায় Read-Your-Own-Writes Consistency সমস্যা কীভাবে সমাধান করবেন?",
-    answer: `
-      <p>Master-এ Write করার সাথে সাথে যদি একই ইউজার Read Replica থেকে Read করে, Replication Lag-এর কারণে ডাটা সিঙ্ক না হওয়ায় ব্যবহারকারী নিজের সদ্য করা আপডেট দেখতে না পারার বিভ্রান্তিকর সমস্যা ঘটে — একে <strong>Read-Your-Own-Writes</strong> সমস্যা বলে।</p>
-      
-      <h4>সমাধান কৌশলসমূহ:</h4>
-      <ul>
-        <li><strong>Session-Sticky Read Routing:</strong> কোনো ইউজার রাইট অপারেশন করলে একটি টাইমস্ট্যাম্প কুকি/সেশনে সেভ করা। পরবর্তী নির্দিষ্ট সময় (যেমন: ৩ সেকেন্ড) সেই ইউজারের সকল রিড সরাসরি Master DB-তে রাউট করা।</li>
-        <li><strong>LSN / Read-Your-Writes Token:</strong> Write অপারেশনের Replication Position (Postgres LSN / MySQL Binlog Offset) ক্লায়েন্টকে ফেরত দেয়া; Read করার সময় সেই LSN পার হওয়া Replica খুঁজে বের করে সেখান থেকে পড়া।</li>
-        <li><strong>Optimistic UI State:</strong> ব্যাকএন্ড থেকে রিচ না করে ক্লায়েন্ট স্টেটেই সাথে সাথে আপডেট ভিউ দেখানো।</li>
-      </ul>
-
-      <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>// Express.js DB Routing Middleware Example
-function routeDbRequest(req, res, next) {
-  const lastWriteTime = req.session.lastWriteTimestamp || 0;
-  const REPLICATION_LAG_WINDOW_MS = 3000; // 3 Seconds
-
-  if (Date.now() - lastWriteTime < REPLICATION_LAG_WINDOW_MS) {
-    req.db = primaryMasterDbPool; // Route to Master
-  } else {
-    req.db = readReplicaPool;     // Route to Read Replica
-  }
-  next();
-}</code></pre>
-      </div>
-    `
-  },
-  {
-    id: "db-11",
-    category: "Database",
-    difficulty: "Advanced",
-    tags: ["Internals", "RDBMS", "ACID", "WAL"],
-    question: "RDBMS-এ WAL (Write-Ahead Logging) কী এবং এটি কীভাবে ACID Durability ও Crash Recovery নিশ্চিত করে?",
-    answer: `
-      <p><strong>Write-Ahead Logging (WAL)</strong> বা Redo Log হলো RDBMS (PostgreSQL, MySQL InnoDB, SQLite)-এর একটি সেন্ট্রাল আর্কিটেকচারাল মেকানিজম যা নিশ্চিত করে যে মূল ডাটা ফাইলে (Disk Data Pages) পরিবর্তন করার আগেই সেই পরিবর্তনের বর্ণনা ডিস্কে লগে সিঙ্ক্রোনাসলি রাইট করা হবে।</p>
-      
-      <h4>WAL কীভাবে কাজ করে (ARIES Protocol Step-by-step):</h4>
-      <ol>
-        <li><strong>RAM Buffer-এ পরিবর্তন:</strong> ইউজার যখন কোনো <code>UPDATE</code> বা <code>INSERT</code> চালায়, তখন ডাটাবেজ ইঞ্জিন সরাসরি ডিস্কে রাইট না করে RAM-এর **Buffer Pool**-এ সংশ্লিষ্ট ডাটা পেজ মডিফাই করে (যাকে Dirty Page বলে)।</li>
-        <li><strong>WAL Buffer-এ লগ তৈরি:</strong> একই সাথে মেমোরির **WAL Buffer**-এ ওই অপারেশনের লজিক্যাল রেকর্ড তৈরি হয়।</li>
-        <li><strong>Synchronous Flush on Commit:</strong> ইউজার যখন <code>COMMIT</code> কমান্ড দেয়, ডাটাবেজ ইঞ্জিন <code>fsync()</code> সিস্টেম কলের মাধ্যমে WAL লগকে ডিস্কে রাইট করে। WAL রাইট সফল হলেই ইউজারকে "Commit Successful" মেসেজ পাঠানো হয়।</li>
-        <li><strong>Asynchronous Page Flush (Checkpointing):</strong> RAM-এ থাকা Dirty Page-গুলো পরবর্তীতে ব্যাকগ্রাউন্ড প্রসেস (Checkpointer) দিয়ে আস্তে আস্তে মূল ডাটা ফাইলে ফ্ল্যাশ হয়।</li>
-      </ol>
-
-      <h4>ক্র্যাশ রিকভারি প্রসেস (Crash Recovery Cycle):</h4>
-      <p>যদি Dirty Page ডিস্কে সেভ হওয়ার আগেই বিদ্যুৎ চলে যায় বা ডাটাবেজ ক্র্যাশ করে, তবে RAM-এর সব ডাটা মুছে যায়। কিন্তু WAL লগ ইতিমধ্যে ডিস্কে সিঙ্ক করা ছিল। ডাটাবেজ পুনরায় স্টার্ট হওয়ার সময় ৩টি ফেজে রিকভারি করে:</p>
-      <ul>
-        <li><strong>Analysis Phase:</strong> শেষ সফল Checkpoint থেকে WAL রিড করে কোন কোন ট্রানজেকশন কমিটেড এবং কোনগুলো আন-কমিটেড ছিল তা চিহ্নিত করে।</li>
-        <li><strong>Redo Phase (REPLAY):</strong> কমিটেড ট্রানজেকশনগুলোর সব পরিবর্তন পুনরায় চালিয়ে ডাটাবেজকে ক্র্যাশের মুহূর্তের অবস্থায় ফিরিয়ে আনে (Durability)।</li>
-        <li><strong>Undo Phase (ROLLBACK):</strong> যেসব ট্রানজেকশন কমিট হওয়ার আগেই ক্র্যাশ করেছিল,Undo Log ব্যবহার করে সেগুলোর পরিবর্তন রোলব্যাক করে (Atomicity)।</li>
-      </ul>
-
-      <div class="code-box">
-        <div class="code-header"><span>text</span><button class="copy-btn">Copy</button></div>
-        <pre><code>[ User Query ] ──> [ RAM: Buffer Pool (Dirty Page) ]
-                         │
-                         ├────(Synchronous Flush on Commit)───> [ WAL File on Disk ] ──► COMMIT ACK
-                         │
-               (Async Checkpoint Process)
-                         │
-                         ▼
-             [ Main Data Files on Disk ]</code></pre>
-      </div>
-
-      <div class="code-box">
-        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
-        <pre><code>-- PostgreSQL WAL Configuration Example (postgresql.conf)
-wal_level = replica                  -- Controls how much information is written to WAL
-max_wal_size = 1GB                   -- Maximum size to let WAL grow during checkpoints
-checkpoint_completion_target = 0.9   -- Spreads checkpoint I/O over time to avoid disk spikes</code></pre>
-      </div>
-    `
-  },
-  {
-    id: "db-12",
-    category: "Database",
-    difficulty: "Intermediate",
-    tags: ["SQL", "Programmability", "RDBMS"],
-    question: "Stored Procedures, User-Defined Functions (UDF) এবং Triggers-এর মধ্যে মূল পার্থক্য কী?",
-    answer: `
-      <p>ডাটাবেজ সার্ভার সাইড প্রোগামেবিলিটির ৩টি প্রধান উপাদানের ফিচার ও আর্কিটেকচারাল পার্থক্য নিম্নে বিস্তৃতভাবে তুলে ধরা হলো:</p>
-      
-      <table>
-        <tr>
-          <th>বৈশিষ্ট্য</th>
-          <th>Stored Procedure</th>
-          <th>User-Defined Function (UDF)</th>
-          <th>Trigger</th>
-        </tr>
-        <tr>
-          <td><strong>ইনভোকেশন</strong></td>
-          <td><code>CALL proc_name()</code> দিয়ে ম্যানুয়ালি বা অ্যাপ কোড থেকে।</td>
-          <td>SQL স্টেটমেন্টের ভেতর সরাসরি (<code>SELECT func() FROM tbl</code>)।</td>
-          <td>DML ইভেন্টে (<code>INSERT/UPDATE/DELETE</code>) অটোমেটিক।</td>
-        </tr>
-        <tr>
-          <td><strong>রিটার্ন ভ্যালু</strong></td>
-          <td>রিটার্ন করা বাধ্যতামূলক নয় (০ বা একাধিক রেজাল্ট সেট দিতে পারে)।</td>
-          <td>বাধ্যতামূলকভাবে একটি সিঙ্গেল মান (Scalar) বা টেবিল (Table) দেয়।</td>
-          <td>কোনো মান রিটার্ন করে না (তবে NEW/OLD রেকর্ড মোডিফাই করতে পারে)।</td>
-        </tr>
-        <tr>
-          <td><strong>ট্রানজেকশন কন্ট্রোল</strong></td>
-          <td>ভিতরে <code>COMMIT</code> এবং <code>ROLLBACK</code> চালানো যায়।</td>
-          <td>ভিতরে ট্রানজেকশন ম্যানেজমেন্ট (Commit/Rollback) সম্পূর্ণ নিষিদ্ধ।</td>
-          <td>প্যারেন্ট ট্রানজেকশনের অংশ হিসেবে কাজ করে (আলাদা Commit সম্ভব নয়)।</td>
-        </tr>
-        <tr>
-          <td><strong>DML/DDL ব্যবহার</strong></td>
-          <td><code>INSERT</code>, <code>UPDATE</code>, <code>CREATE TABLE</code> ইত্যাদি সব চালানো যায়।</td>
-          <td>কেবল মাত্র ডাটা রিড/ক্যালকুলেশন বা সাইড-ইফেক্ট ফ্রি DML সম্ভব।</td>
-          <td>টেবিলের ডাটা মোডিফাই বা অন্য অডিট টেবিলে ইনসার্ট করতে পারে।</td>
-        </tr>
-        <tr>
-          <td><strong>ব্যবহারের ক্ষেত্র</strong></td>
-          <td>জটিল এন্ড-টু-এন্ড বিজনেস ওয়ার্কফ্লো প্রসেসিং।</td>
-          <td>কম্পিউটেশন বা ডাটা ফরম্যাটিং (যেমন: ট্যাক্স হিসাব, ফাজি টেক্সট)।</td>
-          <td>অডিট ট্রেইল (Audit Logging), ডেটা সিকিউরিটি বা ক্যাসকেড কাস্টম চেক।</td>
-        </tr>
-      </table>
-
-      <h4>প্র্যাকটিক্যাল কোড উদাহরণসমূহ:</h4>
-      <div class="code-box">
-        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
-        <pre><code>-- 1. User-Defined Function (Calculates Tax)
-CREATE FUNCTION calculate_tax(amount NUMERIC) RETURNS NUMERIC AS $$
-BEGIN
-    RETURN amount * 0.15; -- 15% Tax
-END;
-$$ LANGUAGE plpgsql IMMUTABLE;
-
--- Usage in SELECT:
-SELECT id, total_amount, calculate_tax(total_amount) AS tax FROM orders;
-
--- 2. Trigger Function for Audit Logging
-CREATE OR REPLACE FUNCTION audit_user_email_change() RETURNS TRIGGER AS $$
-BEGIN
-    IF OLD.email IS DISTINCT FROM NEW.email THEN
-        INSERT INTO audit_logs(user_id, old_email, new_email, changed_at)
-        VALUES (OLD.id, OLD.email, NEW.email, NOW());
-    END IF;
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER trg_email_change
-BEFORE UPDATE ON users
-FOR EACH ROW EXECUTE FUNCTION audit_user_email_change();</code></pre>
-      </div>
-    `
-  },
-  {
-    id: "db-13",
-    category: "Database",
-    difficulty: "Intermediate",
-    tags: ["ORM", "Performance", "SQL"],
-    question: "ORM-এ N+1 Query Problem কী এবং Eager Loading (JOIN / Include) দিয়ে এটি কীভাবে সমাধান করা হয়?",
-    answer: `
-      <p><strong>N+1 Query Problem</strong> হলো ORM (Prisma, Sequelize, TypeORM, Hibernate) ব্যবহারের সময় ঘটা সবচেয়ে কমন পারফরম্যান্স অ্যান্টি-প্যাটার্ন। যখন একটি প্যারেন্ট লিস্ট আনার জন্য ১টি কোয়েরি চালানো হয়, এবং এরপর লুপের ভেতর প্রতিটি প্যারেন্টের রিলেটেড চাইল্ড ডাটা আনার জন্য আলাদা আলাদা N-সংখ্যক কোয়েরি ডাটাবেজে হিট করে, তখন মোট $1 + N$ টি কোয়েরি এক্সিকিউট হয়।</p>
-      
-      <h4>সমস্যাটি যেভাবে তৈরি হয় (১০০ জন ইউজারের ১০০টি পোস্টের উদাহরণ):</h4>
-      <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>// ❌ BAD: Triggers N+1 SQL Queries (1 Query for Users + 100 Queries for Posts)
-const users = await prisma.user.findMany(); // Query 1: SELECT * FROM "User";
-
-for (const user of users) {
-  // Queries 2 to 101: SELECT * FROM "Post" WHERE "userId" = 1, 2, 3...
-  const posts = await prisma.post.findMany({ where: { userId: user.id } });
-  console.log(user.name, posts.length);
-}
-// Result: 101 Network Round-trips to DB! Database connection pool gets exhausted.</code></pre>
-      </div>
-
-      <h4>আর্কিটেকচারাল পার্থক্য (N+1 vs Eager Loading):</h4>
-      <div class="code-box">
-        <div class="code-header"><span>text</span><button class="copy-btn">Copy</button></div>
-        <pre><code>[ N+1 Problem ]     App  ──(101 Queries)──► DB Engine  (High Latency / High CPU)
-[ Eager Loading ]   App  ──( 1  Query )───► DB Engine  (Fast / Efficient JOIN)</code></pre>
-      </div>
-
-      <h4>সমাধান (Eager Loading):</h4>
-      <p>Eager Loading-এর মাধ্যমে ORM একক <code>LEFT OUTER JOIN</code> চালিয়ে অথবা ১টি <code>IN (...)</code> সাব-কোয়েরি ব্যাচ করে একবারেই সব ডাটা নিয়ে আসে।</p>
-
-      <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>// ✅ GOOD: Eager Loading using 'include' (Executes ONLY 1 Single SQL Query with JOIN)
-const usersWithPosts = await prisma.user.findMany({
-  include: {
-    posts: true // Instructs ORM to perform an Eager Load
-  }
-});
-
-// Generated SQL by ORM:
-// SELECT "User"."id", "User"."name", "Post"."id" AS "post_id", "Post"."title" 
-// FROM "User" 
-// LEFT JOIN "Post" ON "User"."id" = "Post"."userId";</code></pre>
-      </div>
-    `
-  },
-  {
-    id: "db-14",
-    category: "Database",
-    difficulty: "Beginner",
-    tags: ["Integrity", "Foreign Key", "SQL"],
-    question: "Foreign Key Constraints এবং ON DELETE CASCADE, SET NULL, RESTRICT-এর পার্থক্য কী?",
-    answer: `
-      <p><strong>Foreign Key (FK) Constraint</strong> হলো Relational Database-এর একটি গুরুত্বপূর্ণ নিয়ম যা ২টি টেবিলের (Parent Table & Child Table) মধ্যে <strong>Referential Integrity</strong> বজায় রাখে। এটি নিশ্চিত করে যে চাইল্ড টেবিলে এমন কোনো রেফারেন্স কী থাকতে পারবে না যা প্যারেন্ট টেবিলে বিদ্যমান নেই।</p>
-      
-      <h4>ON DELETE / ON UPDATE রুলস-এর তুলনা:</h4>
-      <ul>
-        <li><strong>ON DELETE CASCADE:</strong> প্যারেন্ট টেবিল থেকে কোনো রো ডিলিট করা হলে, চাইল্ড টেবিলে থাকা ওই প্যারেন্টের সাথে সম্পর্কিত সকল রেকর্ড **স্বয়ংক্রিয়ভাবে মুছে যাবে**। (ব্যবহার: Order & OrderItems, User & UserProfile)।</li>
-        <li><strong>ON DELETE SET NULL:</strong> প্যারেন্ট রো ডিলিট হলে, চাইল্ড রো-গুলো মুছবে না, কিন্তু চাইল্ডের Foreign Key কলামটি <code>NULL</code> হয়ে যাবে। (ব্যবহার: Post & Author — যেখানে লেখক একাউন্ট ডিলিট করলেও পোস্ট রেখে দেওয়া হয়)। <em>নোট: FK কলামটি অবশ্যই Nullable হতে হবে।</em></li>
-        <li><strong>ON DELETE RESTRICT:</strong> যদি চাইল্ড টেবিলে ওই প্যারেন্টের অন্তত একটি রেফারেন্সও অবশিষ্ট থাকে, তবে ডাটাবেজ প্যারেন্ট রো ডিলিট হতে **বাধা দেবে** এবং ফরেন কী এরর থ্রো করবে। (ব্যবহার: Bank Account & Transactions — ট্রানজেকশন ডাটা থাকা অবস্থায় অ্যাকাউন্ট ডিলিট আটকানো)।</li>
-        <li><strong>ON DELETE NO ACTION:</strong> RESTRICT-এর মতোই কাজ করে, তবে কিছু ডাটাবেজে (যেমন Postgres) এটি ট্রানজেকশনের শেষে (Deferred Check) ভ্যালিডেশন চালায়।</li>
-        <li><strong>ON DELETE SET DEFAULT:</strong> প্যারেন্ট ডিলিট হলে চাইল্ডের FK কলামে টেবিল ডিজাইনে থাকা ডিফল্ট ভ্যালু বসে যাবে।</li>
-      </ul>
-
-      <div class="code-box">
-        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
-        <pre><code>-- Practical Table Definition with Constraints
-CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
-    email VARCHAR(255) UNIQUE NOT NULL
+SELECT *
+FROM employees
+WHERE salary > (
+  SELECT AVG(salary)
+  FROM employees
 );
 
-CREATE TABLE posts (
-    id SERIAL PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    author_id INT,
-    CONSTRAINT fk_author 
-        FOREIGN KEY (author_id) 
-        REFERENCES users(id) 
-        ON DELETE SET NULL -- If user deleted, keep post but set author_id = NULL
-);
+Inner query:
 
-CREATE TABLE order_items (
-    id SERIAL PRIMARY KEY,
-    order_id INT NOT NULL,
-    product_name VARCHAR(255),
-    CONSTRAINT fk_order 
-        FOREIGN KEY (order_id) 
-        REFERENCES orders(id) 
-        ON DELETE CASCADE -- If order is deleted, wipe order_items automatically
-);</code></pre>
-      </div>
-    `
-  },
-  {
-    id: "db-15",
-    category: "Database",
-    difficulty: "Advanced",
-    tags: ["Architecture", "Replication", "Scaling"],
-    question: "Database Master-Slave Replication এবং Read Replicas কীভাবে কাজ করে?",
-    answer: `
-      <p>হাই-ট্রাফিক অ্যাপ্লিকেশনে ডাটাবেজের থ্রুপুট বাড়ানো, রিড-রাইট লোড আলাদা করা এবং High Availability (HA) সুনিশ্চিত করতে <strong>Master-Slave (Primary-Replica) Replication</strong> আর্কিটেকচার ব্যবহৃত হয়।</p>
-      
-      <h4>আর্কিটেকচারাল কম্পোনেন্টস:</h4>
-      <ul>
-        <li><strong>Master (Primary) Node:</strong> অ্যাপ্লিকেশনের সমস্ত Write অপারেশন (<code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code>, DDL) গ্রহণ করে। প্রতিটি পরিবর্তনের ঘটনা WAL (Postgres) বা Binlog (MySQL)-এ রেকর্ড করে।</li>
-        <li><strong>Slave (Read Replica) Nodes:</strong> মাস্টার নোড থেকে ডিস্ক সার্ভিস বা নেটওয়ার্ক স্ট্রিম ক্যোয়ারীর মাধ্যমে WAL/Binlog গ্রহণ করে এবং নিজের লোকাল ডাটা পেজে প্রতিনিয়ত Replay করে সিঙ্ক থাকে। এগুলো কেবল <code>SELECT</code> (Read) কোয়েরি প্রসেস করে।</li>
-      </ul>
+SELECT AVG(salary)
 
-      <h4>Replication Mode-এর প্রকারভেদ:</h4>
-      <ul>
-        <li><strong>Asynchronous Replication (ডিফল্ট):</strong> মাস্টার নোড ডিস্কে WAL সেভ করার পর পরই ইউজারকে Success অ্যাকনলেজমেন্ট পাঠিয়ে দেয়, স্লেভ সিঙ্ক হওয়ার জন্য অপেক্ষা করে না। (খুব ফাস্ট, কিন্তু মাস্টার ক্র্যাশ করলে সামান্য Data Loss বা Replication Lag হতে পারে)।</li>
-        <li><strong>Synchronous Replication:</strong> মাস্টারে রাইট করার পর অন্তত ১টি স্লেভ নোড ডিস্কে WAL সিঙ্ক সম্পন্ন করার বার্তা না পাঠানো পর্যন্ত ইউজার অ্যাকনলেজমেন্ট পায় না। (জিরো ডাটা লস, কিন্তু ল্যাটেন্সি একটু বেশি)।</li>
-      </ul>
+Outer query:
 
-      <div class="code-box">
-        <div class="code-header"><span>text</span><button class="copy-btn">Copy</button></div>
-        <pre><code>                         ┌──► [ Read Replica 1 ] (SELECTs)
-                         │
-[ App Layer ] ──(Writes)─┼──► [ Primary Master ] ──(WAL Streaming)──┐
-                         │                                           ▼
-                         └──► [ Read Replica 2 ] (SELECTs) ◄─────────┘</code></pre>
-      </div>
+salary > average
 
-      <div class="code-box">
-        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
-        <pre><code>-- Checking Replication Status on PostgreSQL Primary
-SELECT 
-    client_addr AS replica_ip,
-    state,
-    sync_state, -- async or sync
-    pg_wal_lsn_diff(pg_current_wal_lsn(), replay_lsn) AS lag_bytes
-FROM pg_stat_replication;</code></pre>
-      </div>
-    `
-  },
-  {
-    id: "db-16",
-    category: "Database",
-    difficulty: "Advanced",
-    tags: ["Distributed Systems", "CAP Theorem", "Architecture"],
-    question: "Distributed Database Design-এ CAP Theorem কী?",
-    answer: `
-      <p><strong>CAP Theorem (Brewer's Theorem)</strong> বলে যে, যেকোনো ডিস্ট্রিবিউটেড ডাটাবেজ সিস্টেমে (যেখানে ডাটা একাধিক নেটওয়ার্কড নোডে শেয়ার করা থাকে) নিচের ৩টি গ্যারান্টির মধ্যে <strong>একসাথে সর্বোচ্চ ২টি অর্জন করা সম্ভব</strong>:</p>
-      
-      <h4>৩টি প্রধান গ্যারান্টি:</h4>
-      <ul>
-        <li><strong>Consistency (C):</strong> সিস্টেমের সকল ক্লায়েন্ট একই মুহূর্তে যেকোনো নোড থেকে একই ডাটা দেখবে। (Master-এ রাইট হলে সব নোডে সিঙ্ক হওয়া পর্যন্ত রিড ব্লক থাকবে)।</li>
-        <li><strong>Availability (A):</strong> প্রতিটি নন-ফেইলিং নোড সবসময় রিকোয়েস্টের সফল রেসপন্স (Read/Write) দেবে—এমনকি কোনো নোড পুরোনো ডাটা দেখালেও রিকোয়েস্ট ফেল করবে না।</li>
-        <li><strong>Partition Tolerance (P):</strong> সিস্টেমের নোডগুলোর মধ্যকার নেটওয়ার্ক ক্যাবল বিচ্ছিন্ন (Network Partition) হলেও বা মেসেজ ড্রপ করলেও পুরো ডিস্ট্রিবিউটেড সিস্টেম চালু থাকবে।</li>
-      </ul>
+Subquery SELECT, WHERE, FROM ইত্যাদি জায়গায় ব্যবহার হতে পারে।`,
+	},
 
-      <h4>কেন "CP" অথবা "AP" বেছে নিতে হয়?</h4>
-      <p>বাস্তবিকের ডিস্ট্রিবিউটেড সিস্টেমে নেটওয়ার্ক ফেইলিওর (Network Partition) যেকোনো সময় ঘটতে পারে। তাই <strong>Partition Tolerance (P) কে বাদ দেওয়া অসম্ভব</strong>। এর ফলে নেটওয়ার্ক পার্টিশন ঘটলে ডাটাবেজ স্থপতিদের ১টি পছন্দ করতে হয়:</p>
+	{
+		id: "db-23",
+		category: "SQL",
+		difficulty: "Very Important",
+		tags: ["CTE", "WITH"],
+		question: "CTE কী?",
+		answer: `CTE = Common Table Expression।
 
-      <div class="code-box">
-        <div class="code-header"><span>text</span><button class="copy-btn">Copy</button></div>
-        <pre><code>                     CAP Theorem Triangle
-                             / \
-                            /   \
-                           /  P  \
-                          /───────\
-                         /  /   \  \
-                        /  /     \  \
-            (CP System)/  /       \  \(AP System)
-                      /  /         \  \
-                     /  /           \  \
-   [ Consistency ] ─┴───             ───┴─ [ Availability ]</code></pre>
-      </div>
+WITH clause ব্যবহার করে temporary named result তৈরি করা হয়।
 
-      <ul>
-        <li><strong>CP System (Consistency + Partition Tolerance):</strong> নেটওয়ার্ক বিচ্ছিন্ন হলে ডাটা অমিল হওয়া ঠেকাতে সিস্টেম রাইট বা রিড অপারেশন ব্লক/এরর করে দেয়। (উদাহরণ: HBase, MongoDB, CockroachDB, PostgreSQL with 2PC)।</li>
-        <li><strong>AP System (Availability + Partition Tolerance):</strong> নেটওয়ার্ক বিচ্ছিন্ন হলেও রিকোয়েস্ট প্রসেস করতে থাকে, তবে ক্লায়েন্ট কিছু সময় পুরোনো ডাটা (Stale Data) পেতে পারে। পার্টিশন ঠিক হলে Eventual Consistency অর্জন করে। (উদাহরণ: Apache Cassandra, Amazon DynamoDB, CouchDB)।</li>
-      </ul>
-    `
-  },
-  {
-    id: "db-17",
-    category: "Database",
-    difficulty: "Intermediate",
-    tags: ["DevOps", "Migrations", "Zero Downtime"],
-    question: "Database Migration Management (Knex/Prisma/Flyway) কী এবং Zero-Downtime Migration কী?",
-    answer: `
-      <p><strong>Database Migration</strong> হলো ডাটাবেজ স্কিমার সংস্করণ নিয়ন্ত্রণ (Version Control Systems like Git, but for DDL)। এটি ডায়নামিক ফাইল (SQL বা JS/TS Scripts) ব্যবহার করে ডেভেলপমেন্ট, স্টেজিং এবং প্রোডাকশন পরিবেশের ডাটাবেজ স্কিমা স্টেট হুবহু সিঙ্ক রাখে।</p>
-      
-      <h4>মাইগ্রেশন কীভাবে কাজ করে (Tracking Table):</h4>
-      <p>প্রতিটি মাইগ্রেশন টুলে একটি ট্র্যাকিং টেবিল থাকে (যেমন: Knex-এ <code>knex_migrations</code>, Flyway-এ <code>flyway_schema_history</code>)। মাইগ্রেশন রান করলে টুলটি এই টেবিলে প্রয়োগকৃত ফাইলের হ্যাশ ও নাম সেভ রাখে, যাতে একই মাইগ্রেশন দ্বিতীয়বার রান না করে।</p>
+Example:
 
-      <h4>Zero-Downtime Migration Pattern (Expand and Contract):</h4>
-      <p>চলমান প্রোডাকশনে সরাসরি <code>ALTER TABLE RENAME COLUMN</code> বা <code>DROP COLUMN</code> চালালে পুরানো সার্ভিস ক্র্যাশ করে। ডাউনটাইম ছাড়া মাইগ্রেশনের ৩-ধাপের আর্কিটেকচার:</p>
-
-      <ol>
-        <li><strong>Phase 1 (Expand):</strong> নতুন কলাম যোগ করুন (Nullable হিসেবে)। পুরানো অ্যাপ পুরানো কলামেই রিড/রাইট করতে থাকবে।</li>
-        <li><strong>Phase 2 (Migrate & Dual-Write):</strong> নতুন অ্যাপ ভার্সন ডিপ্লয় করুন যা পুরানো ও নতুন দুই কলামেই একসাথে লেখে (Dual-write)। ব্যাকগ্রাউন্ড স্ক্রিপ্ট চালিয়ে পুরানো রেকর্ডগুলোকে নতুন কলামে ব্যাকফিল (Backfill) করুন।</li>
-        <li><strong>Phase 3 (Contract):</strong> নিশ্চিত হওয়ার পর অ্যাপ থেকে পুরানো কলামের ব্যবহার তুলে নিন এবং নতুন মাইগ্রেশন চালিয়ে পুরানো কলামটি ড্রপ করুন।</li>
-      </ol>
-
-      <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>// Knex.js Migration Example with Up/Down rollback safety
-exports.up = function(knex) {
-  return knex.schema.table('users', function(table) {
-    table.string('phone_v2', 20).nullable(); // Step 1: Expand safely
-  });
-};
-
-exports.down = function(knex) {
-  return knex.schema.table('users', function(table) {
-    table.dropColumn('phone_v2'); // Rollback path
-  });
-};</code></pre>
-      </div>
-    `
-  },
-  {
-    id: "db-18",
-    category: "Database",
-    difficulty: "Intermediate",
-    tags: ["SQL", "CTE", "Queries"],
-    question: "SQL-এ Common Table Expressions (CTE) এবং Recursive Queries কী?",
-    answer: `
-      <p><strong>Common Table Expression (CTE)</strong> হলো একটি অস্থায়ী নামযুক্ত রেজাল্ট সেট যা <code>WITH</code> ক্লজ ব্যবহার করে কোনো প্রধান SQL কোয়েরির ভেতরে সংজ্ঞায়িত করা হয়। এটি সাব-কোয়েরির চেয়ে অনেক বেশি পঠনযোগ্য (Readable) এবং কোড রি-ইউজেবল করে।</p>
-      
-      <h4>Recursive CTE:</h4>
-      <p>যখন একটি CTE নিজেই নিজেকে রিকার্সিভলি রেফার করে, তাকে <strong>Recursive CTE</strong> বলে। এটি অসীম নেস্টেড ক্যাটাগরি, অর্গানাইজেশনাল হায়ারার্কি বা থ্রেডেড কমেন্টস-এর মতো **Tree Structure Data** প্রসেস করতে ব্যবহৃত হয়।</p>
-
-      <h4>Recursive CTE-এর ২টি মূল অংশ:</h4>
-      <ul>
-        <li><strong>Anchor Member (Base Case):</strong> এটি প্রথম কোয়েরি যা রিকার্শনের মূল বা Root নোড খুঁজে বের করে।</li>
-        <li><strong>Recursive Member:</strong> এটি <code>UNION ALL</code> দিয়ে যুক্ত থাকে এবং আগের সাইকেলের রেজাল্টের সাথে জয়েন করে চাইল্ড নোড বের করে আনে।</li>
-      </ul>
-
-      <div class="code-box">
-        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
-        <pre><code>-- Querying Employee Manager Org Chart with Hierarchy Level
-WITH RECURSIVE OrgChart AS (
-    -- Anchor Member: Find CEO (No Manager)
-    SELECT id, name, manager_id, 1 AS level, CAST(name AS VARCHAR(255)) AS path
-    FROM employees 
-    WHERE manager_id IS NULL
-    
-    UNION ALL
-    
-    -- Recursive Member: Join employees with previous hierarchy step
-    SELECT e.id, e.name, e.manager_id, oc.level + 1, CAST(oc.path || ' -> ' || e.name AS VARCHAR(255))
-    FROM employees e
-    INNER JOIN OrgChart oc ON e.manager_id = oc.id
+WITH active_users AS (
+  SELECT *
+  FROM users
+  WHERE status = 'active'
 )
-SELECT id, name, level, path FROM OrgChart ORDER BY path;</code></pre>
-      </div>
-    `
-  },
-  {
-    id: "db-19",
-    category: "Database",
-    difficulty: "Advanced",
-    tags: ["Database", "Backup", "Disaster Recovery", "Senior"],
-    question: "Database Backup Strategy: Full vs Incremental vs Differential এবং Point-in-Time Recovery (PITR) কী?",
-    answer: `
-      <p>প্রোডাকশন ডাটাবেজে সিস্টেম ডিজাস্টার, র‍্যানসমওয়্যার বা এক্সিডেন্টাল <code>DROP TABLE</code> থেকে রিকভারির জন্য সঠিক ব্যাকআপ স্ট্র্যাটেজি রাখা আবশ্যক।</p>
-      
-      <h4>ব্যাকআপ কৌশলের তুলনা:</h4>
-      <table>
-        <tr>
-          <th>টাইপ</th>
-          <th>কী কপি হয়</th>
-          <th>স্টোরেজ ও সময়</th>
-          <th>Restore প্রসেস ও সময়</th>
-        </tr>
-        <tr>
-          <td><strong>Full Backup</strong></td>
-          <td>সম্পূর্ণ ডাটাবেজ ফাইল ও স্কিমা স্ন্যাপশট।</td>
-          <td>সর্বোচ্চ স্টোরেজ এবং অনেক সময় লাগে।</td>
-          <td>খুব দ্রুত (একক ফাইল থেকে ডিরেক্ট রিস্টোর)।</td>
-        </tr>
-        <tr>
-          <td><strong>Incremental Backup</strong></td>
-          <td>শেষ ব্যাকআপের (Full/Incremental) পর যা বদলেছে।</td>
-          <td>সর্বনিম্ন স্টোরেজ ও দ্রুততম সময়।</td>
-          <td>ধীরগতি (Full Backup + প্রতিটি Incremental ফাইল ক্রমানুসারে অ্যাপ্লাই করতে হয়)।</td>
-        </tr>
-        <tr>
-          <td><strong>Differential Backup</strong></td>
-          <td>শেষ <em>Full Backup</em>-এর পর থেকে পরিবর্তিত সকল ডাটা।</td>
-          <td>মাঝারি স্টোরেজ ও সময়।</td>
-          <td>মাঝারি (Full Backup + কেবল সর্বশেষ Differential ফাইলটি লাগে)।</td>
-        </tr>
-      </table>
+SELECT *
+FROM active_users;
 
-      <h4>Point-in-Time Recovery (PITR) কী?</h4>
-      <p>ধরা যাক রাত ২টায় ডেইলি ব্যাকআপ নেওয়া হয়, কিন্তু দুপুর ১২টায় কোনো ডেভেলপার ভুলবশত প্রোডাক্টস টেবিল ড্রপ করে ফেলল। সাধারণ ব্যাকআপ রিস্টোর করলে সকালের ১০ ঘণ্টার ডাটা হারিয়ে যাবে।</p>
-      <p><strong>PITR</strong> হলো একটি ফুল ব্যাকআপ এবং ক্রমাগত ডিস্কে আর্কাইভ করা WAL/Binlog ফাইলের সমন্বয়ে ডাটাবেজকে **নির্দিষ্ট কোনো সেকেন্ডের পূর্ববর্তী স্টেটে** (যেমন: দুপুর ১১:৫৯:৫৯ সেকেন্ডে) পুনঃপ্রতিষ্ঠা করার প্রযুক্তি।</p>
+Benefits:
 
-      <div class="code-box">
-        <div class="code-header"><span>text</span><button class="copy-btn">Copy</button></div>
-        <pre><code>[ Daily Full Backup (2:00 AM) ] ───► [ Apply WAL Archives 2:00 AM to 11:59 AM ] ──► [ Restored DB State (11:59:59 AM) ]</code></pre>
-      </div>
+- Readability
+- Complex query simplify
+- Recursive query support
+- Query organization
 
-      <div class="code-box">
-        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
-        <pre><code>-- PostgreSQL PITR Target Config in postgresql.conf / recovery.signal
-restore_command = 'cp /var/lib/postgresql/wal_archive/%f %p'
-recovery_target_time = '2026-08-11 11:59:59+06'
-recovery_target_action = 'promote'</code></pre>
-      </div>
-    `
-  },
-  {
-    id: "db-20",
-    category: "Database",
-    difficulty: "Advanced",
-    tags: ["Indexing", "B-Tree", "Performance"],
-    question: "B-Tree Indexing Mechanism, Composite Indexing, Leftmost Prefix Rule এবং Index Scan vs Index Seek কী?",
-    answer: `
-      <p>ডাটাবেজ ইঞ্জিন ডাটা সার্চ করার জন্য বিভিন্ন ইনডেক্স স্ক্যানিং স্ট্র্যাটেজি ব্যবহার করে। পারফরম্যান্স টিউনিংয়ের জন্য এগুলো জানা জরুরি।</p>
-      
-      <h4>১. Index Seek vs Index Scan vs Table Scan:</h4>
-      <ul>
-        <li><strong>Index Seek:</strong> ডাটাবেজ B-Tree ট্রাভার্স করে সরাসরি কাঙ্ক্ষিত রো-এর পেজ পয়েন্টারে পৌঁছায় ($O(\log N)$)। এটি সবচেয়ে দ্রুততম অপারেশন (যেমন: <code>WHERE primary_id = 500</code>)।</li>
-        <li><strong>Index Scan:</strong> ইনডেক্স স্ট্রাকচারের সম্পূর্ণ বা বিশাল অংশ সিকুয়েনশিয়ালি স্ক্যান করতে হয়। Index Seek-এর চেয়ে ধীর হলেও Full Table Scan-এর চেয়ে ভালো।</li>
-        <li><strong>Seq Scan / Full Table Scan:</strong> ইনডেক্স বাইপাস করে ডিস্ক থেকে সকল টেবিল পেজ রিড করা ($O(N)$)। বড় টেবিলের জন্য এটি মারাত্মক পারফরম্যান্স বটলনেক।</li>
-      </ul>
+Complex reporting query-তে CTE খুব useful।`,
+	},
 
-      <h4>২. Composite Indexing & Leftmost Prefix Rule:</h4>
-      <p>যখন একাধিক কলাম নিয়ে ইনডেক্স তৈরি করা হয় (যেমন: <code>INDEX(A, B, C)</code>), B-Tree প্রথমে কলাম <code>A</code> দিয়ে সর্ট করে, তারপর একই <code>A</code>-এর জন্য <code>B</code> দিয়ে, এবং শেষে <code>C</code> দিয়ে।</p>
-      <p><strong>Leftmost Prefix Rule:</strong> ক্যোয়ারীতে বামপাশের কলামগুলোর সিকোয়েন্স থাকতে হবে। <code>INDEX(A, B, C)</code> কেবল নিচের ফিল্টারগুলোতে ইনডেক্স ব্যবহার করতে পারবে:</p>
-      <ul>
-        <li><code>WHERE A = 1</code> (Uses Index)</li>
-        <li><code>WHERE A = 1 AND B = 2</code> (Uses Index)</li>
-        <li><code>WHERE A = 1 AND B = 2 AND C = 3</code> (Uses Index)</li>
-        <li><code>WHERE B = 2 AND C = 3</code> (<strong>CANNOT Use Index!</strong> কারণ <code>A</code> অনুপস্থিত)</li>
-      </ul>
+	{
+		id: "db-24",
+		category: "SQL",
+		difficulty: "Important",
+		tags: ["Window Function", "SQL"],
+		question: "Window Function কী?",
+		answer: `Window function rows collapse না করে related rows-এর উপর calculation করে।
 
-      <div class="code-box">
-        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
-        <pre><code>-- Creating Composite Index
-CREATE INDEX idx_orders_user_status_date ON orders(user_id, status, order_date);
+Example:
 
--- Query 1: Performs Optimal INDEX SEEK
-EXPLAIN ANALYZE 
-SELECT * FROM orders 
-WHERE user_id = 101 AND status = 'COMPLETED' AND order_date >= '2026-01-01';
+ROW_NUMBER()
+RANK()
+DENSE_RANK()
+SUM() OVER()
+AVG() OVER()
 
--- Query 2: Performs INDEX SCAN / SEQ SCAN (Violates Leftmost Prefix Rule)
-EXPLAIN ANALYZE 
-SELECT * FROM orders 
-WHERE status = 'COMPLETED'; -- Missing user_id!</code></pre>
-      </div>
-    `
-  },
-  {
-    id: "db-21",
-    category: "Database",
-    difficulty: "Advanced",
-    tags: ["Performance", "EXPLAIN ANALYZE", "Query Plan"],
-    question: "EXPLAIN ANALYZE দিয়ে SQL Query Execution Plan এবং Performance Bottlenecks কীভাবে চিহ্নিত করবেন?",
-    answer: `
-      <p>ডাটাবেজ পারফরম্যান্স অপ্টিমাইজেশনের প্রথম ধাপ হলো ডাটাবেজ ক্যোয়ারী প্ল্যানার (Query Planner) কীভাবে কোয়েরিটি এক্সিকিউট করছে তা বিশ্লেষণ করা। <code>EXPLAIN ANALYZE</code> কোয়েরিটি প্রকৃতপক্ষে রান করে এবং এর বিস্তারিত **Execution Tree** ও সময়ের হিসাব দেয়।</p>
-      
-      <h4>১. EXPLAIN ANALYZE-এর প্রধান মেট্রিকসমূহ:</h4>
-      <ul>
-        <li><strong>Cost (Estimates):</strong> <code>cost=0.28..8.29</code> — ১ম মানটি হলো ফার্স্ট রো (First Row) ফেরত পেতে আনুমানিক কম্পিউটেশনাল কস্ট এবং ২য় মানটি হলো সম্পূর্ণ রেজাল্ট আনতে মোট কস্ট।</li>
-        <li><strong>Actual Time:</strong> <code>actual time=0.035..0.036</code> — প্রথম রো পেতে লাগা প্রকৃত সময় এবং সম্পূর্ণ প্রসেস শেষ হতে লাগা মোট সময় (মিলিসেকেন্ডে)।</li>
-        <li><strong>Rows:</strong> প্ল্যানারের আনুমানিক রো সংখ্যা বনাম <code>actual rows</code> (প্রকৃত রেজাল্ট রো সংখ্যা)। এই দুটির মধ্যে বিশাল পার্থক্য থাকলে ডাটাবেজ স্ট্যাটিস্টিক্স (Table Statistics) আউটডেটেড হতে পারে।</li>
-        <li><strong>Buffers (RAM vs Disk):</strong> <code>shared hit</code> মানে মেমোরি (Buffer Pool) থেকে ডাটা পাওয়া গেছে, আর <code>shared read</code> মানে ডাটা ডিস্ক থেকে রিড করতে হয়েছে (ধীরগতি)।</li>
-      </ul>
+Example:
 
-      <h4>২. কমন পারফরম্যান্স বটলনেক এবং সমাধান:</h4>
-      <table>
-        <tr>
-          <th>নোড টাইপ (Node Type)</th>
-          <th>সমস্যা/কারণ</th>
-          <th>অপ্টিমাইজেশন কৌশল</th>
-        </tr>
-        <tr>
-          <td><code>Seq Scan / Table Scan</code></td>
-          <td>ফিল্টার ফিল্ডে ইনডেক্স নেই অথবা টেবিল খুব ছোট।</td>
-          <td>ফিল্টার করা কলামের ওপর B-Tree/Composite Index তৈরি করা।</td>
-        </tr>
-        <tr>
-          <td><code>Rows Removed by Filter</code></td>
-          <td>ইনডেক্স ব্যবহার না করে অনেক রো রিড করে ফিল্টারে ড্রপ করা হচ্ছে।</td>
-          <td><code>WHERE</code> কন্ডিশনে ব্যবহৃত কলামগুলোতে ইনডেক্স যুক্ত করা।</td>
-        </tr>
-        <tr>
-          <td><code>External Sort / Disk Sort</code></td>
-          <td><code>ORDER BY</code> প্রসেস করার জন্য মেমোরি (work_mem) অপর্যাপ্ত, তাই ডিস্কে টেম্প ফাইল তৈরি হচ্ছে।</td>
-          <td><code>work_mem</code> সাইজ বাড়ানো অথবা সর্টেড কলামে ইনডেক্স বসানো।</td>
-        </tr>
-        <tr>
-          <td><code>Nested Loop (Large Data)</code></td>
-          <td>বড় দুটি টেবিল জয়েন করার সময় চাইল্ড টেবিলে ইনডেক্স না থাকা।</td>
-          <td>Foreign Key বা Join-Key তে ইনডেক্স যোগ করা যেন Hash Join বা Index Seek ব্যবহার করে।</td>
-        </tr>
-      </table>
+SELECT
+  employee_id,
+  department_id,
+  salary,
+  RANK() OVER(
+    PARTITION BY department_id
+    ORDER BY salary DESC
+  ) AS rank
+FROM employees;
 
-      <h4>প্র্যাকটিক্যাল কোড ও আউটপুট অ্যানালাইসিস:</h4>
-      <div class="code-box">
-        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
-        <pre><code>-- 1. Executing EXPLAIN ANALYZE with Buffers info
-EXPLAIN (ANALYZE, BUFFERS, VERBOSE)
-SELECT o.id, o.total_amount, u.email
-FROM orders o
-JOIN users u ON o.user_id = u.id
-WHERE o.order_date >= '2026-01-01' AND o.status = 'COMPLETED'
-ORDER BY o.total_amount DESC
-LIMIT 10;
+এটি প্রতি department-এর salary ranking করতে পারে।`,
+	},
 
-/* Sample Execution Output Analysis:
-Limit  (cost=1250.40..1250.43 rows=10 width=40) (actual time=45.120..45.125 rows=10 loops=1)
-  Buffers: shared hit=420 read=15
-  -> Sort  (cost=1250.40..1265.10 rows=5880 width=40) (actual time=45.118..45.120 rows=10 loops=1)
-        Sort Key: o.total_amount DESC
-        Sort Method: quicksort  Memory: 1024kB
-        -> Hash Join  (cost=120.00..1100.50 rows=5880 width=40) (actual time=3.100..40.250 rows=5880 loops=1)
-              Hash Cond: (o.user_id = u.id)
-              -> Seq Scan on orders o  (cost=0.00..950.00 rows=5880 width=24) (actual time=0.050..32.100 rows=5880 loops=1)
-                    Filter: ((order_date >= '2026-01-01'::date) AND ((status)::text = 'COMPLETED'::text))
-                    Rows Removed by Filter: 150000 -- ◄── BOTTLENECK: 150k rows read & dropped!
-              -> Hash  (cost=70.00..70.00 rows=4000 width=24) (actual time=2.900..2.900 rows=4000 loops=1)
-                    -> Seq Scan on users u
-*/
+	{
+		id: "db-25",
+		category: "SQL",
+		difficulty: "Very Important",
+		tags: ["UNION", "UNION ALL"],
+		question: "UNION এবং UNION ALL-এর মধ্যে পার্থক্য কী?",
+		answer: `UNION duplicate rows remove করে।
 
--- 2. Fixing the Bottleneck with a Composite Partial Index
-CREATE INDEX idx_orders_date_status_incl 
-ON orders (order_date, status) 
-INCLUDE (user_id, total_amount)
-WHERE status = 'COMPLETED';
+UNION ALL duplicate rows remove করে না।
 
--- Re-running EXPLAIN ANALYZE now changes 'Seq Scan' to 'Index Only Scan' reducing time from 45ms to 0.8ms!</code></pre>
-      </div>
-    `
-  },
-  {
-    id: "db-22",
-    category: "Database",
-    difficulty: "Advanced",
-    tags: ["Optimization", "Sharding", "Partitioning"],
-    question: "Database Partitioning (Range, List, Hash) vs Database Sharding-এর মধ্যে মৌলিক পার্থক্য কী?",
-    answer: `
-      <p>বিশাল পরিমাণের ডাটা সেট (মাল্টি-টেরাবাইট) এবং হাই-থ্রুপুট অ্যাপ্লিকেশন সামলানোর জন্য ডাটা বিভাজন (Data Division) করা হয়। তবে **Table Partitioning** এবং **Database Sharding** দুটি সম্পূর্ণ আলাদা স্তরের সমাধান।</p>
-      
-      <h4>১. মৌলিক পার্থক্যসমূহ:</h4>
-      <table>
-        <tr>
-          <th>বৈশিষ্ট্য</th>
-          <th>Table Partitioning (Vertical / Horizontal)</th>
-          <th>Database Sharding</th>
-        </tr>
-        <tr>
-          <td><strong>আর্কিটেকচারাল লেভেল</strong></td>
-          <td>একক ডাটাবেজ ইন্সট্যান্স ও একই ফিজিক্যাল সার্ভারের ভেতরের টেবিল বিভাজন।</td>
-          <td>একাধিক স্বতন্ত্র ফিজিক্যাল/ভার্চুয়াল সার্ভার (Multi-Node Clusters) জুড়ে ডিস্ট্রিবিউটেড বিভাজন।</td>
-        </tr>
-        <tr>
-          <td><strong>কম্পিউট রিসোর্স (CPU/RAM)</strong></td>
-          <td>সকল পার্টিশন একই সার্ভারের CPU, RAM এবং I/O শেয়ার করে।</td>
-          <td>প্রতিটি শার্ডের স্বতন্ত্র CPU, RAM, Disk I/O এবং ডাটাবেজ ইঞ্জিন থাকে।</td>
-        </tr>
-        <tr>
-          <td><strong>স্কেলিং পদ্ধতি</strong></td>
-          <td><strong>Vertical Scaling (Scale-Up):</strong> বড় সার্ভার বা RAM যুক্ত করতে হয়।</td>
-          <td><strong>Horizontal Scaling (Scale-Out):</strong> নতুন নতুন কমদামী নোড/শার্ড ক্লাস্টারে যুক্ত করা যায়।</td>
-        </tr>
-        <tr>
-          <td><strong>জটিলতা</strong></td>
-          <td>খুব কম। ডাটাবেজ ইঞ্জিন স্বয়ংক্রিয়ভাবে পার্টিশন প্রুনিং (Partition Pruning) করে।</td>
-          <td>অত্যন্ত জটিল। Cross-Shard Joins, Distributed Transactions (2PC) এবং Rebalancing সামলাতে হয়।</td>
-        </tr>
-      </table>
+তাই UNION ALL সাধারণত faster কারণ duplicate elimination করতে হয় না।
 
-      <h4>২. Partitioning-এর প্রকারভেদ (Range, List, Hash):</h4>
-      <ul>
-        <li><strong>Range Partitioning:</strong> নির্দিষ্ট সীমার ওপর ভিত্তি করে (যেমন: তারিখ বা সাল অনুযায়ী)। উদাহরণ: প্রতি মাসের ডাটা আলাদা পার্টিশনে রাখা।</li>
-        <li><strong>List Partitioning:</strong> সুনির্দিষ্ট ক্যাটাগরি বা ডিসক্রিট ভ্যালুর ওপর ভিত্তি করে (যেমন: দেশ বা রিজিওন অনুযায়ী — 'BD', 'US', 'IN')।</li>
-        <li><strong>Hash Partitioning:</strong> একটি কলামকে (যেমন <code>user_id</code>) হ্যাশ ফাংশন দিয়ে ভাগ করে সমপরিমাণ ডাটায় বন্টন করা।</li>
-      </ul>
+যদি duplicate intentionally valid হয় এবং শুধু combine করতে চান:
 
-      <h4>৩. আর্কিটেকচারাল ডায়াগ্রাম:</h4>
-      <div class="code-box">
-        <div class="code-header"><span>text</span><button class="copy-btn">Copy</button></div>
-        <pre><code>[ Single Database Instance ]                      [ Distributed Sharded Cluster ]
-  └── Table: Orders                                 ├── Shard 1 (Server A) ──► Orders (User 1-1M)
-      ├── Partition 2024 (File A)                   ├── Shard 2 (Server B) ──► Orders (User 1M-2M)
-      ├── Partition 2025 (File B)                   └── Shard 3 (Server C) ──► Orders (User 2M-3M)
-      └── Partition 2026 (File C)                         ▲
-           ▲                                              │
-           └─ Partition Pruning (DB Engine handles)       └─ Shard Router / Proxy (e.g., Vitess / Citus)</code></pre>
-      </div>
+UNION ALL
 
-      <h4>প্র্যাকটিক্যাল SQL উদাহরণ (Declarative Range Partitioning in PostgreSQL):</h4>
-      <div class="code-box">
-        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
-        <pre><code>-- 1. Create Parent Partitioned Table
-CREATE TABLE audit_logs (
-    id BIGSERIAL,
-    user_id INT NOT NULL,
-    action VARCHAR(50),
-    created_at TIMESTAMPTZ NOT NULL
-) PARTITION BY RANGE (created_at);
+ব্যবহার করা ভালো।`,
+	},
 
--- 2. Create Child Partitions for Specific Ranges
-CREATE TABLE audit_logs_y2026m01 PARTITION OF audit_logs
-    FOR VALUES FROM ('2026-01-01 00:00:00+00') TO ('2026-02-01 00:00:00+00');
+	{
+		id: "db-26",
+		category: "SQL",
+		difficulty: "Important",
+		tags: ["NULL", "SQL"],
+		question: "SQL NULL কী এবং কেন এটি tricky?",
+		answer: `NULL মানে unknown বা missing value।
 
-CREATE TABLE audit_logs_y2026m02 PARTITION OF audit_logs
-    FOR VALUES FROM ('2026-02-01 00:00:00+00') TO ('2026-03-01 00:00:00+00');
+NULL:
 
--- Query Planner automatically uses 'Partition Pruning' to scan ONLY audit_logs_y2026m01
-SELECT * FROM audit_logs 
-WHERE created_at >= '2026-01-15' AND created_at < '2026-01-20';</code></pre>
-      </div>
-    `
-  },
-  {
-    id: "db-23",
-    category: "Database",
-    difficulty: "Advanced",
-    tags: ["PostgreSQL", "JSONB", "GIN Index"],
-    question: "PostgreSQL JSON vs JSONB, GIN Indexing, এবং Expression Indexing কীভাবে সার্চ গতি বাড়ায়?",
-    answer: `
-      <p>PostgreSQL হলো একটি হাইব্রিড রিলেশনাল ডাটাবেজ যা চমৎকার ডায়নামিক NoSQL/Document স্টোরেজ সমর্থন করে। এটি ২ প্রকার JSON টাইপ প্রদান করে: <code>JSON</code> এবং <code>JSONB</code>।</p>
-      
-      <h4>১. JSON vs JSONB তুলনামূলক পার্থক্য:</h4>
-      <table>
-        <tr>
-          <th>বৈশিষ্ট্য</th>
-          <th>JSON (Plain Text Format)</th>
-          <th>JSONB (Binary Format)</th>
-        </tr>
-        <tr>
-          <td><strong>স্টোরেজ ফরম্যাট</strong></td>
-          <td>ইনপুট স্ট্রিংয়ের হুবহু প্লেইন টেক্সট কপি স্টোর করে (হোয়াইটস্পেস ও কি-অর্ডারসহ)।</td>
-          <td>পার্স করা, ডি-কমপ্রেসড বাইনারি ফরম্যাটে স্টোর করে (হোয়াইটস্পেস বাদ যায়, কি সর্টেড থাকে)।</td>
-        </tr>
-        <tr>
-          <td><strong>ইনসার্ট গতি</strong></td>
-          <td>খুবই ফাস্ট (কোনো বাইনারি কনভার্সন বা পার্সিং লাগে না)।</td>
-          <td>সামান্য ধীর (ইনসার্ট করার সময় বাইনারি ট্রি অবজেক্ট তৈরি করতে হয়)।</td>
-        </tr>
-        <tr>
-          <td><strong>কোয়েরি/রিড গতি</strong></td>
-          <td>খুব ধীর। প্রতিবার প্রসেস করার সময় টেক্সট রি-পার্স করতে হয়।</td>
-          <td>অত্যন্ত দ্রুত। পার্সিং ছাড়াই সরাসরি বাইনারি নোড রিড করা যায়।</td>
-        </tr>
-        <tr>
-          <td><strong>ইনডেক্সিং</strong></td>
-          <td>সরাসরি GIN ইনডেক্স করা অসম্ভব।</td>
-          <td>সম্পূর্ণ বাইনারি অবজেক্টে <strong>GIN (Generalized Inverted Index)</strong> সাপোর্ট করে।</td>
-        </tr>
-      </table>
+0 নয়
+empty string নয়
+false নয়
 
-      <h4>২. GIN (Generalized Inverted Index) কীভাবে কাজ করে?</h4>
-      <p>GIN হলো এক ধরনের ইনভার্টেড ইনডেক্স। JSONB ডকুমেন্টের প্রতিটি কী এবং ভ্যালুকে আলাদা আলাদা সাব-আইটেমে ভেঙে একটি B-Tree ইনডেক্স ট্রি তৈরি করে। ফলে <code>@></code> (Containment Operator) দিয়ে অনুসন্ধান করলে সেকেন্ডের ভগ্নাংশে রেজাল্ট পাওয়া যায়।</p>
+তাই:
 
-      <h4>প্র্যাকটিক্যাল কোড এবং ইনডেক্সিং কৌশল:</h4>
-      <div class="code-box">
-        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
-        <pre><code>-- Create Table with JSONB column
-CREATE TABLE user_profiles (
-    id SERIAL PRIMARY KEY,
-    username VARCHAR(50),
-    attributes JSONB
-);
+WHERE column = NULL
 
--- Strategy A: Full GIN Indexing on whole JSONB Column
--- Uses default 'jsonb_ops' (Indexes both keys and values)
-CREATE INDEX idx_profiles_attributes_gin ON user_profiles USING GIN (attributes);
+সঠিক নয়।
 
--- Strategy B: Specialized GIN Indexing using 'jsonb_path_ops' (Smaller index size, faster matching)
-CREATE INDEX idx_profiles_attributes_path ON user_profiles USING GIN (attributes jsonb_path_ops);
+ব্যবহার করতে হবে:
 
--- Query using Containment Operator '@>' (Utilizes GIN Index!)
-SELECT * FROM user_profiles 
-WHERE attributes @> '{"role": "admin", "settings": {"theme": "dark"}}';
+WHERE column IS NULL
 
--- Strategy C: Expression Indexing on a Specific Nested JSON Field
--- Use when you only frequently query ONE specific nested field
-CREATE INDEX idx_profiles_city 
-ON user_profiles ((attributes->'address'->>'city'));
+অথবা:
 
--- Query using Expression Index:
-SELECT * FROM user_profiles 
-WHERE attributes->'address'->>'city' = 'Dhaka';</code></pre>
-      </div>
-    `
-  },
-  {
-    id: "db-24",
-    category: "Database",
-    difficulty: "Intermediate",
-    tags: ["Database", "SQL", "Query Optimization", "Senior"],
-    question: "SQL-এ Subquery vs JOIN vs CTE — পারফরম্যান্সের দিক থেকে কখন কোনটি বেছে নেবেন?",
-    answer: `
-      <p>একই বিজনেস লজিক অর্জন করতে SQL-এ তিনটি ভিন্ন স্টাইল ব্যবহার করা যায় — Subquery, JOIN, এবং Common Table Expressions (CTE)। তবে এদের মেমোরি কনসাম্পশন, এক্সিকিউশন স্ট্র্যাটেজি এবং পঠনযোগ্যতায় বিশাল তফাৎ রয়েছে।</p>
-      
-      <h4>১. তুলনামূলক বিশ্লেষণ ও পারফরম্যান্স মেট্রিক্স:</h4>
-      <ul>
-        <li><strong>Correlated Subquery (ঝুঁকিপূর্ণ):</strong> যে Subquery ভেতরের কোয়েরি চালানোর জন্য বাইরের ক্যোয়ারীর রো-এর ওপর নির্ভর করে। এটি বাইরের প্রতি সারির জন্য পুনরায় চালিত হতে পারে ($O(N \times M)$)। এটি সবচেয়ে ধীরগতির কৌশল।</li>
-        <li><strong>JOINs (সর্বোত্তম পারফরম্যান্স):</strong> ক্যোয়ারী প্ল্যানারদের (Postgres/MySQL) জন্য অপটিমাইজ করা সবচেয়ে সহজ। Hash Join বা Merge Join ব্যবহার করে একবারে পুরো ডেটাসেট ইন-মেমোরিতে প্রসেস করে।</li>
-        <li><strong>CTE (WITH Clause - Readability & Modularization):</strong> কোড সুন্দর ও মডুলার করে। <strong>PostgreSQL 12-এর পর থেকে</strong> ক্যোয়ারী প্ল্যানার CTE-কে স্বয়ংক্রিয়ভাবে Inline Query হিসেবে জেনারেট করে JOIN-এর সমান স্পিড দেয়। তবে <code>MATERIALIZED</code> কি-ওয়ার্ড দিলে CTE রেজাল্ট ইন-মেমোরি টেম্প টেবিলে সেভ করে রাখা হয়।</li>
-      </ul>
+WHERE column IS NOT NULL
 
-      <h4>২. কখন কোনটি বেছে নেবেন?</h4>
-      <table>
-        <tr>
-          <th>টেকনিক</th>
-          <th>কখন ব্যবহার করবেন?</th>
-          <th>কখন এড়িয়ে চলবেন?</th>
-        </tr>
-        <tr>
-          <td><strong>JOIN</strong></td>
-          <td>একাধিক রিলেশনাল টেবিলের ডাটা মার্চ করা এবং হাই-পারফরম্যান্স প্রোডাকশন কোয়েরিতে।</td>
-          <td>অত্যন্ত জটিল নেস্টেড লজিক যা পড়তে কঠিন হয়ে যায়।</td>
-        </tr>
-        <tr>
-          <td><strong>CTE</strong></td>
-          <td>রিকার্সিভ কোয়েরি (Hierarchy) চালাতে এবং বড় জটিল কোয়েরিকে ছোট ছোট রিডেবল ধাপে সাজাতে।</td>
-          <td>খুব ছোট ওয়ান-লাইনার কোয়েরিতে অনাবশ্যক ব্যবহার।</td>
-        </tr>
-        <tr>
-          <td><strong>Subquery</strong></td>
-          <td><code>EXISTS</code> বা <code>IN</code> কন্ডিশন দিয়ে সাধারণ অস্তিত্ব যাচাইয়ের জন্য (Uncorrelated)।</td>
-          <td>লুপের ভেতরে থাকা Correlated Subquery হিসেবে (<code>SELECT (SELECT ...) FROM ...</code>)।</td>
-        </tr>
-      </table>
+NULL-এর কারণে three-valued logic তৈরি হয়:
 
-      <h4>প্র্যাকটিক্যাল কোড তুলনা (Subquery vs JOIN vs CTE):</h4>
-      <div class="code-box">
-        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
-        <pre><code>-- ❌ BAD: Correlated Subquery (Re-executes inner query for EVERY outer row -> Slow)
-SELECT u.name, 
-       (SELECT AVG(total_amount) FROM orders WHERE user_id = u.id) as avg_order
-FROM users u;
+TRUE
+FALSE
+UNKNOWN
 
--- ✅ GOOD: Optimized JOIN with GROUP BY (Processes dataset in single pass)
-SELECT u.name, COALESCE(AVG(o.total_amount), 0) as avg_order
-FROM users u
-LEFT JOIN orders o ON u.id = o.user_id
-GROUP BY u.id, u.name;
+Interview-এ এটি খুব common প্রশ্ন।`,
+	},
 
--- ✅ BEST FOR READABILITY: CTE (Auto-inlined in Postgres 12+)
-WITH UserOrderStats AS (
-    SELECT user_id, AVG(total_amount) as avg_order
-    FROM orders
-    GROUP BY user_id
-)
-SELECT u.name, COALESCE(uos.avg_order, 0) as avg_order
-FROM users u
-LEFT JOIN UserOrderStats uos ON u.id = uos.user_id;</code></pre>
-      </div>
-    `
-  },
-  {
-    id: "db-25",
-    category: "Database",
-    difficulty: "Advanced",
-    tags: ["Concurrency", "Pessimistic Locking", "Optimistic Locking"],
-    question: "Pessimistic Locking (SELECT ... FOR UPDATE) vs Optimistic Locking (Version Column) কখন কোনটা ব্যবহার করবেন?",
-    answer: `
-      <p>কনকারেন্ট সিস্টেমে যখন একাধিক ইউজার বা ব্যাকগ্রাউন্ড সার্ভিস একই সাথে একই রো আপডেট করতে চায়, তখন ডাটা রেস কন্ডিশন (Data Race Condition) এবং <strong>Lost Update Problem</strong> তৈরি হয়। এটি সমাধান করতে ২টি কৌশল ব্যবহৃত হয়।</p>
-      
-      <h4>১. Pessimistic Locking ( pessimistic = সংশয়বাদী ):</h4>
-      <p>ধরে নেওয়া হয় কনফ্লিক্ট বা সংঘাত নিশ্চিত ঘটবেই। তাই ডাটা পড়ার সময়ই ডাটাবেজের সারিতে <code>SELECT ... FOR UPDATE</code> চালিয়ে এক্সক্লুসিভ লক বসানো হয়। বর্তমান ট্রানজেকশন <code>COMMIT</code> বা <code>ROLLBACK</code> না করা পর্যন্ত অন্য কেউ ওই রো পড়তে বা আপডেট করতে পারে না (ব্লক হয়ে থাকে)।</p>
-      <ul>
-        <li><strong>উপযোগী ক্ষেত্র:</strong> হাই-কনফ্লিক্ট এনভায়রনমেন্ট, ফাইনান্সিয়াল ব্যালেন্স ট্রান্সফার, ফ্ল্যাশ সেলে লিমিটেড স্টক বাইং, সিট বুকিং সিস্টেম।</li>
-        <li><strong>অসুবিধা:</strong> থ্রুপুট কমে যায় এবং লক অর্ডারিং ভুল হলে Deadlock সৃষ্টি হতে পারে।</li>
-      </ul>
+	{
+		id: "db-27",
+		category: "SQL",
+		difficulty: "Very Important",
+		tags: ["DELETE", "TRUNCATE", "DROP"],
+		question: "DELETE, TRUNCATE এবং DROP-এর মধ্যে পার্থক্য কী?",
+		answer: `DELETE:
 
-      <h4>২. Optimistic Locking ( optimistic = আশাবাদী ):</h4>
-      <p>ধরে নেওয়া হয় সংঘাত ঘটার সম্ভাবনা খুব কম। তাই ডাটা রিড করার সময় কোনো ডাটাবেজ লক বসানো হয় না। টেবিলে একটি <code>version</code> বা <code>updated_at</code> কলাম ট্র্যাক রাখা হয়। ডাটা আপডেট করার সময় অপটিমিস্টিক চেক চালানো হয়: <code>WHERE id = x AND version = old_version</code>। যদি মাঝপথে অন্য কেউ ডাটা বদলে ফেলে, তবে এফেক্টেড রো সংখ্যা ০ হবে এবং অ্যাপ্লিকেশন থেকে এক্সেপশন থ্রো করা হবে।</p>
-      <ul>
-        <li><strong>উপযোগী ক্ষেত্র:</strong> লো-কনফ্লিক্ট এনভায়রনমেন্ট, সিএমএস আর্টিকেলে কন্টেন্ট এডিটিং, ইউজার প্রোফাইল সেটিংস।</li>
-        <li><strong>অসুবিধা:</strong> কনফ্লিক্ট বেশি হলে বারবার ট্রানজেকশন ফেল করবে এবং অ্যাপ থেকে রিট্রি (Retry) প্রসেস চালাতে হবে।</li>
-      </ul>
+Table-এর selected rows delete করে।
 
-      <h4>প্র্যাকটিক্যাল কোড উদাহরণসমূহ:</h4>
-      <div class="code-box">
-        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
-        <pre><code>-- A. Pessimistic Locking with 'SKIP LOCKED' (Ideal for High Concurrency Job Queue)
+DELETE FROM users
+WHERE id = 10;
+
+TRUNCATE:
+
+Table-এর সব rows দ্রুত remove করে এবং সাধারণত table structure রাখে।
+
+TRUNCATE TABLE users;
+
+DROP:
+
+Table structure-সহ object remove করে।
+
+DROP TABLE users;
+
+সাধারণভাবে:
+
+DELETE → rows
+TRUNCATE → all rows
+DROP → table/object`,
+	},
+
+	// ============================================================
+	// INDEXING
+	// ============================================================
+
+	{
+		id: "db-28",
+		category: "Database",
+		difficulty: "Very Important",
+		tags: ["Index", "Performance"],
+		question: "Database Index কী?",
+		answer: `Index হলো database-এর data retrieval দ্রুত করার জন্য তৈরি করা auxiliary data structure।
+
+Without index:
+
+Query
+ ↓
+Scan many rows
+ ↓
+Find matching row
+
+With index:
+
+Query
+ ↓
+Index lookup
+ ↓
+Relevant row/location
+ ↓
+Data
+
+Index সাধারণত read performance বাড়ায়।
+
+কিন্তু trade-off:
+
+- Extra disk space
+- INSERT slower
+- UPDATE slower
+- DELETE maintenance cost
+
+তাই সব column-এ index দেওয়া উচিত নয়।`,
+	},
+
+	{
+		id: "db-29",
+		category: "Database",
+		difficulty: "Very Important",
+		tags: ["B-Tree", "Index"],
+		question: "B-Tree/B+Tree Index কী?",
+		answer: `Relational database-এ B-Tree family index খুব common।
+
+এটি balanced tree structure ব্যবহার করে efficient search করতে সাহায্য করে।
+
+Concept:
+
+             Root
+            /    \
+          Node   Node
+         /  \    /  \
+       Leaf Leaf Leaf Leaf
+
+B+Tree-তে data references leaf level-এ সংগঠিত থাকে এবং leaf nodes linked থাকতে পারে।
+
+এটি efficient:
+
+- Equality search
+- Range search
+- ORDER BY
+- Prefix-related operations
+
+যেমন:
+
+WHERE age BETWEEN 20 AND 30
+
+Index range scan করতে পারে।`,
+	},
+
+	{
+		id: "db-30",
+		category: "Database",
+		difficulty: "Very Important",
+		tags: ["Clustered Index", "Primary Key"],
+		question: "Clustered Index কী?",
+		answer: `Clustered index table-এর data storage/order-এর সাথে closely associated।
+
+InnoDB/MySQL-এ primary key clustered index হিসেবে ব্যবহৃত হয়।
+
+Concept:
+
+Primary Key
+ ↓
+Clustered Index
+ ↓
+Row data
+
+তাই primary key নির্বাচন গুরুত্বপূর্ণ।
+
+একটি table-এর clustered storage order একটিই হতে পারে।`,
+	},
+
+	{
+		id: "db-31",
+		category: "Database",
+		difficulty: "Very Important",
+		tags: ["Secondary Index", "Non-Clustered"],
+		question: "Secondary/Non-Clustered Index কী?",
+		answer: `Primary/clustered index ছাড়া অন্য column-এর উপর তৈরি index secondary index।
+
+Example:
+
+CREATE INDEX idx_users_email
+ON users(email);
+
+Query:
+
+WHERE email = 'a@test.com'
+
+এই index ব্যবহার করতে পারে।
+
+In clustered-storage systems, secondary index থেকে matching primary key/row locator পাওয়া যায় এবং পরে actual row fetch হতে পারে।`,
+	},
+
+	{
+		id: "db-32",
+		category: "Database",
+		difficulty: "Very Important",
+		tags: ["Composite Index"],
+		question: "Composite Index কী?",
+		answer: `একাধিক column নিয়ে তৈরি index হলো composite index।
+
+Example:
+
+CREATE INDEX idx_orders_user_status
+ON orders(user_id, status);
+
+এটি useful হতে পারে:
+
+WHERE user_id = ?
+AND status = ?
+
+Index order গুরুত্বপূর্ণ।
+
+Index:
+
+(user_id, status)
+
+সাধারণত user_id দিয়ে filtering-এর ক্ষেত্রে ব্যবহারযোগ্য, কিন্তু শুধু status দিয়ে query করলে একই index সবসময় efficient হবে না।
+
+এটিকে leftmost-prefix principle-এর সাথে relate করা হয়।`,
+	},
+
+	{
+		id: "db-33",
+		category: "Database",
+		difficulty: "Very Important",
+		tags: ["Covering Index"],
+		question: "Covering Index কী?",
+		answer: `যখন query-এর প্রয়োজনীয় columns index-এর মধ্যেই পাওয়া যায় এবং table row-তে আলাদা lookup করতে হয় না, তখন index query cover করতে পারে।
+
+Example:
+
+INDEX(user_id, status, created_at)
+
+Query:
+
+SELECT user_id, status, created_at
+FROM orders
+WHERE user_id = 10;
+
+Index থেকেই প্রয়োজনীয় data পাওয়া যেতে পারে।
+
+এতে table lookup কমে performance improve হতে পারে।`,
+	},
+
+	{
+		id: "db-34",
+		category: "Database",
+		difficulty: "Very Important",
+		tags: ["Query Optimization", "EXPLAIN"],
+		question: "EXPLAIN কী?",
+		answer: `EXPLAIN query optimizer কীভাবে query execute করতে চায় তা দেখায়।
+
+এতে দেখা যেতে পারে:
+
+- Access type
+- Possible indexes
+- Chosen index
+- Estimated rows
+- Join strategy
+- Extra operations
+
+Example:
+
+EXPLAIN
+SELECT *
+FROM orders
+WHERE user_id = 10;
+
+Performance debugging-এর জন্য EXPLAIN অত্যন্ত গুরুত্বপূর্ণ।
+
+Actual runtime behavior বুঝতে database-specific EXPLAIN ANALYZE-ও useful হতে পারে।`,
+	},
+
+	{
+		id: "db-35",
+		category: "Database",
+		difficulty: "Senior",
+		tags: ["SARGable", "Performance"],
+		question: "SARGable query কী?",
+		answer: `SARGable query এমন query যেখানে database index efficiently ব্যবহার করতে পারে।
+
+Bad:
+
+WHERE YEAR(created_at) = 2026
+
+কারণ column-এর উপর function প্রয়োগ করা হয়েছে।
+
+Better:
+
+WHERE created_at >= '2026-01-01'
+AND created_at < '2027-01-01'
+
+এতে index range scan-এর সুযোগ বেশি থাকে।
+
+Performance tuning-এ function-on-column, implicit conversion এবং leading wildcard-এর মতো patterns খেয়াল করতে হয়।`,
+	},
+
+	// ============================================================
+	// TRANSACTION & ACID
+	// ============================================================
+
+	{
+		id: "db-36",
+		category: "Database",
+		difficulty: "Very Important",
+		tags: ["Transaction", "ACID"],
+		question: "Database Transaction কী?",
+		answer: `Transaction হলো এক বা একাধিক database operation-এর logical unit।
+
+Example:
+
+Transfer:
+
+Account A
+ ↓
+-1000
+
+Account B
+ ↓
++1000
+
+দুটো operation সফল হলে COMMIT।
+
+কোনো operation fail হলে ROLLBACK।
+
+Goal:
+
+একটি consistent business operation হিসেবে changes handle করা।`,
+	},
+
+	{
+		id: "db-37",
+		category: "Database",
+		difficulty: "Very Important",
+		tags: ["ACID"],
+		question: "ACID কী?",
+		answer: `ACID:
+
+A = Atomicity
+C = Consistency
+I = Isolation
+D = Durability
+
+Atomicity:
+সব operation হবে অথবা কিছুই হবে না।
+
+Consistency:
+Transaction database constraints/invariants maintain করবে।
+
+Isolation:
+Concurrent transaction একে অন্যের intermediate state থেকে appropriately isolated থাকবে।
+
+Durability:
+Commit হওয়ার পরে data crash-এর পরেও recoverable থাকবে।
+
+Banking/payment system-এ ACID অত্যন্ত গুরুত্বপূর্ণ।`,
+	},
+
+	{
+		id: "db-38",
+		category: "Database",
+		difficulty: "Very Important",
+		tags: ["Commit", "Rollback"],
+		question: "COMMIT এবং ROLLBACK কী?",
+		answer: `COMMIT:
+
+Transaction-এর changes permanently commit করে।
+
+ROLLBACK:
+
+Transaction-এর uncommitted changes undo করে।
+
+Example:
+
 BEGIN;
 
-SELECT id, payload 
-FROM background_jobs 
-WHERE status = 'PENDING' 
-LIMIT 1 
-FOR UPDATE SKIP LOCKED; -- ◄── Other workers skip locked rows immediately without waiting!
+UPDATE accounts
+SET balance = balance - 1000
+WHERE id = 1;
 
-UPDATE background_jobs SET status = 'PROCESSING' WHERE id = 10;
+UPDATE accounts
+SET balance = balance + 1000
+WHERE id = 2;
 
 COMMIT;
 
--- B. Optimistic Locking Query Pattern
--- 1. Read row: fetch id=101, stock=50, version=3
-SELECT id, stock, version FROM products WHERE id = 101;
-
--- 2. Perform business logic in application, then update with version check:
-UPDATE products 
-SET stock = stock - 1, version = version + 1 
-WHERE id = 101 AND version = 3; -- ◄── If rows_affected == 0, conflict detected! Rollback app logic.</code></pre>
-      </div>
-    `
-  },
-  {
-    id: "db-26",
-    category: "Database",
-    difficulty: "Intermediate",
-    tags: ["CTE", "WITH RECURSIVE", "Hierarchical"],
-    question: "Common Table Expressions (CTE) এবং WITH RECURSIVE দিয়ে অসীম নেস্টেড ক্যাটাগরি ট্রি (Tree Structure) কীভাবে কোয়েরি করবেন?",
-    answer: `
-      <p>ই-কমার্স ওয়েবসাইটে ক্যাটাগরি এবং সাব-ক্যাটাগরি অসীম লেভেল পর্যন্ত নেস্টেড থাকতে পারে (যেমন: <code>Electronics -> Computers -> Laptops -> Gaming Laptops</code>)। রিলেশনাল ডাটাবেজে প্রতিটি চাইল্ড রো-তে <code>parent_id</code> স্টোর করা হয়। এই ধরনের ট্রি স্ট্রাকচার ডাটা এক কোয়েরিতে তুলে আনতে <code>WITH RECURSIVE</code> ব্যবহার করা হয়।</p>
-      
-      <h4>WITH RECURSIVE-এর ৩টি ধাপ:</h4>
-      <ol>
-        <li><strong>Anchor Query (Base Case):</strong> রুট বা টপ-লেভেল ক্যাটাগরি (যেগুলোর <code>parent_id IS NULL</code>) খুঁজে বের করে। এটি রিকার্শনের শুরু।</li>
-        <li><strong>Recursive Query:</strong> <code>UNION ALL</code> দিয়ে যুক্ত থাকে। এটি আগের সাইকেলের রেজাল্টের সাথে প্যারেন্ট-চাইল্ড রিলেশন জয়েন করে পরবর্তী লেভেলের চাইল্ড খুঁজে আনে।</li>
-        <li><strong>Termination Condition:</strong> যখন কোনো চাইল্ড রো খুঁজে পাওয়া যায় না, রিকার্শন স্বয়ংক্রিয়ভাবে বন্ধ হয়ে যায়।</li>
-      </ol>
-
-      <h4>প্র্যাকটিক্যাল কোড (Tree Path, Depth, & Cycle Prevention):</h4>
-      <div class="code-box">
-        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
-        <pre><code>-- 1. Schema Definition
-CREATE TABLE categories (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    parent_id INT REFERENCES categories(id)
-);
-
--- 2. Querying Infinite Nested Category Tree with Breadcrumb Path and Depth Level
-WITH RECURSIVE CategoryTree AS (
-    -- Anchor Member: Root Categories
-    SELECT 
-        id, 
-        name, 
-        parent_id, 
-        1 AS depth_level,
-        CAST(name AS TEXT) AS breadcrumb_path
-    FROM categories 
-    WHERE parent_id IS NULL
-
-    UNION ALL
-
-    -- Recursive Member: Sub-categories
-    SELECT 
-        c.id, 
-        c.name, 
-        c.parent_id, 
-        ct.depth_level + 1,
-        ct.breadcrumb_path || ' > ' || c.name
-    FROM categories c
-    INNER JOIN CategoryTree ct ON c.parent_id = ct.id
-)
-SELECT id, breadcrumb_path, depth_level 
-FROM CategoryTree 
-ORDER BY breadcrumb_path;
-
-/* Sample Result Output:
- id | breadcrumb_path                              | depth_level
-----+----------------------------------------------+─────────────
-  1 | Electronics                                  |          1
-  2 | Electronics > Computers                      |          2
-  3 | Electronics > Computers > Laptops            |          3
-  4 | Electronics > Computers > Laptops > Gaming   |          4
-*/</code></pre>
-      </div>
-
-      <p><em>অ্যাডভান্সড টিপ:</em> চক্রীয় ডাটা (Cyclic Data Error — A-এর প্যারেন্ট B, আবার B-এর প্যারেন্ট A) থাকলে অনন্ত লুপ আটকানোর জন্য PostgreSQL 14+ এ <code>CYCLE parent_id SET is_cycle USING path</code> স্টেটমেন্ট ব্যবহার করা যায়।</p>
-    `
-  },
-  {
-    id: "db-27",
-    category: "Database",
-    difficulty: "Advanced",
-    tags: ["Connection Pooling", "PgBouncer", "Idle Sockets"],
-    question: "Database Connection Pooling (PgBouncer / HikariCP) এবং Max Connections Tuning কেন জরুরি?",
-    answer: `
-      <p>PostgreSQL-এ প্রতিটি ইনকামিং ক্লায়েন্ট কানেকশনের জন্য ডাটাবেজ ইঞ্জিন অপারেটিং সিস্টেমে একটি **স্বতন্ত্র প্রসেস (Backend Process)** ফর্ক করে। প্রতিটি প্রসেসের নিজস্ব মেমোরি ওভারহেড (~৫MB - ১০MB RAM) এবং কন্টাক্সট সুইচিং কস্ট থাকে। হাজার হাজার ক্লায়েন্ট সরাসরি ডাটাবেজে কানেক্ট করলে RAM ক্র্যাশ করা নিশ্চিত।</p>
-      
-      <h4>১. PgBouncer-এর Pooling Modes:</h4>
-      <ul>
-        <li><strong>Session Pooling:</strong> ক্লায়েন্ট কানেক্ট করার পর ডিসকানেক্ট না করা পর্যন্ত ডাটাবেজ কানেকশন ধরে রাখে। (কম ইফিসিয়েন্ট)।</li>
-        <li><strong>Transaction Pooling (সর্বোত্তম):</strong> ক্লায়েন্ট কেবল একটি ট্রানজেকশন (<code>BEGIN</code> to <code>COMMIT</code>) চলার সময় ডাটাবেজ কানেকশন পায়। ট্রানজেকশন শেষ হওয়ামাত্র কানেকশন পুলে ফিরে যায়। হাজার হাজার অ্যাপ কানেকশনকে মাত্র ৫০টি মূল ডাটাবেজ কানেকশন দিয়ে হ্যান্ডেল করা যায়।</li>
-        <li><strong>Statement Pooling:</strong> প্রতিটি এক��রে, তখন মূল ডাটা পেজ সরাসরি ডিস্কে রাইট হয় না—বরং মেমোরির **Buffer Pool**-এ পরিবর্তন হয় (Dirty Pages)। কিন্তু ডিস্কে ডাটা স্থায়ী করতে **Checkpointer** এবং **WAL Logger** সাহায্য করে।</p>
-      
-      <h4>১. Checkpoint প্রসেস কী?</h4>
-      <p><strong>Checkpoint</strong> হলো ব্যাকগ্রাউন্ডে ঘটা একটি নির্দিষ্ট সময়পরপর ঘটনা, যেখানে PostgreSQL মেমোরিতে জমে থাকা সকল Dirty Pages-কে ডিস্কের মূল ফাইলগুলোতে (Heap Files) সিঙ্ক করে লিখে দেয় এবং WAL ফাইলের ভেতরে একটি সেভপয়েন্ট রেকর্ড (Checkpoint LSN) চিহ্নিত করে।</p>
-
-      <h4>২. কেন Checkpoint জরুরি?</h4>
-      <p>যদি Checkpoint না থাকত, তবে ক্র্যাশ রিকভারির সময় ডাটাবেজ শুরুর দিন থেকে জমে থাকা সকল WAL ফাইল রি-প্লে (Replay) করতে হতো—যাতে ডাটাবেজ স্টার্ট হতে কয়েক দিন লেগে যেত! Checkpoint ঘটার ফলে ডাটাবেজ জানে যে Checkpoint LSN পর্যন্ত সকল ডাটা ডিস্কে সেভ আছে, তাই রিকভারির সময় **কেবলমাত্র শেষ Checkpoint-এর পর জমা হওয়া WAL অংশটুকু** রি-প্লে করলেই চলে।</p>
-
-      <h4>৩. ক্র্যাশ রিকভারি ভিজ্যুয়াল টাইমলাইন:</h4>
-      <div class="code-box">
-        <div class="code-header"><span>text</span><button class="copy-btn">Copy</button></div>
-        <pre><code>[ Old WAL Records ] ──► [ Checkpoint Executed (LSN 100) ] ──► [ WAL Record 101 ] ──► [ WAL Record 102 ] ──► [ CRASH! ]
-  (Dirty Pages synced to disk)                                                                                  │
-  (No recovery needed for these)                                                                                │
-                                                                                                                ▼
-                               [ RECOVERY ENGINE: Replays ONLY LSN 101 to 102 from WAL ] ◄──────────────────────┘</code></pre>
-      </div>
-
-      <h4>৪. Checkpoint Tuning Parameters (postgresql.conf):</h4>
-      <div class="code-box">
-        <div class="code-header"><span>ini</span><button class="copy-btn">Copy</button></div>
-        <pre><code>; Minimum interval between automatic WAL checkpoints
-checkpoint_timeout = 15min          
-
-; Maximum size to let WAL files grow before forcing an automatic checkpoint
-max_wal_size = 16GB                  
-
-; Spreads out the Checkpoint Write I/O over time to prevent disk I/O spikes (0.9 = 90% of duration)
-checkpoint_completion_target = 0.9  </code></pre>
-      </div>
-    `
-  },
-  {
-    id: "db-30",
-    category: "Database",
-    difficulty: "Intermediate",
-    tags: ["Schema", "Migrations", "Zero Downtime"],
-    question: "Database Migrations (Zero Downtime Schema Migration Pattern) কীভাবে পরিচালনা করবেন?",
-    answer: `
-      <p>হাই-ট্রাফিক ২৪/৭ প্রোডাকশন সিস্টেমে কোনো ডাউনটাইম বা সার্ভিস পজ না করে ডাটাবেজ স্কিমা রিফ্যাক্টর (যেমন: কলামের নাম পরিবর্তন, ডাটা টাইপ পরিবর্তন, কলাম ড্রপ করা) করার আর্কিটেকচারাল প্যাটার্নকে **Zero Downtime Migration (Expand and Contract Pattern)** বলে।</p>
-      
-      <h4>৩-ধাপের সমাধান প্রক্রিয়া (Expand and Contract Steps):</h4>
-      <ol>
-        <li><strong>Phase 1: Expand (সম্প্রসারণ)</strong>
-          <ul>
-            <li>ডাটাবেজে নতুন কলামটি <code>NULLABLE</code> বা <code>DEFAULT</code> ভ্যালুসহ যোগ করুন।</li>
-            <li>পুরোনো কোড অ্যাপ সার্ভারে চলতে থাকবে এবং পুরোনো কলামেই রিড/রাইট করবে। অ্যাপ ক্র্যাশ করবে না।</li>
-          </ul>
-        </li>
-        <li><strong>Phase 2: Dual-Write & Backfill (স্থানান্তর)</strong>
-          <ul>
-            <li>নতুন অ্যাপ ভার্সন ডিপ্লয় করুন যা নতুন ও পুরোনো **উভয় কলামেই ডাটা লেখে** (Dual-write)।</li>
-            <li>একটি ব্যাকগ্রাউন্ড মাইগ্রেশন স্ক্রিপ্ট (Batch Processing) চালিয়ে পুরোনো টেবিল রো-গুলোর ডাটা নতুন কলামে কপি করুন (Backfilling)।</li>
-          </ul>
-        </li>
-        <li><strong>Phase 3: Contract (সংকোচন)</strong>
-          <ul>
-            <li>অ্যাপ সার্ভারকে সম্পূর্ণরূপে নতুন কলাম রিড/রাইট করার জন্য কনফিগার করুন।</li>
-            <li>নিশ্চিত হওয়ার পর মাইগ্রেশন ফাইল চালিয়ে পুরোনো অব্যবহৃত কলামটি <code>DROP</code> করে দিন।</li>
-          </ul>
-        </li>
-      </ol>
-
-      <h4>প্র্যাকটিক্যাল কোড এবং মাইগ্রেশন স্ক্রিপ্ট:</h4>
-      <div class="code-box">
-        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
-        <pre><code>-- Step 1: Expand Phase - Add new column safely
-ALTER TABLE users ADD COLUMN phone_v2 VARCHAR(20) DEFAULT NULL;
-
--- Step 2: Backfill Old Data in Non-Blocking Batches (Prevents Table Locking)
-DO $$
-DECLARE
-    r RECORD;
-BEGIN
-    FOR r IN SELECT id, phone FROM users WHERE phone_v2 IS NULL LOOP
-        UPDATE users SET phone_v2 = r.phone WHERE id = r.id;
-        -- Sleep slightly if needed to avoid I/O spikes
-    END LOOP;
-END $$;
-
--- Step 3: Contract Phase - Safe to drop old column after App release
-ALTER TABLE users DROP COLUMN phone;</code></pre>
-      </div>
-    `
-  },
-  {
-    id: "db-31",
-    category: "Database",
-    difficulty: "Advanced",
-    tags: ["Architecture", "CAP Theorem", "PACELC"],
-    question: "CAP Theorem (Consistency, Availability, Partition Tolerance) এবং PACELC Theorem-এর আধুনিক ব্যাখ্যা কী?",
-    answer: `
-      <p>ডিস্ট্রিবিউটেড ডাটাবেজ সিস্টেমে ডাটা আদান-প্রদান ও সিঙ্ক্রোনাইজেশনের ট্রেড-অফ (Trade-off) বোঝার জন্য <strong>CAP Theorem</strong> এবং এর আধুনিক রূপ <strong>PACELC Theorem</strong> ব্যবহার করা হয়।</p>
-      
-      <h4>১. CAP Theorem-এর মূলনীতি ও সীমাবদ্ধতা:</h4>
-      <p>CAP থিওরেম (Eric Brewer) বলে যে, যেকোনো ডিস্ট্রিবিউটেড ডাটাবেজে ৩টি বৈশিষ্ট্যের মধ্যে একসাথে সর্বোচ্চ ২টি অর্জন করা সম্ভব:</p>
-      <ul>
-        <li><strong>Consistency (C):</strong> সব নোড একই সময়ে সর্বশেষ ডাটা দেখাবে।</li>
-        <li><strong>Availability (A):</strong> প্রতিটি নন-ফেইলিং নোড সবসময় সফল রেসপন্স প্রদান করবে।</li>
-        <li><strong>Partition Tolerance (P):</strong> নোডগুলোর মাঝে নেটওয়ার্ক ড্রপ (Partition) হলেও সিস্টেম চালু থাকবে।</li>
-      </ul>
-      <p><em>সীমাবদ্ধতা:</em> বাস্তবিকের ডিস্ট্রিবিউটেড নেটওয়ার্কে Network Partition ($P$) একটি অনিবার্য ঘটনা। ফলে $P$-কে বাদ দেয়া যায় না। তাই মূল ট্রেড-অফটি হয় <strong>CP (Consistency over Availability)</strong> অথবা <strong>AP (Availability over Consistency)</strong>-এর মধ্যে। কিন্তু CAP থিওরেমের মূল সীমাবদ্ধতা হলো, এটি কেবল নেটওয়ার্ক ফেইলিয়র বা পার্টিশনের মুহূর্তের কথা বলে—স্বাভাবিক অবস্থায় (Normal State) ডাটাবেজ কীভাবে আচরণ করবে তা ব্যাখ্যা করে না।</p>
-
-      <h4>২. PACELC Theorem (আধুনিক ব্যাখ্যা):</h4>
-      <p>Daniel Abadi দ্বারা প্রস্তাবিত <strong>PACELC Theorem</strong> ডিস্ট্রিবিউটেড ডাটাবেজের স্বাভাবিক ও অস্বাভাবিক উভয় অবস্থার ট্রেড-অফ ব্যাখ্যা করে। এর সূত্রটি হলো:</p>
-      
-      <div class="code-box">
-        <div class="code-header"><span>text</span><button class="copy-bit">Copy</button></div>
-        <pre><code>If Partition (P):
-    Choose between Availability (A) and Consistency (C)
-Else (E) [Normal Operation]:
-    Choose between Latency (L) and Consistency (C)</code></pre>
-      </div>
-
-      <h4>৩. PACELC শ্রেণীবিন্যাস ও ডাটাবেজ ম্যাপিং:</h4>
-      <table>
-        <tr>
-          <th>টাইপ</th>
-          <th>পার্টিশনের সময় (P)</th>
-          <th>স্বাভাবিক অবস্থায় (E)</th>
-          <th>উদাহরণ ডাটাবেজ</th>
-        </tr>
-        <tr>
-          <td><strong>PC/EC</strong></td>
-          <td>Consistency বজায় রাখে (A কমায়)</td>
-          <td>Consistency বজায় রাখে (Latency বাড়ে)</td>
-          <td>PostgreSQL (2PC), CockroachDB, Google Spanner, MongoDB (Majority)</td>
-        </tr>
-        <tr>
-          <td><strong>PA/EL</strong></td>
-          <td>Availability বজায় রাখে (C কমায়)</td>
-          <td>Low Latency কে প্রাধান্য দেয় (Eventual C)</td>
-          <td>Apache Cassandra, Amazon DynamoDB, Couchbase</td>
-        </tr>
-        <tr>
-          <td><strong>PA/EC</strong></td>
-          <td>Availability বজায় রাখে</td>
-          <td>Consistency নিশ্চিত করে</td>
-          <td>MongoDB (Primary Read/Write with default WriteConcern)</td>
-        </tr>
-      </table>
-
-      <div class="code-box">
-        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
-        <pre><code>-- MongoDB Read Preference tuning reflecting PACELC Trade-off:
--- PC/EC mode (High Consistency, Higher Latency):
-db.orders.find().readConcern("majority");
-
--- PA/EL mode (Low Latency, Eventual Consistency):
-db.orders.find().readPreference("nearest");</code></pre>
-      </div>
-    `
-  },
-  {
-    id: "db-32",
-    category: "Database",
-    difficulty: "Intermediate",
-    tags: ["Replication", "Master-Slave", "Logical"],
-    question: "Master-Slave Replication (Physical Streaming vs Logical Replication) এবং Replication Lag কী?",
-    answer: `
-      <p>PostgreSQL এবং আধুনিক RDBMS-এ ডাটা স্কেলিং ও রিড-হেভি ওয়ার্কলোড কমানোর জন্য Master-Slave Replication ব্যবহৃত হয়। এটি ২ উপায়ে করা যায়: <strong>Physical Streaming Replication</strong> এবং <strong>Logical Replication</strong>।</p>
-      
-      <h4>১. Physical Streaming vs Logical Replication:</h4>
-      <table>
-        <tr>
-          <th>বৈশিষ্ট্য</th>
-          <th>Physical Streaming Replication</th>
-          <th>Logical Replication</th>
-        </tr>
-        <tr>
-          <td><strong>ডাটা লেভেল</strong></td>
-          <td>ডিস্কের বাইনারি পেজ ও WAL ব্লক হুবহু কপি করে (Byte-for-byte copy)।</td>
-          <td>লজিক্যাল DML ইভেন্ট (INSERT, UPDATE, DELETE) আকারে টেবিল-বাই-টেবিল স্ট্রিম করে।</td>
-        </tr>
-        <tr>
-          <td><strong>স্কিমা ও ভার্সন</strong></td>
-          <td>মাস্টার ও স্লেভের ডাটাবেজ ভার্সন, ওএস এবং আর্কিটেকচার সম্পূর্ণ এক হতে হবে।</td>
-          <td>ভিন্ন ডাটাবেজ ভার্সনেও কাজ করে (e.g., Postgres 14 to Postgres 16) এবং স্লেভে ভিন্ন ইনডেক্স রাখা যায়।</td>
-        </tr>
-        <tr>
-          <td><strong>গ্র্যানুলারিটি (Granularity)</strong></td>
-          <td>পুরো ডাটাবেজ ক্লাস্টার একবারে কপি হয় (অল-অর-নাথিং)।</td>
-          <td>নির্দিষ্ট নির্দিষ্ট টেবিল বা স্কিমা সিলেক্ট করে (Publish/Subscribe) সিঙ্ক করা যায়।</td>
-        </tr>
-        <tr>
-          <td><strong>স্লেভ রাইট অ্যাক্সেস</strong></td>
-          <td>স্লেভ সম্পূর্ণ Read-Only মোডে থাকে।</td>
-          <td>স্লেভ নোডে অতিরিক্ত স্থানীয় টেবিল তৈরি ও রাইট করা সম্ভব।</td>
-        </tr>
-      </table>
-
-      <h4>২. Replication Lag কী এবং কীভাবে মনিটর করবেন?</h4>
-      <p><strong>Replication Lag</strong> হলো মাস্টারে কোনো ডাটা রাইট (Commit) হওয়া এবং স্লেভ নোডে সেই একই ডাটা অ্যাপ্লাই হওয়ার মধ্যকার সময়ের বা সাইজের পার্থক্য (Delay)। নেটওয়ার্ক ধীর হলে, স্লেভে ভারী রিড কোয়েরি চললে বা মাস্টারে একবারে অনেক বাল্ক ইনসার্ট হলে Replication Lag বাড়ে।</p>
-
-      <div class="code-box">
-        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
-        <pre><code>-- 1. Logical Replication Setup (Publisher on Primary)
-CREATE PUBLICATION order_pub FOR TABLE orders, order_items;
-
--- Logical Replication Setup (Subscriber on Replica)
-CREATE SUBSCRIPTION order_sub 
-CONNECTION 'host=primary_db port=5432 dbname=prod user=rep_user password=secret' 
-PUBLICATION order_pub;
-
--- 2. Monitoring Replication Lag Bytes on Primary Master (PostgreSQL)
-SELECT 
-    client_addr AS replica_ip,
-    application_name,
-    state,
-    sync_state,
-    pg_wal_lsn_diff(pg_current_wal_lsn(), replay_lsn) AS lag_bytes
-FROM pg_stat_replication;</code></pre>
-      </div>
-    `
-  },
-  {
-    id: "db-33",
-    category: "Database",
-    difficulty: "Advanced",
-    tags: ["Foreign Keys", "CASCADE", "Triggers"],
-    question: "ON DELETE CASCADE, ON DELETE SET NULL, এবং Foreign Key Constraint Triggers-এর সঠিক ব্যবহার কী?",
-    answer: `
-      <p>প্যারেন্ট টেবিল থেকে কোনো রেকর্ড মুছে ফেলা হলে (Delete) চাইল্ড টেবিলের রেফারেন্সযুক্ত ডাটাগুলোর কী পরিণতি হবে, তা নির্ধারিত হয় Referential Integrity Rules এবং Constraint Triggers দ্বারা।</p>
-      
-      <h4>১. সঠিক ব্যবহার ও রিস্ক অ্যাসেসমেন্ট:</h4>
-      <ul>
-        <li><strong>ON DELETE CASCADE (কঠোর আঁটসাঁট সম্পর্ক):</strong> প্যারেন্ট ডিলিট হলে চাইল্ডের সব রেকর্ড নিজ দায়িত্বে ডিলিট হয়।
-          <br/><em>ব্যবহার:</em> <code>Orders -> OrderItems</code>, <code>Invoices -> InvoiceLineItems</code>।
-          <br/><em>ঝুঁকি:</em> ভুলবশত প্যারেন্ট টেবিলের ১টি সারি ডিলিট করলে অজান্তেই চাইল্ড টেবিলের হাজার হাজার রেকর্ড মুছে যেতে পারে (Mass accidental deletion)।
-        </li>
-        <li><strong>ON DELETE SET NULL (অডিট ট্রেইল ও রিটেনশন):</strong> প্যারেন্ট ডিলিট হলে চাইল্ড রেকর্ড থেকে যায়, কেবল FK কলামটি <code>NULL</code> হয়।
-          <br/><em>ব্যবহার:</em> <code>Users -> Posts</code> (ইউজার একাউন্ট ডিলিট করলেও তার পোস্টগুলো 'Anonymous User' হিসেবে ব্লগে রেখে দেওয়া)।
-        </li>
-        <li><strong>ON DELETE RESTRICT / NO ACTION (ডাটা সুরক্ষা):</strong> চাইল্ড টেবিলে রেকর্ড থাকলে প্যারেন্ট রো কোনোভাবেই ডিলিট হতে দেয় না। (ডিফল্ট ও নিরাপদ মোড)।</li>
-      </ul>
-
-      <h4>২. Foreign Key Constraint Triggers (কাস্টম বিজনেস রুলস):</h4>
-      <p>সাধারণ declarative constraint দিয়ে যখন জটিল শর্ত পূরণ করা যায় না (যেমন: অর্ডারের স্ট্যাটাস 'DELIVERED' হয়ে গেলে আর ডিলিট করতে না দেওয়া, অথবা সফট ডিলিট বাস্তবায়ন করা), তখন Constraint Trigger ব্যবহার করা হয়।</p>
-
-      <div class="code-box">
-        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
-        <pre><code>-- 1. Standard Declarative Foreign Key Definitions
-CREATE TABLE posts (
-    id SERIAL PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    author_id INT REFERENCES users(id) ON DELETE SET NULL -- Keeps post, clears author
-);
-
--- 2. Custom Constraint Trigger Example (Blocks deletion if business logic fails)
-CREATE OR REPLACE FUNCTION check_order_deletion_safety() 
-RETURNS TRIGGER AS $$
-BEGIN
-    -- Prevent deletion of User if they have active processing orders
-    IF EXISTS (SELECT 1 FROM orders WHERE user_id = OLD.id AND status = 'PROCESSING') THEN
-        RAISE EXCEPTION 'Cannot delete User ID %: User has active PROCESSING orders!', OLD.id;
-    END IF;
-    RETURN OLD;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE CONSTRAINT TRIGGER trg_prevent_user_delete
-AFTER DELETE ON users
-DEFERRABLE INITIALLY DEFERRED
-FOR EACH ROW EXECUTE FUNCTION check_order_deletion_safety();</code></pre>
-      </div>
-    `
-  },
-  {
-    id: "db-34",
-    category: "Database",
-    difficulty: "Intermediate",
-    tags: ["Normalization", "3NF", "Denormalization"],
-    question: "Database Normalization (1NF, 2NF, 3NF, BCNF) vs Denormalization — পারফরম্যান্স ও ডেটা ইন্টিগ্রিটি ব্যালেন্স কীভাবে করবেন?",
-    answer: `
-      <p>ডাটাবেজ আর্কিটেকচারে <strong>Normalization</strong> এবং <strong>Denormalization</strong> দুটি সম্পূর্ণ বিপরীতমুখী কৌশল। সঠিক প্রজেক্ট ডিজাইনের জন্য এই দুটির মধ্যে ব্যালেন্স করা অত্যন্ত জরুরি।</p>
-      
-      <h4>১. নরম্যালাইজেশন বনাম ডি-নরম্যালাইজেশন তুলনা:</h4>
-      <table>
-        <tr>
-          <th>বিষয়</th>
-          <th>Normalization (3NF / BCNF)</th>
-          <th>Denormalization</th>
-        </tr>
-        <tr>
-          <th>মূল উদ্দেশ্য</th>
-          <td>ডাটা ডুপ্লিকেশন দূর করা ও Write Integrity নিশ্চিত করা।</td>
-          <td><code>JOIN</code> কমানো এবং Read Performance বাড়ানো।</td>
-        </tr>
-        <tr>
-          <th>উপযোগী সিস্টেম</th>
-          <td><strong>OLTP (Online Transaction Processing):</strong> হাই ইনসার্ট/আপডেট অ্যাপ (e.g., Banking, ERP)।</td>
-          <td><strong>OLAP (Online Analytical Processing):</strong> রিড-হেভি সিস্টেম, রিপোর্ট ও ড্যাশবোর্ড।</td>
-        </tr>
-        <tr>
-          <th>পারফরম্যান্স ট্রেড-অফ</th>
-          <td>Write ফাস্ট, কিন্তু রিডের সময় অনেকগুলো টেবিল <code>JOIN</code> করতে হয় বলে রিড স্লো।</td>
-          <td>Read ফাস্ট, কিন্তু ডাটা আপডেটের সময় একাধিক জায়গায় আপডেট করতে হয় (Write overhead)।</td>
-        </tr>
-      </table>
-
-      <h4>২. ব্যালেন্স করার সিনিয়র-লেভেল কৌশল (Materialized Views & Triggers):</h4>
-      <p>প্রোডাকশন লেভেলে মূল OLTP ডাটাবেজকে সবসময় 3NF-এ নরম্যালাইজড রাখা হয়। আর রিড পারফরম্যান্স বাড়ানোর জন্য নিচের পদ্ধতিগুলো দিয়ে ডি-নরম্যালাইজেশন করা হয়:</p>
-      <ul>
-        <li><strong>Calculated Column Caching:</strong> ড্যাশবোর্ডের জন্য বারবার <code>COUNT()</code> বা <code>SUM()</code> না চালিয়ে মূল টেবিলে ১টি ক্যালকুলেটেড কলাম রাখা এবং ট্র্রিগার দিয়ে তা সিঙ্ক রাখা।</li>
-        <li><strong>Materialized Views:</strong> জটিল এবং ভারী JOIN ক্যোয়ারীর ফলাফল ডিস্কে ক্যাশ করে রাখা এবং নির্দিষ্ট সময় পরপর রিফ্রেশ করা।</li>
-      </ul>
-
-      <div class="code-box">
-        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
-        <pre><code>-- Creating a Materialized View for Denormalized Analytics Dashboard
-CREATE MATERIALIZED VIEW mv_customer_summary AS
-SELECT 
-    u.id AS user_id,
-    u.name,
-    COUNT(o.id) AS total_orders,
-    COALESCE(SUM(o.total_amount), 0) AS lifetime_value
-FROM users u
-LEFT JOIN orders o ON u.id = o.user_id
-GROUP BY u.id, u.name;
-
--- Unique Index on Materialized View allows Concurrent Refresh (Zero Read-Locking!)
-CREATE UNIQUE INDEX idx_mv_customer_user_id ON mv_customer_summary(user_id);
-
--- Refresh View in Background
-REFRESH MATERIALIZED VIEW CONCURRENTLY mv_customer_summary;</code></pre>
-      </div>
-    `
-  },
-  {
-    id: "db-35",
-    category: "Database",
-    difficulty: "Advanced",
-    tags: ["PostgreSQL", "VACUUM", "Bloat"],
-    question: "PostgreSQL MVCC Bloat এবং Autovacuum / VACUUM FULL কীভাবে মেমোরি ফিনিক্স করে?",
-    answer: `
-      <p>PostgreSQL কনকারেন্সি কন্ট্রোলের জন্য **MVCC (Multi-Version Concurrency Control)** ব্যবহার করে। এর ফলে কোনো ডাটা <code>UPDATE</code> বা <code>DELETE</code> করলে টেবিলের পুরনো ডাটা সারিগুলো ফিজিক্যালি ডিস্ক থেকে মুছে যায় না—বরং সেগুলো <strong>Dead Tuples</strong> হিসেবে থেকে যায়। এটিই হলো **Table Bloat**।</p>
-      
-      <h4>১. Table & Index Bloat-এর সমস্যা:</h4>
-      <p>যদি Dead Tuples পরিষ্কার না করা হয়, তবে টেবিলের সাইজ অযথা বাড়তে থাকে (Bloat)। এর ফলে ইনডেক্স সার্চ ও সিকুয়েনশিয়াল স্ক্যান অনেক ধীর হয়ে যায়, কারণ ডাটাবেজ ইঞ্জিনকে অনাবশ্যক মৃত সারিগুলোও রিড করতে হয়।</p>
-
-      <h4>২. Autovacuum vs VACUUM FULL কাজের পার্থক্য:</h4>
-      <table>
-        <tr>
-          <th>বৈশিষ্ট্য</th>
-          <th>Autovacuum (Standard Vacuum)</th>
-          <th>VACUUM FULL</th>
-        </tr>
-        <tr>
-          <td><strong>কাজের মেকানিজম</strong></td>
-          <td>Dead Tuples চিহ্নিত করে সেগুলোর স্থানকে "Free Space Map (FSM)"-এ খালি হিসেবে মার্ক করে, যাতে নতুন <code>INSERT</code> সেখানে হতে পারে।</td>
-          <td>পুরো টেবিলটি রি-রাইট করে একদম নতুন ডিস্ক ফাইলে কপি করে এবং মৃত অংশগুলো সম্পূর্ণ মুছে ফেলে।</td>
-        </tr>
-        <tr>
-          <td><strong>অপারেটিং সিস্টেমকে ডিস্ক স্পেস ফেরত দেয়া</strong></td>
-          <td><strong>দেয় না।</strong> (ফাইলের শেষ প্রান্তের ফ্রি স্পেস ছাড়া বাকি স্পেস ডাটাবেজের ভেতরেই পুনর্ব্যবহারের জন্য থেকে যায়)।</td>
-          <td><strong>সম্পূর্ণ ফেরত দেয়।</strong> ডিস্ক স্পেস OS-কে ফ্রি করে দেয়।</td>
-        </tr>
-        <tr>
-          <td><strong>টেবিল লকিং</strong></td>
-          <td>নন-ব্লকিং। সাধারণ রিড/রাইটের সাথে ব্যাকগ্রাউন্ডে চলতে পারে (<code>SHARE UPDATE EXCLUSIVE</code>)।</td>
-          <td><strong>এক্সক্লুসিভ লক নেয় (ACCESS EXCLUSIVE)।</strong> এটি চলাকালীন টেবিলে সব প্রকার রিড/রাইট সম্পূর্ণ ব্লক থাকে।</td>
-        </tr>
-      </table>
-
-      <div class="code-box">
-        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
-        <pre><code>-- 1. Check Table Bloat & Dead Tuples in PostgreSQL
-SELECT 
-    relname AS table_name, 
-    n_live_tup AS live_rows, 
-    n_dead_tup AS dead_rows,
-    round(n_dead_tup::numeric / NULLIF(n_live_tup + n_dead_tup, 0) * 100, 2) AS dead_tuple_ratio
-FROM pg_stat_user_tables
-ORDER BY n_dead_tup DESC;
-
--- 2. Run Manual Standard Vacuum (Non-blocking)
-VACUUM (VERBOSE, ANALYZE) orders;
-
--- 3. Zero-Downtime Bloat Reduction Alternative (using pg_repack extension instead of VACUUM FULL)
--- pg_repack builds a new table copy online WITHOUT holding exclusive lock!
--- Terminal Command: pg_repack -k -t orders prod_db</code></pre>
-      </div>
-    `
-  },
-  {
-    id: "db-36",
-    category: "Database",
-    difficulty: "Intermediate",
-    tags: ["Database", "Microservices", "Architecture", "Senior"],
-    question: "একাধিক মাইক্রোসার্ভিস একই Database Schema শেয়ার করা কেন Anti-pattern — Database-per-Service কীভাবে সমাধান দেয়?",
-    answer: `
-      <p>মাইক্রোসার্ভিস আর্কিটেকচারে একাধিক স্বাধীন সার্ভিস একই ডাটাবেজ স্কিমা শেয়ার করা একটি মারাত্মক অ্যান্টি-প্যাটার্ন (যাকে <strong>Shared Database Anti-pattern</strong> বলা হয়)।</p>
-      
-      <h4>১. শেয়ার্ড ডাটাবেজের প্রধান সমস্যাসমূহ:</h4>
-      <ul>
-        <li><strong>Tight Coupling (কঠিন নির্ভরতা):</strong> Order Service যদি টেবিলে ১টি কলামের নাম বদলায়, তবে একই টেবিল অ্যাক্সেস করা Shipping Service এবং Inventory Service না জানিয়ে হঠাৎ ক্র্যাশ করবে।</li>
-        <li><strong>No Bounded Context (মালিকানার অভাব):</strong> ডাটাবেজের কোনো টেবিলের একক মালিক থাকে না। যেকোনো সার্ভিস সরাসরি SQL চালিয়ে বিজনেস নিয়ম লঙ্ঘন করতে পারে।</li>
-        <li><strong>Scaling Bottleneck:</strong> ১টি সার্ভিস বেশি লোড পেলে পুরো এক একক শেয়ার্ড ডাটাবেজ থমকে যায়—স্বাধীনভাবে স্কেল করা যায় না।</li>
-      </ul>
-
-      <h4>২. সমাধান: Database-per-Service Architecture:</h4>
-      <p>প্রতিটি মাইক্রোসার্ভিসের নিজস্ব ডাটাবেজ (Postgres, MongoDB, Redis ইত্যাদি) থাকবে। কোনো সার্ভিস অন্য সার্ভিসের ডাটাবেজে সরাসরি SQL চালাতে পারবে না। ডাটা শেয়ার করার ২টি সঠিক পদ্ধতি:</p>
-      <ul>
-        <li><strong>Synchronous Communication (REST/gRPC):</strong> সার্ভিস সরাসরি অন্য সার্ভিসের অনুমোদিত API কল করে ডাটা নেবে।</li>
-        <li><strong>Asynchronous Event-Driven Communication (Outbox Pattern + Kafka):</strong> ডাটা পরিবর্তনের ঘটনা Event হিসেবে মেসেজ ব্রোকারে পুশ হবে, অন্য সার্ভিস তা কনজিউম করে নিজের ডাটাবেজে ভিউ তৈরি করে নেবে।</li>
-      </ul>
-
-      <div class="code-box">
-        <div class="code-header"><span>text</span><button class="copy-btn">Copy</button></div>
-        <pre><code>[ ❌ SHARED DATABASE ANTI-PATTERN ]
-[ Order Service ] ────┐
-[ Shipping Service ] ─┼──► ( Shared MySQL Database ) ◄── Tight Coupling / Single Point of Failure
-[ Inventory Service ]─┘
-
-[ ✅ DATABASE-PER-SERVICE ARCHITECTURE ]
-[ Order Service ] ────► ( Order DB ) ───( Publish Event )───┐
-                                                             ▼
-                                                    [ Kafka Event Bus ]
-                                                             │
-[ Shipping Service ] ──► ( Shipping DB ) ◄──( Consume Event )┘</code></pre>
-      </div>
-    `
-  },
-  {
-    id: "db-37",
-    category: "Database",
-    difficulty: "Advanced",
-    tags: ["Indexing", "Partial Index", "Covering Index"],
-    question: "Partial Index and Covering Index (INCLUDE Clause) কীভাবে কোয়েরি অপটিমাইজ করে?",
-    answer: `
-      <p>বড় প্রোডাকশন ডাটাবেজে ইনডেক্সের সাইজ ছোট রাখা এবং ডিস্ক আই/ও (Heap Read) পুরোপুরি বাইপাস করার জন্য **Partial Index** এবং **Covering Index** ব্যবহার করা হয়।</p>
-      
-      <h4>১. Partial Index (আংশিক ইনডেক্স):</h4>
-      <p>পুরো টেবিলের সকল সারিতে ইনডেক্স না বসিয়ে <code>WHERE</code> কন্ডিশন দিয়ে কেবল নির্দিষ্ট শর্ত পূরণকারী সারিগুলোর ওপর ইনডেক্স তৈরি করা।</p>
-      <ul>
-        <li><strong>সুবিধা:</strong> ইনডেক্সের সাইজ ৮০-৯০% পর্যন্ত ছোট হয়, RAM মেমোরি বাঁচে এবং ইনসার্ট/আপডেটের সময় ইনডেক্স মেইনটেইন করার ওভারহেড কমে।</li>
-        <li><strong>ব্যবহারের ক্ষেত্র:</strong> Soft-deleted টেবিল (<code>WHERE is_deleted = false</code>), অথবা আন-প্রসেসড অর্ডার (<code>WHERE status = 'PENDING'</code>)।</li>
-      </ul>
-
-      <h4>২. Covering Index with INCLUDE Clause:</h4>
-      <p>সাধারণত ইনডেক্স থেকে ডাটার পয়েন্টার পাওয়ার পর ডাটাবেজকে মূল ডাটা পেজে (Heap Page) গিয়ে বাকি কলামগুলো রিড করতে হয় (Heap Fetch)। কিন্তু যদি কোয়েরির প্রয়োজনীয় অতিরিক্ত কলামগুলো ইনডেক্সের Leaf Node-এই <code>INCLUDE</code> ক্লজ দিয়ে সেভ রাখা হয়, তবে ডাটাবেজকে মূল টেবিলে যেতেই হয় না। একে <strong>Index-Only Scan</strong> বলে।</p>
-
-      <div class="code-box">
-        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
-        <pre><code>-- 1. Partial Index Example
--- Only indexes active pending orders (Ignores millions of completed historic orders)
-CREATE INDEX idx_pending_orders ON orders (user_id, created_at) 
-WHERE status = 'PENDING';
-
--- Query using Partial Index:
-SELECT * FROM orders WHERE user_id = 500 AND status = 'PENDING';
-
--- 2. Covering Index Example with INCLUDE Clause
--- B-Tree Key: email | Payload in Leaf Node: first_name, last_name
-CREATE INDEX idx_users_email_covering ON users (email) 
-INCLUDE (first_name, last_name);
-
--- Query triggers 'Index Only Scan' (Zero Heap Fetch! Super Fast):
-EXPLAIN ANALYZE 
-SELECT first_name, last_name FROM users WHERE email = 'dev@test.com';</code></pre>
-      </div>
-    `
-  },
-  {
-    id: "db-38",
-    category: "Database",
-    difficulty: "Intermediate",
-    tags: ["PostgreSQL", "pflow", "Listen/Notify"],
-    question: "PostgreSQL LISTEN / NOTIFY দিয়ে রিয়েল-টাইম ডাটাবেজ চেঞ্জ নোটিফিকেশন কীভাবে ট্র্যাকিং করবেন?",
-    answer: `
-      <p><strong>LISTEN / NOTIFY</strong> হলো PostgreSQL-এর বিল্ট-ইন Pub-Sub (Publisher-Subscriber) মেকানিজম। এটি ব্যাকএন্ড অ্যাপ্লিকেশনগুলোকে ডাটাবেজের অনাকাঙ্ক্ষিত পোলিং (Polling - বারবার <code>SELECT</code> চালানো) ছাড়াই রিয়েল-টাইমে ডাটা পরিবর্তনের আপডেট পেতে সাহায্য করে।</p>
-      
-      <h4>১. কীভাবে কাজ করে?</h4>
-      <ul>
-        <li><strong>LISTEN channel_name:</strong> ক্লায়েন্ট (যেমন Node.js বা Go সার্ভিস) নির্দিষ্ট নোটিফিকেশন চ্যানেলে সাবস্ক্রাইব করে শোনে।</li>
-        <li><strong>NOTIFY channel_name, 'payload':</strong> ডাটাবেজের কোনো ট্রিগার বা কোয়েরি থেকে ওই চ্যানেলে মেসেজ বা JSON পে-লোড পাঠানো হয়।</li>
-        <li><strong>Transaction Atomicity:</strong> <code>NOTIFY</code> ঘটনাটি ট্রানজেকশনের ভেতরে ঘটে। ট্রানজেকশন সফলভাবে <code>COMMIT</code> হলেই কেবল ক্লায়েন্টের কাছে মেসেজ ডেলিভার হয়। Rollback হলে মেসেজ ড্রপ হয়।</li>
-      </ul>
-
-      <h4>২. সীমাবদ্ধতা:</h4>
-      <p>পে-লোড সাইজ সর্বোচ্চ **৮০০০ বাইট (8KB)** হতে পারে। এটি Kafka বা RabbitMQ-এর মতো কোনো মেসেজ পারসিস্টেন্স বা কিউয়িং সাপোর্ট করে না (সংযোগ বিচ্ছিন্ন থাকলে নোটিফিকেশন হারিয়ে যায়)।</p>
-
-      <div class="code-box">
-        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
-        <pre><code>-- Step 1: Create Trigger Function that emits NOTIFY JSON
-CREATE OR REPLACE FUNCTION notify_order_status_change() 
-RETURNS TRIGGER AS $$
-BEGIN
-    IF OLD.status IS DISTINCT FROM NEW.status THEN
-        PERFORM pg_notify(
-            'order_status_channel', 
-            json_build_object(
-                'order_id', NEW.id, 
-                'old_status', OLD.status, 
-                'new_status', NEW.status
-            )::text
-        );
-    END IF;
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER trg_order_status_notify
-AFTER UPDATE ON orders
-FOR EACH ROW EXECUTE FUNCTION notify_order_status_change();</code></pre>
-      </div>
-
-      <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>// Step 2: Node.js Backend Subscribing to Postgres NOTIFY
-const { Client } = require('pg');
-const client = new Client({ connectionString: process.env.DATABASE_URL });
-
-async function listenToDbEvents() {
-  await client.connect();
-  await client.query('LISTEN order_status_channel');
-
-  client.on('notification', (msg) => {
-    const payload = JSON.parse(msg.payload);
-    console.log('Real-time Event Received:', payload);
-    // Push real-time event to Frontend via WebSocket!
-  });
-}
-listenToDbEvents();</code></pre>
-      </div>
-    `
-  },
-  {
-    id: "db-39",
-    category: "Database",
-    difficulty: "Advanced",
-    tags: ["Optimization", "Bulk Insert", "COPY"],
-    question: "PostgreSQL COPY Command vs Bulk INSERT — ১ লাখ রেকর্ড ১ সেকেন্ডে আপলোডের উপায় কী?",
-    answer: `
-      <p>বড় ডেটাসেট (CSV/Dump files) ডাটাবেজে বাল্ক লোড করার সময় সাধারণ <code>INSERT</code> স্টেটমেন্ট চরম ধীরগতির হয়। সঠিক কৌশল ব্যবহার করলে ১ লাখ রেকর্ড ১-২ সেকেন্ডে ইমপোর্ট করা সম্ভব।</p>
-      
-      <h4>১. সাধারণ INSERT ধীর হওয়ার কারণ:</h4>
-      <p>প্রতিটি পৃথক <code>INSERT</code> স্টেটমেন্টের জন্য: (১) আলাদা নেটওয়ার্ক রাউন্ড-ট্রিপ, (২) কোয়েরি পার্সিং ও প্ল্যানিং ওভারহেড, এবং (৩) প্রতি রো-তে পৃথক WAL (Write-Ahead Log) ডিস্ক ফ্ল্যাশ হয়।</p>
-
-      <h4>২. বাল্ক ইমপোর্টের ৩টি স্তরের পারফরম্যান্স তুলনা:</h4>
-      <ul>
-        <li><strong>Individual INSERT (ধীরতম):</strong> ১ লাখ রো = ১ লাখ নেটওয়ার্ক ট্রিপ (সময়: ১-২ মিনিট)।</li>
-        <li><strong>Multi-row INSERT (মাঝারি):</strong> <code>INSERT INTO tbl VALUES (...), (...), (...)</code> ব্যাচে ১০০০টি করে রো পাঠানো (সময়: ৫-১০ সেকেন্ড)।</li>
-        <li><strong>PostgreSQL COPY Command (দ্রুততম):</strong> SQL Parser বাইপাস করে সরাসরি বাইনারি/CSV স্ট্রিম ডিস্ক পেজে পাঠায় (সময়: ১ সেকেন্ডের কম)।</li>
-      </ul>
-
-      <h4>৩. ১ লাখ রেকর্ড ১ সেকেন্ডে আপলোডের মাস্টার চেকক্লিনিক:</h4>
-      <ol>
-        <li><code>COPY</code> স্টেটমেন্ট বা Node.js-এর <code>pg-copy-streams</code> ব্যবহার করা।</li>
-        <li>বাল্ক ইনসার্টের আগে সাময়িকভাবে টেবিলের **Secondary Indexes** এবং **Foreign Key Constraints** ড্রপ/ডিজেবল করা (ইনসার্ট শেষে পুনরায় বিল্ড করা)।</li>
-        <li>ইনসার্ট প্রক্রিয়াটি একটি একক ট্রানজেকশনে রাখা।</li>
-      </ol>
-
-      <div class="code-box">
-        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
-        <pre><code>-- 1. High-Performance COPY Command via SQL
-COPY users (first_name, last_name, email) 
-FROM '/var/lib/postgresql/data_file.csv' 
-WITH (FORMAT csv, HEADER true, DELIMITER ',');</code></pre>
-      </div>
-
-      <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>// 2. Ultra-Fast Streaming COPY via Node.js (pg-copy-streams)
-const { from: copyFrom } = require('pg-copy-streams');
-const fs = require('fs');
-
-async function bulkUpload() {
-  const client = await pool.connect();
-  try {
-    const stream = client.query(
-      copyFrom("COPY users (first_name, last_name, email) FROM STDIN WITH (FORMAT csv)")
-    );
-    const fileStream = fs.createReadStream('100k_users.csv');
-    
-    fileStream.pipe(stream); // Directly streams CSV chunks into DB Binary Engine
-    stream.on('finish', () => console.log('100k rows imported in < 1 second!'));
-  } finally {
-    client.release();
-  }
-}</code></pre>
-      </div>
-    `
-  },
-  {
-    id: "db-40",
-    category: "Database",
-    difficulty: "Intermediate",
-    tags: ["Types", "UUID vs AutoIncrement", "Performance"],
-    question: "Primary Keys: Auto-increment INT vs UUID v4 vs UUID v7 (Time-ordered) — বি-ট্রি ইনডেক্স পারফরম্যান্স তুলনা কী?",
-    answer: `
-      <p>ডাটাবেজ টেবিলের Primary Key সিলেক্ট করার ওপর B-Tree ইনডেক্স পারফরম্যান্স, ডিস্ক আই/ও এবং ডিস্ট্রিবিউটেড স্কেলিং সরাসরি নির্ভর করে।</p>
-      
-      <h4>১. ৩টি প্রাইমারি কি টাইপের অভ্যন্তরীণ তুলনা:</h4>
-      <table>
-        <tr>
-          <th>বৈশিষ্ট্য</th>
-          <th>Auto-Increment (BIGINT)</th>
-          <th>UUID v4 (Random)</th>
-          <th>UUID v7 (Time-Ordered)</th>
-        </tr>
-        <tr>
-          <td><strong>সাইজ (Storage)</strong></td>
-          <td>৮ বাইট (64-bit) — খুব ছোট।</td>
-          <td>১৬ বাইট (128-bit) — বড়।</td>
-          <td>১৬ বাইট (128-bit) — বড়।</td>
-        </tr>
-        <tr>
-          <td><strong>ইনসার্ট প্যাটার্ন</strong></td>
-          <td>সিকুয়েনশিয়াল (Monotonically Increasing)।</td>
-          <td>সম্পূর্ণ র্যান্ডম (Random 128 bits)।</td>
-          <td>সময় অনুযায়ী সিকুয়েনশিয়াল (Unix Epoch + Random bits)।</td>
-        </tr>
-        <tr>
-          <td><strong>B-Tree Index বিহেভিয়ার</strong></td>
-          <td><strong>Optimal:</strong> B-Tree গাছের সবচেয়ে ডানপাশের পাতায় (Rightmost Leaf) পরপর ইনসার্ট হয়। zero page-splits।</td>
-          <td><strong>Terrible:</strong> B-Tree-এর যেকোনো এলোমেলো পাতায় ঢোকে। ফলে মারাত্মক <strong>Page Split</strong>, Index Fragmentation এবং Random Disk Read হয়।</td>
-        </tr>
-        <tr>
-          <td><strong>ডিস্ট্রিবিউটেড ইউনিকনেস</strong></td>
-          <td>নাই (সেন্ট্রাল ডাটাবেজ লাগে, ID Collision এর ঝুঁকি থাকে)।</td>
-          <td>১০০% গ্লোবালি ইউনিক (No Central DB required)।</td>
-          <td>১০০% গ্লোবালি ইউনিক (Time-sortable + Unique)।</td>
-        </tr>
-      </table>
-
-      <h4>২. B-Tree Insertion Impact (ASCII Diagram):</h4>
-      <div class="code-box">
-        <div class="code-header"><span>text</span><button class="copy-btn">Copy</button></div>
-        <pre><code>[ Auto-Increment / UUID v7 ] ──► Inserts sequentially at the END of B-Tree ──► Fast / No Page Split
-[ UUID v4 (Random) ]         ──► Inserts in the MIDDLE of full B-Tree Pages ──► Page Split / Fragmentation!</code></pre>
-      </div>
-
-      <h4>৩. কেন আধুনিক ডিস্ট্রিবিউটেড ব্যাকএন্ডে UUID v7 বিজয়ী?</h4>
-      <p>UUID v7 প্রথম ৪৮-বিট টাইমস্ট্যাম্প ধারণ করে, যা ইনডেক্সে Auto-Increment-এর মতো সিকুয়েনশিয়াল ইনসার্ট স্পিড নিশ্চিত করে এবং একই সাথে UUID-এর মতো গ্লোবাল ইউনিকত্ব ও সিকিউরিটি নিশ্চিত করে।</p>
-
-      <div class="code-box">
-        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
-        <pre><code>-- PostgreSQL 17+ Native UUID v7 support
-CREATE TABLE orders (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuidv7(), -- Time-sorted UUID v7!
-    user_id INT NOT NULL,
-    amount NUMERIC
-);
-
--- UUID v7 Binary Structure:
--- | 48-bit Timestamp (msec) | 12-bit Ver/Var | 68-bit Cryptographic Random |</code></pre>
-      </div>
-    `
-  },
-  {
-    id: "db-41",
-    category: "Database",
-    difficulty: "Advanced",
-    tags: ["Joins", "Nested Loop", "Hash Join", "Merge Join"],
-    question: "Database Join Algorithms: Nested Loop Join vs Hash Join vs Merge Join কীভাবে কাজ করে?",
-    answer: `
-      <p>SQL ক্যোয়ারী রান করার সময় ডাটাবেজ ক্যোয়ারী প্ল্যানার (Query Planner) টেবিলের ডাটা সাইজ, ইনডেক্সিং এবং memory limits-এর ওপর ভিত্তি করে ৩টি মূল অভ্যন্তরীণ অ্যালগরিদমের একটি বেছে নিয়ে টেবিল জয়েন সম্পন্ন করে।</p>
-      
-      <h4>১. অ্যালগরিদমসমূহের অভ্যন্তরীণ মেকানিজম ও তুলনা:</h4>
-      <table>
-        <tr>
-          <th>অ্যালগরিদম</th>
-          <th>কাজের মেকানিজম</th>
-          <th>টাইম কমপ্লেক্সিটি</th>
-          <th>কখন বেছে নেওয়া হয়?</th>
-        </tr>
-        <tr>
-          <td><strong>Nested Loop Join</strong></td>
-          <td>আউটার টেবিলের (Outer Table) প্রতিটি সারির জন্য ইনার টেবিলের (Inner Table) সব সারি ট্রাভার্স করে ম্যাচ খোঁজে।</td>
-          <td>
-            ইনডেক্স থাকলে: $O(N \log M)$<br/>
-            ইনডেক্স না থাকলে: $O(N \times M)$
-          </td>
-          <td>১টি টেবিল খুব ছোট এবং অন্য টেবিলে জয়েন-কি এর ওপর B-Tree Inndex থাকে।</td>
-        </tr>
-        <tr>
-          <td><strong>Hash Join</strong></td>
-          <td>
-            <strong>Build Phase:</strong> ছোট টেবিলের কলামগুলোর ওপর RAM-এ Hash Table তৈরি করে।<br/>
-            <strong>Probe Phase:</strong> বড় টেবিল রিড করে Hash Table-এ দ্রুত লুকআপ করে।
-          </td>
-          <td>$O(N + M)$ (সবচেয়ে ফাস্ট)</td>
-          <td>বড় আন-সর্টেড (Unsorted) দুটি টেবিল জয়েন করার জন্য (কোনো ইনডেক্স না থাকলেও কাজ করে)।</td>
-        </tr>
-        <tr>
-          <td><strong>Merge Join</strong></td>
-          <td>উভয় টেবিলের ডাটা জয়েন-কি অনুযায়ী পূর্ব থেকেই সর্টেড থাকলে সমান্তরালভাবে ১ পাসে (Single Pass) মার্জ করে।</td>
-          <td>
-            সর্টেড থাকলে: $O(N + M)$<br/>
-            সর্ট করতে হলে: $O(N \log N + M \log M)$
-          </td>
-          <td>উভয় টেবিল জয়েন-কি দিয়ে সর্টেড থাকলে অথবা জয়েন কলামে B-Tree ইনডেক্স থাকলে।</td>
-        </tr>
-      </table>
-
-      <h4>২. Hash Join-এর আর্কিটেকচারাল ডায়াগ্রাম:</h4>
-      <div class="code-box">
-        <div class="code-header"><span>text</span><button class="copy-btn">Copy</button></div>
-        <pre><code>[ Build Phase ]  Small Table A ──► [ Hash Function ] ──► [ In-Memory Hash Table ]
-                                                                 ▲
-[ Probe Phase ]  Large Table B ──► [ Hash Function ] ────────────┘ (Fast Lookups & Match)</code></pre>
-      </div>
-
-      <div class="code-box">
-        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
-        <pre><code>-- EXPLAIN ANALYZE Output showing Hash Join execution
-EXPLAIN ANALYZE 
-SELECT o.id, u.name 
-FROM orders o 
-JOIN users u ON o.user_id = u.id;
-
-/* Output Example:
-Hash Join  (cost=3.25..18.40 rows=100 width=32) (actual time=0.080..0.210 rows=100 loops=1)
-  Hash Cond: (o.user_id = u.id)
-  -> Seq Scan on orders o
-  -> Hash  (cost=2.00..2.00 rows=50 width=16)
-        -> Seq Scan on users u
-*/</code></pre>
-      </div>
-    `
-  },
-  {
-    id: "db-42",
-    category: "Database",
-    difficulty: "Intermediate",
-    tags: ["PostgreSQL", "pg_stat_activity", "Slow Queries"],
-    question: "PostgreSQL pg_stat_activity এবং pg_stat_statements দিয়ে স্লো কোয়েরি ও ডেডলক কীভাবে চিহ্নিত করবেন?",
-    answer: `
-      <p>প্রোডাকশন PostgreSQL সার্ভারে ঝুলন্ত (Hanging), আটকে থাকা (Locked) অথবা অতিরিক্ত মেমোরি খাওয়া স্লো ক্যোয়ারী ট্রাবলশুট করার জন্য ২টি গুরুত্বপূর্ণ সিস্টেম ভিউ (System Views) ব্যবহৃত হয়।</p>
-      
-      <h4>১. pg_stat_activity (রিয়েল-টাইম লাইভ স্টেট মনিটরিং):</h4>
-      <p>এটি ডাটাবেজের বর্তমানে রানিং সকল সংযোগ, ক্যোয়ারী, সংযোগকারী ক্লায়েন্টের IP, ক্যোয়ারী শুরুর সময় এবং স্টেট (e.g., <code>active</code>, <code>idle in transaction</code>) সরাসরি ফ্রেম করে দেখায়।</p>
-
-      <h4>২. pg_stat_statements (ঐতিহাসিক ক্যোয়ারী পারফরম্যান্স স্ট্যাটিস্টিক্স):</h4>
-      <p>এটি একটি অফিসিয়াল এক্সটেনশন যা ডাটাবেজে রান হওয়া সকল ক্যোয়ারীর ফ্রিকোয়েন্সি, মোট এক্সিকিউশন টাইম, গড়ে মেমোরি বা বাফার রিড ইত্যাদি পারসিস্টেন্টলি ট্র্যাক করে রাখে।</p>
-
-      <div class="code-box">
-        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
-        <pre><code>-- 1. Enable pg_stat_statements in postgresql.conf
-shared_preload_libraries = 'pg_stat_statements'
-
--- 2. Find Currently Active Queries Running for More Than 5 Seconds (pg_stat_activity)
-SELECT pid, usename, client_addr, state, age(clock_timestamp(), query_start) AS duration, query
-FROM pg_stat_activity
-WHERE state != 'idle' AND (clock_timestamp() - query_start) > interval '5 seconds'
-ORDER BY duration DESC;
-
--- 3. Find Top 5 Most Time-Consuming Queries Historically (pg_stat_statements)
-CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
-
-SELECT 
-    query, 
-    calls, 
-    round(total_exec_time::numeric, 2) AS total_time_ms,
-    round(mean_exec_time::numeric, 2) AS avg_time_ms,
-    rows
-FROM pg_stat_statements
-ORDER BY total_exec_time DESC
-LIMIT 5;
-
--- 4. Terminate a Hanging Blocking Query Process (by Process ID / PID)
-SELECT pg_terminate_backend(12345);</code></pre>
-      </div>
-    `
-  },
-  {
-    id: "db-43",
-    category: "Database",
-    difficulty: "Advanced",
-    tags: ["PostgreSQL", "Tablespace", "Storage"],
-    question: "PostgreSQL Tablespaces দিয়ে আলাদা ফিজিক্যাল ডিস্কে (NVMe SSD vs HDD) টেবিল স্টোর কীভাবে করবেন?",
-    answer: `
-      <p><strong>Tablespace</strong> হলো PostgreSQL-এর একটি স্টোরেজ অ্যাবস্ট্রাকশন ফিচার যা ডাটাবেজ অ্যাডমিনিস্ট্রেটরদের নির্দিষ্ট টেবিল, ইনডেক্স বা ডাটাবেজকে সার্ভারের নির্দিষ্ট কোনো ফিজিক্যাল ড্রাইভ বা ডিস্ক পার্টিশনে স্টোর করার সুবিধা দেয়।</p>
-      
-      <h4>১. হট/কোল্ড স্টোরেজ টিয়ারিং (Tiered Storage Strategy):</h4>
-      <ul>
-        <li><strong>Hot Data (NVMe SSD):</strong> যেসব টেবিল বা ইনডেক্সে সেকেন্ডে হাজার হাজার রিড/রাইট হয় (যেমন: <code>orders</code>, <code>active_sessions</code>), সেগুলো আল্ট্রা-ফাস্ট NVMe SSD ড্রাইভে রাখা।</li>
-        <li><strong>Cold Data (Cheap HDD / Cloud Storage):</strong> যেসব পুরনো আর্কাইভ ডাটা কালেভদ্রে কোয়েরি করা হয় (যেমন: <code>audit_logs_2023</code>, <code>invoice_backups</code>), সেগুলো সস্তা ও বড় মেমোরির HDD-তে রাখা।</li>
-      </ul>
-
-      <div class="code-box">
-        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
-        <pre><code>-- Step 1: Create Tablespaces pointing to Linux directory mount points
-CREATE TABLESPACE fast_nvme_storage LOCATION '/mnt/nvme_drive/pg_data';
-CREATE TABLESPACE cheap_hdd_storage LOCATION '/mnt/hdd_drive/pg_archive';
-
--- Step 2: Create Hot Table in Fast NVMe Storage
-CREATE TABLE active_orders (
-    id BIGSERIAL PRIMARY KEY,
-    user_id INT NOT NULL,
-    amount NUMERIC(10,2)
-) TABLESPACE fast_nvme_storage;
-
--- Step 3: Create Cold Archive Partition Table in Cheap Storage
-CREATE TABLE archived_orders_2023 (
-    id BIGINT,
-    user_id INT,
-    amount NUMERIC(10,2)
-) TABLESPACE cheap_hdd_storage;
-
--- Step 4: Move an Existing Table to a Different Physical Disk (Online operation)
-ALTER TABLE user_audit_logs SET TABLESPACE cheap_hdd_storage;</code></pre>
-      </div>
-    `
-  },
-  {
-    id: "db-44",
-    category: "Database",
-    difficulty: "Intermediate",
-    tags: ["Queries", "GROUP BY", "HAVING", "Execution Order"],
-    question: "GROUP BY vs HAVING vs WHERE Clause-এর এক্সিকিউশন অর্ডার ও কাজের পার্থক্য কী?",
-    answer: `
-      <p>SQL কোয়েরি লেখার অর্ডার এবং ডাটাবেজ ইঞ্জিনের অভ্যন্তরীণ **Execution Order** সম্পূর্ণ ভিন্ন। সঠিক পারফরম্যান্সের জন্য এই এক্সিকিউশন পাইপলাইন বোঝা জরুরি।</p>
-      
-      <h4>১. SQL Execution Order Pipeline:</h4>
-      <div class="code-box">
-        <div class="code-header"><span>text</span><button class="copy-btn">Copy</button></div>
-        <pre><code>1. FROM / JOIN  ──► 2. WHERE  ──► 3. GROUP BY  ──► 4. HAVING  ──► 5. SELECT  ──► 6. ORDER BY  ──► 7. LIMIT</code></pre>
-      </div>
-
-      <h4>২. WHERE বনাম HAVING-এর মূল পার্থক্যসমূহ:</h4>
-      <table>
-        <tr>
-          <th>বৈশিষ্ট্য</th>
-          <th>WHERE Clause</th>
-          <th>HAVING Clause</th>
-        </tr>
-        <tr>
-          <td><strong>ফিল্টারিংয়ের সময়</strong></td>
-          <td>ডাটা গ্রুপ (Group) করার **পূর্বে** ইনডিভিজুয়াল রো ফিল্টার করে।</td>
-          <td><code>GROUP BY</code> দিয়ে ডাটা গ্রুপ তৈরি করার **পরে** ফিল্টার করে।</td>
-        </tr>
-        <tr>
-          <td><strong>Aggregate Functions</strong></td>
-          <td>Aggregate Functions (<code>SUM</code>, <code>COUNT</code>, <code>AVG</code>) সমর্থন করে না।</td>
-          <td>Aggregate Functions-এর ওপর ফিল্টার বসায় (e.g., <code>HAVING COUNT(*) > 5</code>)।</td>
-        </tr>
-        <tr>
-          <td><strong>ইনডেক্স ব্যবহার</strong></td>
-          <td>ইনডেক্স ব্যবহার করে দ্রুত রো বাতিল করতে পারে (ফাস্ট)।</td>
-          <td>সাধারণত ইনডেক্স ব্যবহার করতে পারে না, গ্রুপ ডাটার ওপর কাজ করে।</td>
-        </tr>
-      </table>
-
-      <div class="code-box">
-        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
-        <pre><code>-- Practical Example showing Execution Sequence
-SELECT 
-    department_id, 
-    AVG(salary) AS avg_salary
-FROM employees
-WHERE status = 'ACTIVE'                   -- 1. Filters individual active rows BEFORE grouping
-GROUP BY department_id                    -- 2. Groups remaining rows by department
-HAVING AVG(salary) > 60000                -- 3. Filters aggregated department groups
-ORDER BY avg_salary DESC;                 -- 4. Sorts final result set</code></pre>
-      </div>
-    `
-  },
-  {
-    id: "db-45",
-    category: "Database",
-    difficulty: "Advanced",
-    tags: ["Security", "SQL Injection", "Parameterized Queries"],
-    question: "SQL Injection (SQLi) কীভাবে কাজ করে এবং Parameterized Prepared Statements এটি কেন শতভাগ প্রতিরোধ করে?",
-    answer: `
-      <p><strong>SQL Injection (SQLi)</strong> হলো একটি ওয়েব সিকিউরিটি ভ্যালনারেবিলিটি যেখানে অ্যাটাকার অনাকাঙ্ক্ষিত ইউজার ইনপুটের সাথে কাঁচা SQL কোড যুক্ত করে ক্যোয়ারীর স্ট্রাকচার পরিবর্তন করে ফেলে ডাটাবেজ থেকে স্পর্শকাতর ডাটা বের করে বা মুছে ফেলে।</p>
-      
-      <h4>১. SQL Injection কীভাবে ঘটে (String Concatenation Vulnerability):</h4>
-      <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>// ❌ VULNERABLE CODE: Direct String Interpolation
-const userInput = "' OR '1'='1"; 
-const query = 'SELECT * FROM users WHERE email = '\${userInput}' AND password = '\${password}'';
-
-// Resulting Executed SQL AST Parser Tree:
-// SELECT * FROM users WHERE email = '' OR '1'='1' AND password = '...'
-// '1'='1' is always TRUE! Attacker bypasses authentication and dumps entire users table.</code></pre>
-      </div>
-
-      <h4>২. Prepared Statements কেন শতভাগ সুরক্ষা দেয়?</h4>
-      <p>Parameterized Query ২টি আলাদা ফেজে প্রসেস হয়:</p>
-      <ol>
-        <li><strong>Preparation Phase (AST Compilation):</strong> ডাটাবেজ ইঞ্জিন ইউজার ইনপুট ছাড়াই কেবল SQL ক্যোয়ারী টেমপ্লেটটি কম্পাইল করে Abstract Syntax Tree (AST) গঠন করে নেয়। ক্যোয়ারীর লজিক্যাল স্ট্রাকচার এখানে চিরতরে ফিক্সড হয়ে যায়।</li>
-        <li><strong>Execution Phase (Parameter Binding):</strong> ইউজার ইনপুট ডাটাবেজে সম্পূর্ণ পৃথক প্রোটোকল স্ট্রিমে পাঠানো হয়। ডাটাবেজ ইউজার ইনপুটকে কেবল একটি **Literal Scalar Value** হিসেবে গয়না পরে গ্রহণ করে। ইনপুটের ভেতরে <code>' OR '1'='1</code> থাকলেও তা কোনো কোড হিসেবে এক্সিকিউট হয় না—বরং স্ট্রিং হিসেবে সার্চ করা হয়।</li>
-      </ol>
-
-      <div class="code-box">
-        <div class="code-header"><span>javascript</span><button class="copy-btn">Copy</button></div>
-        <pre><code>// ✅ SECURE CODE: Using Parameterized Prepared Statement
-const userInput = "' OR '1'='1";
-const query = 'SELECT * FROM users WHERE email = $1 AND password = $2';
-
-// userInput is sent bound separately as raw string data:
-await db.query(query, [userInput, password]); 
-// Safe! Database checks if literal email text is equal to the string "' OR '1'='1"</code></pre>
-      </div>
-    `
-  },
-  {
-    id: "db-46",
-    category: "Database",
-    difficulty: "Intermediate",
-    tags: ["PostgreSQL", "Extensions", "pg_trgm"],
-    question: "PostgreSQL Extension: pg_trgm (Trigram Index) দিয়ে Fuzzy Text Search কীভাবে করবেন?",
-    answer: `
-      <p>সাধারণ B-Tree ইনডেক্স কেবল Prefix Match (e.g., <code>LIKE 'phone%'</code>)-এ কাজ করতে পারে। কিন্তু টেক্সটের শুরুতে ওয়াইল্ডকার্ড থাকলে (e.g., <code>LIKE '%phone%'</code>) বা ইউজার স্পেলিং ভুল লিখলে (Fuzzy Search) B-Tree কাজ করে না এবং Full Table Scan করে। এর সমাধান হলো <strong>pg_trgm (Trigram) Extension</strong>।</p>
-      
-      <h4>১. Trigram কীভাবে কাজ করে?</h4>
-      <p>Trigram একটি শব্দকে ৩-অক্ষরের টুকরায় (Slices) বিভক্ত করে। উদাহরণস্বরূপ <code>"phone"</code> শব্দটি ভাঙলে Trigram হয়: <code>"  p", " ph", "pho", "hon", "one", "ne "</code>। এরপর <strong>GIN (Generalized Inverted Index)</strong> ব্যবহার করে ট্রাইগ্রামগুলোর ওপর ইনডেক্স তৈরি করা হয়।</p>
-
-      <div class="code-box">
-        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
-        <pre><code>-- Step 1: Enable Extension
-CREATE EXTENSION IF NOT EXISTS pg_trgm;
-
--- Step 2: Create GIN Index using Trigram operators
-CREATE INDEX idx_products_name_trgm ON products USING GIN (name gin_trgm_ops);
-
--- Step 3: Fast Substring Wildcard Search (Uses Index!)
-EXPLAIN ANALYZE 
-SELECT * FROM products WHERE name ILIKE '%iphone%';
-
--- Step 4: Fuzzy Similarity Search (Handles Typos!)
--- User types misspelled 'iphne', pg_trgm matches 'iPhone' using similarity threshold
-SELECT name, similarity(name, 'iphne') AS score
+কোনো error হলে:
+
+ROLLBACK;
+
+Transaction boundary carefully design করা গুরুত্বপূর্ণ।`,
+	},
+
+	{
+		id: "db-39",
+		category: "Database",
+		difficulty: "Very Important",
+		tags: ["Isolation Level", "Concurrency"],
+		question: "Transaction Isolation Level কী?",
+		answer: `Isolation level concurrent transactions-এর মধ্যে visibility/interaction control করে।
+
+Common levels:
+
+1. READ UNCOMMITTED
+2. READ COMMITTED
+3. REPEATABLE READ
+4. SERIALIZABLE
+
+Higher isolation সাধারণত consistency বাড়ায় কিন্তু concurrency/performance cost বাড়াতে পারে।
+
+Common anomalies:
+
+- Dirty Read
+- Non-repeatable Read
+- Phantom Read
+
+Database-specific implementation ভিন্ন হতে পারে।`,
+	},
+
+	{
+		id: "db-40",
+		category: "Database",
+		difficulty: "Very Important",
+		tags: ["Dirty Read", "Concurrency"],
+		question: "Dirty Read কী?",
+		answer: `একটি transaction অন্য transaction-এর uncommitted data read করলে dirty read হয়।
+
+Transaction A:
+
+UPDATE balance = 5000
+কিন্তু এখনও COMMIT করেনি।
+
+Transaction B:
+
+balance = 5000 read করল।
+
+তারপর A rollback করল।
+
+তাহলে B এমন data read করেছে যা কখনো committed হয়নি।
+
+এটাই dirty read।`,
+	},
+
+	{
+		id: "db-41",
+		category: "Database",
+		difficulty: "Very Important",
+		tags: ["Non-repeatable Read", "Concurrency"],
+		question: "Non-repeatable Read কী?",
+		answer: `একই transaction-এ একই row দুইবার read করে দুইবার different value পাওয়া গেলে non-repeatable read হতে পারে।
+
+Transaction A:
+
+Read balance = 1000
+
+Transaction B:
+
+Update balance = 2000
+Commit
+
+Transaction A:
+
+Read balance = 2000
+
+একই transaction-এর মধ্যে একই row-এর value পরিবর্তিত হয়েছে।`,
+	},
+
+	{
+		id: "db-42",
+		category: "Database",
+		difficulty: "Very Important",
+		tags: ["Phantom Read", "Concurrency"],
+		question: "Phantom Read কী?",
+		answer: `একই query পুনরায় execute করলে নতুন matching rows দেখা গেলে phantom read।
+
+Example:
+
+SELECT COUNT(*)
+FROM orders
+WHERE amount > 1000;
+
+প্রথমে 10 rows।
+
+অন্য transaction নতুন matching order insert করল।
+
+পুনরায় query করলে 11 rows।
+
+নতুন row-টি phantom row হিসেবে দেখা যায়।`,
+	},
+
+	{
+		id: "db-43",
+		category: "Database",
+		difficulty: "Very Important",
+		tags: ["MVCC", "Concurrency"],
+		question: "MVCC কী?",
+		answer: `MVCC = Multi-Version Concurrency Control।
+
+Database একই data-এর multiple versions ব্যবহার করে concurrent reads/writes manage করতে পারে।
+
+Concept:
+
+Transaction A → Version 1
+Transaction B → Version 2
+
+এতে অনেক ক্ষেত্রে reader এবং writer একে অপরকে কম block করে।
+
+PostgreSQL এবং InnoDB-style systems MVCC ব্যবহার করে।
+
+MVCC-এর details database engine-specific।`,
+	},
+
+	// ============================================================
+	// LOCKING & CONCURRENCY
+	// ============================================================
+
+	{
+		id: "db-44",
+		category: "Database",
+		difficulty: "Very Important",
+		tags: ["Locking", "Concurrency"],
+		question: "Database Lock কী?",
+		answer: `Lock concurrent transaction-এর access control করতে ব্যবহৃত হয়।
+
+Common:
+
+- Shared lock
+- Exclusive lock
+- Row lock
+- Table lock
+
+Example:
+
+SELECT *
+FROM accounts
+WHERE id = 1
+FOR UPDATE;
+
+এটি row-level locking-এর জন্য ব্যবহৃত হতে পারে।
+
+Payment/order/inventory system-এ locking গুরুত্বপূর্ণ।`,
+	},
+
+	{
+		id: "db-45",
+		category: "Database",
+		difficulty: "Very Important",
+		tags: ["Pessimistic Locking"],
+		question: "Pessimistic Locking কী?",
+		answer: `Pessimistic locking ধরে নেয় যে conflict হওয়ার সম্ভাবনা আছে।
+
+তাই আগে থেকেই lock নেয়।
+
+Example:
+
+SELECT stock
 FROM products
-WHERE name % 'iphne' -- '%' is the similarity operator
-ORDER BY score DESC;</code></pre>
-      </div>
-    `
-  },
-  {
-    id: "db-47",
-    category: "Database",
-    difficulty: "Advanced",
-    tags: ["PostgreSQL", "FDW", "Foreign Data Wrapper"],
-    question: "PostgreSQL Foreign Data Wrappers (postgres_fdw) দিয়ে ডিস্ট্রিবিউটেড ডাটাবেজ কোয়েরি কীভাবে করবেন?",
-    answer: `
-      <p><strong>Foreign Data Wrapper (FDW)</strong> হলো SQL/MED (SQL Management of External Data) স্ট্যান্ডার্ড অনুসারী PostgreSQL-এর একটি এক্সটেনশন। এর মাধ্যমে একাধিক ভিন্ন ফিজিক্যাল সার্ভারে থাকা PostgreSQL বা অন্যান্য ডাটাবেজের টেবিলকে লোকাল টেবিলের মতো অ্যাক্সেস ও <code>JOIN</code> করা যায়।</p>
-      
-      <h4>১. Pushdown Optimization:</h4>
-      <p><code>postgres_fdw</code> অত্যন্ত বুদ্ধিমান। এটি লোকাল ক্যোয়ারীর <code>WHERE</code> কন্ডিশন ও <code>JOIN</code> লজিক দূরবর্তী সার্ভারে পাঠায় (Pushdown), যাতে নেটওয়ার্কে কেবল ফিল্টার করা ফাইনাল ডাটা চলে আসে।</p>
+WHERE id = 10
+FOR UPDATE;
 
-      <div class="code-box">
-        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
-        <pre><code>-- Step 1: Enable Extension
-CREATE EXTENSION postgres_fdw;
+তারপর stock update করা হয়।
 
--- Step 2: Define Connection Server to Remote Postgres Instance
-CREATE SERVER remote_payment_db 
-FOREIGN DATA WRAPPER postgres_fdw 
-OPTIONS (host '10.0.0.45', port '5432', dbname 'payments_prod');
+Useful:
 
--- Step 3: Map Local User Credentials to Remote Database User
-CREATE USER MAPPING FOR current_user 
-SERVER remote_payment_db 
-OPTIONS (user 'fdw_read_user', password 'secure_password');
+- Inventory
+- Financial transactions
+- Highly contended rows
 
--- Step 4: Import Foreign Table Schema locally
-IMPORT FOREIGN SCHEMA public FROM SERVER remote_payment_db INTO public;
+Trade-off:
 
--- Step 5: Query Remote Table Seamlessly locally & JOIN with Local Users table!
-SELECT u.id, u.name, rp.amount, rp.status
-FROM users u -- Local table
-JOIN foreign_payments rp ON u.id = rp.user_id -- Remote Foreign Table
-WHERE rp.created_at >= NOW() - INTERVAL '7 days';</code></pre>
-      </div>
-    `
-  },
-  {
-    id: "db-48",
-    category: "Database",
-    difficulty: "Intermediate",
-    tags: ["PostgreSQL", "COLLATE", "Case Insensitive"],
-    question: "PostgreSQL CITEXT Data Type vs Lowercase Indexing — Case-Insensitive Search কীভাবে করবেন?",
-    answer: `
-      <p>PostgreSQL-এ ডিফল্টভাবে টেক্সট ফিল্টার ও তুলনা কেস-সেনসিটিভ (Case-Sensitive) হয় (যেমন: <code>'Test@test.com'</code> এবং <code>'test@test.com'</code> আলাদা)। কেস-ইনসেনসিটিভ সার্চের জন্য ২টি প্রধান অ্যাপ্রোচ রয়েছে।</p>
-      
-      <h4>১. Expression Indexing (LOWER Function):</h4>
-      <p>সাধারণ <code>VARCHAR</code> কলামে <code>LOWER(email)</code> দিয়ে কাস্টম এক্সপ্রেশন ইনডেক্স তৈরি করা। ক্যোয়ারী চালানোর সময়ও <code>LOWER(email)</code> লিখতে হয়।</p>
+- Lock contention
+- Deadlock possibility
+- Reduced concurrency`,
+	},
 
-      <h4>২. CITEXT Extension (Case-Insensitive Text Data Type):</h4>
-      <p><code>CITEXT</code> হলো একটি কাস্টম টাইপ যা ব্যাকগ্রাউন্ডে স্বয়ংক্রিয়ভাবে সকল স্ট্রিং অপারেশনে (<code>=</code>, <code>LIKE</code>, <code>UNIQUE</code> constraint) <code>LOWER()</code> কল করে নেয়।</p>
+	{
+		id: "db-46",
+		category: "Database",
+		difficulty: "Very Important",
+		tags: ["Optimistic Locking"],
+		question: "Optimistic Locking কী?",
+		answer: `Optimistic locking ধরে নেয় conflict কম হবে।
 
-      <div class="code-box">
-        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
-        <pre><code>-- Approach 1: Expression Indexing on Standard VARCHAR
-CREATE INDEX idx_users_lower_email ON users (LOWER(email));
+Row-তে version রাখা হয়।
 
--- Query must explicitly use LOWER() to utilize the index:
-SELECT * FROM users WHERE LOWER(email) = LOWER('User@Example.com');
+Example:
 
+id | stock | version
+---|-------|--------
+10 | 20    | 5
 
--- Approach 2: Using CITEXT Extension (Cleaner Code)
-CREATE EXTENSION IF NOT EXISTS citext;
+Update:
 
-CREATE TABLE accounts (
-    id SERIAL PRIMARY KEY,
-    username CITEXT UNIQUE NOT NULL -- Case-Insensitive Unique Constraint!
-);
+UPDATE products
+SET stock = 19,
+    version = 6
+WHERE id = 10
+AND version = 5;
 
--- Plain Query automatically matches Case-Insensitively!
-SELECT * FROM accounts WHERE username = 'JohnDOELocal'; -- Matches 'johndoelocal'</code></pre>
-      </div>
-    `
-  },
-  {
-    id: "db-49",
-    category: "Database",
-    difficulty: "Advanced",
-    tags: ["Resilience", "Two-Phase Commit", "2PC"],
-    question: "Two-Phase Commit (2PC) Protocol দিয়ে Multi-Database Distributed Transaction কীভাবে সামলাবেন?",
-    answer: `
-      <p>যখন একটি ট্রানজেকশনের কার্যপরিধি একাধিক স্বাধীন ফিজিক্যাল ডাটাবেজ নোড জুড়ে বিস্তৃত থাকে, তখন সকল ডাটাবেজে একসাথে <code>COMMIT</code> অথবা একসাথে <code>ROLLBACK</code> সুনিশ্চিত করতে <strong>Two-Phase Commit (2PC) Protocol</strong> ব্যবহার করা হয়।</p>
-      
-      <h4>১. Two-Phase Commit (2PC)-এর ২টি ফেজ:</h4>
-      <ul>
-        <li><strong>Phase 1: Prepare Phase (ভোট গ্রহণ)</strong>
-          <br/>সেন্ট্রাল কো-অর্ডিনেটর (Coordinator Node) সবকয়টি পার্টিসিপেন্ট ডাটাবেজকে পরিবর্তনটি প্রস্তুত করতে বলে এবং মেসেজ পাঠায়: <em>"Can you Commit?"</em>। পার্টিসিপেন্টরা ডাটা লকিং ও WAL-এ রাইট করে তৈরি থাকে এবং প্রত্যেকে 'YES' বা 'NO' ভোট পাঠায়।
-        </li>
-        <li><strong>Phase 2: Commit / Abort Phase (সিদ্ধান্ত বাস্তবায়ন)</strong>
-          <br/>সব নোড যদি 'YES' বলে, তবে কো-অর্ডিনেটর সবাইকে <strong>COMMIT PREPARED</strong> বার্তা পাঠায়। আর যদি একটি নোডও 'NO' বলে বা টাইমআউট হয়, তবে কো-অর্ডিনেটর সবাইকে <strong>ROLLBACK PREPARED</strong> নির্দশ দিয়ে পুরো ডিস্ট্রিবিউটেড ট্রানজেকশন বাতিল করে।
-        </li>
-      </ul>
+যদি affected rows = 0 হয়, তাহলে অন্য কেউ আগে update করেছে।
 
-      <h4>২. 2PC আর্কিটেকচারাল ফ্লো:</h4>
-      <div class="code-box">
-        <div class="code-header"><span>text</span><button class="copy-btn">Copy</button></div>
-        <pre><code>Coordinator ───► Prepare? ───► DB Node 1 (Locks & Writes WAL) ──► Vote YES ──┐
-Coordinator ───► Prepare? ───► DB Node 2 (Locks & Writes WAL) ──► Vote YES ──┼──► Coordinator sends "COMMIT PREPARED"
-                                                                             │
-                                                               (If Any NO) ──┴──► Coordinator sends "ROLLBACK PREPARED"</code></pre>
-      </div>
+এতে explicit database lock কম লাগে।`,
+	},
 
-      <div class="code-box">
-        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
-        <pre><code>-- Manual 2PC Protocol Execution in PostgreSQL
-BEGIN;
-UPDATE accounts SET balance = balance - 500 WHERE id = 10;
+	{
+		id: "db-47",
+		category: "Database",
+		difficulty: "Very Important",
+		tags: ["Deadlock", "Concurrency"],
+		question: "Database Deadlock কী?",
+		answer: `দুই বা তার বেশি transaction একে অপরের lock release-এর জন্য অপেক্ষা করলে deadlock হয়।
 
--- Step 1: Prepare Transaction (Persists locks & WAL to disk, assigns GID)
-PREPARE TRANSACTION 'tx_transfer_bd_to_us_101';
+Example:
 
--- Step 2A: Commit Prepared Transaction (Executed by Coordinator if all OK)
-COMMIT PREPARED 'tx_transfer_bd_to_us_101';
+Transaction A:
+Lock Row 1
+ ↓
+Wait Row 2
 
--- Step 2B: Rollback Prepared Transaction (Executed if any node fails)
-ROLLBACK PREPARED 'tx_transfer_bd_to_us_101';</code></pre>
-      </div>
-    `
-  },
-  {
-    id: "db-50",
-    category: "Database",
-    difficulty: "Intermediate",
-    tags: ["PostgreSQL", "Constraints", "CHECK", "EXCLUSION"],
-    question: "PostgreSQL CHECK Constraints and EXCLUSION Constraints-এর সিকিউরিটি সুবিধা কী?",
-    answer: `
-      <p>ডাটাবেজ আর্কিটেকচারের সবচেয়ে শক্তিশালী নিরাপত্তার স্তর হলো **Database-Level Constraints**। অ্যাপ্লিকেশন লেভেলের ভ্যালিডেশন বাইপাস (Race condition বা Direct Script Access) হলেও ডাটাবেজের এই কনস্ট্রেইন্টগুলো টেবিলে কোনো অবৈধ ডাটা প্রবেশ করতে দেয় না।</p>
-      
-      <h4>১. CHECK Constraint (কলাম মান যাচাই):</h4>
-      <p>একক রো-এর বিভিন্ন কলামের মানের ওপর গাণিতিক বা লজিক্যাল ফিল্টার বসায়।</p>
+Transaction B:
+Lock Row 2
+ ↓
+Wait Row 1
 
-      <h4>২. EXCLUSION Constraint (GiST Index-based Overlap Prevention):</h4>
-      <p>একাধিক সারির মধ্যকার সম্পর্কের মধ্যে ওভারল্যাপিং (Overlapping) প্রতিরোধ করে। এটি সময় ভিত্তিক বুকিং শিডিউল বা জিওগ্রাফিক্যাল মানচিত্রে জোনিং ওভারল্যাপ প্রতিরোধে অত্যন্ত কার্যকর। এটি অ্যাপ্লিকেশন লেভেলের <strong>Race Condition শতভাগ প্রতিরোধ করে</strong>।</p>
+A waits for B
+B waits for A
 
-      <div class="code-box">
-        <div class="code-header"><span>sql</span><button class="copy-btn">Copy</button></div>
-        <pre><code>-- 1. Table with CHECK Constraints
-CREATE TABLE products (
-    id SERIAL PRIMARY KEY,
-    price NUMERIC(10,2) CHECK (price > 0), -- Price cannot be zero or negative
-    discount_price NUMERIC(10,2),
-    CONSTRAINT chk_discount_valid CHECK (discount_price < price) -- Multi-column logic
-);
+এটাই deadlock।
 
--- 2. EXCLUSION Constraint Example (Prevent Hotel Room Double Booking Race Conditions)
-CREATE EXTENSION IF NOT EXISTS btree_gist;
+Prevent:
 
-CREATE TABLE hotel_room_bookings (
-    room_number INT,
-    booking_period TSRANGE, -- Timestamp range: '[2026-08-10 10:00, 2026-08-12 10:00)'
-    
-    -- EXCLUSION: Prevent booking if room_number is EQUAL (=) 
-    -- AND booking_period OVERLAPS (&&) with any existing row!
-    EXCLUDE USING GIST (
-        room_number WITH =, 
-        booking_period WITH &&
-    )
-);
+- Consistent lock ordering
+- Short transactions
+- Proper indexes
+- Avoid unnecessary locks
+- Retry after deadlock detection`,
+	},
 
--- Inserting non-overlapping booking: SUCCESS
-INSERT INTO hotel_room_bookings VALUES (101, '[2026-08-10 10:00, 2026-08-12 10:00)');
+	{
+		id: "db-48",
+		category: "Database",
+		difficulty: "Senior",
+		tags: ["Connection Pool", "Performance"],
+		question: "Database Connection Pool কী?",
+		answer: `Application প্রতিবার নতুন DB connection না খুলে reusable connection pool ব্যবহার করে।
 
--- Trying to insert overlapping time range: FAILS IMMEDIATELY WITH DB EXCEPTION!
-INSERT INTO hotel_room_bookings VALUES (101, '[2026-08-11 10:00, 2026-08-13 10:00)');
--- ERROR: conflicting key value violates exclusion constraint "hotel_room_bookings_room_number_booking_period_excl"</code></pre>
-      </div>
-    `
+Application
+ ↓
+Connection Pool
+ ├── Conn 1
+ ├── Conn 2
+ ├── Conn 3
+ └── Conn N
+ ↓
+Database
+
+Benefits:
+
+- Lower connection overhead
+- Better throughput
+- Connection count control
+
+Pool size খুব বড় করলেই performance বাড়বে না।
+
+Database-এর CPU, workload এবং maximum connection capacity অনুযায়ী tune করতে হয়।`,
+	},
+
+	// ============================================================
+	// DATABASE STORAGE / INTERNALS
+	// ============================================================
+
+	{
+		id: "db-49",
+		category: "Database",
+		difficulty: "Senior",
+		tags: ["Buffer Pool", "InnoDB", "Internals"],
+		question: "Database Buffer Pool কী?",
+		answer: `Buffer pool হলো memory area যেখানে database frequently accessed data/index pages cache করে।
+
+Query
+ ↓
+Buffer Pool
+ ├── Page found → Memory থেকে read
+ └── Page missing
+       ↓
+      Disk
+       ↓
+  Buffer Pool
+       ↓
+      Query
+
+Memory থেকে read disk-এর চেয়ে অনেক faster।
+
+InnoDB-তে buffer pool অত্যন্ত গুরুত্বপূর্ণ performance component।`,
+	},
+
+	{
+		id: "db-50",
+		category: "Database",
+		difficulty: "Senior",
+		tags: ["Redo Log", "WAL", "Durability"],
+		question: "Redo Log/WAL কী?",
+		answer: `Database durability এবং crash recovery-এর জন্য log-based mechanism ব্যবহার করে।
+
+Simplified flow:
+
+Application
+ ↓
+Transaction
+ ↓
+Memory/Buffer
+ ↓
+Redo Log / WAL
+ ↓
+Commit
+ ↓
+Disk pages later flushed
+
+Crash হলে database log ব্যবহার করে committed changes recover করতে পারে।
+
+MySQL InnoDB-তে Redo Log এবং PostgreSQL-এ WAL গুরুত্বপূর্ণ concepts।`,
+	},
+
+	{
+		id: "db-51",
+		category: "Database",
+		difficulty: "Senior",
+		tags: ["Write-Ahead Logging", "WAL"],
+		question: "WAL কী?",
+		answer: `WAL = Write-Ahead Logging।
+
+মূল ধারণা:
+
+Data page disk-এ পরিবর্তন করার আগে corresponding log record durable করতে হবে।
+
+Concept:
+
+Change
+ ↓
+WAL
+ ↓
+Durable
+ ↓
+Data Page
+
+Crash হলে WAL replay করে database recovery করতে পারে।
+
+PostgreSQL-এর architecture বুঝতে WAL খুব গুরুত্বপূর্ণ।`,
+	},
+
+	{
+		id: "db-52",
+		category: "Database",
+		difficulty: "Senior",
+		tags: ["Checkpoint", "Recovery"],
+		question: "Database Checkpoint কী?",
+		answer: `Checkpoint হলো recovery process সহজ করার জন্য database-এর dirty pages/log state-এর একটি consistent progress point তৈরি করা।
+
+Crash recovery:
+
+Last checkpoint
+ ↓
+Replay necessary logs
+ ↓
+Recover database
+
+Checkpoint frequency performance এবং recovery time-এর মধ্যে trade-off তৈরি করে।`,
+	},
+
+	// ============================================================
+	// QUERY PERFORMANCE
+	// ============================================================
+
+	{
+		id: "db-53",
+		category: "Database",
+		difficulty: "Very Important",
+		tags: ["Performance", "N+1"],
+		question: "N+1 Query Problem কী?",
+		answer: `প্রথমে 1টি query করে parent records আনা হয়, তারপর প্রতিটি parent-এর জন্য আলাদা query করা হলে N+1 problem হয়।
+
+Example:
+
+1 query:
+SELECT * FROM users;
+
+তারপর:
+
+User 1 → orders query
+User 2 → orders query
+User 3 → orders query
+...
+User N → orders query
+
+Total:
+
+1 + N queries
+
+Solution:
+
+- JOIN
+- Batch query
+- Eager loading
+- DataLoader pattern
+- Proper aggregation
+
+ORM ব্যবহার করার সময় N+1 বিশেষভাবে খেয়াল করতে হয়।`,
+	},
+
+	{
+		id: "db-54",
+		category: "Database",
+		difficulty: "Very Important",
+		tags: ["Slow Query", "Optimization"],
+		question: "একটি SQL query slow হলে কীভাবে optimize করবেন?",
+		answer: `Step-by-step:
+
+1. Query identify করুন
+2. Execution time measure করুন
+3. EXPLAIN/EXPLAIN ANALYZE করুন
+4. Index usage check করুন
+5. Full table scan আছে কি দেখুন
+6. Join condition check করুন
+7. Returned rows কমান
+8. SELECT * avoid করুন
+9. Query structure optimize করুন
+10. Data distribution/statistics check করুন
+
+তারপর:
+
+- Proper index
+- Composite index
+- Query rewrite
+- Pagination
+- Pre-aggregation
+- Cache
+
+ব্যবহার করা যায়।
+
+Blindly index add করা উচিত নয়।`,
+	},
+
+	{
+		id: "db-55",
+		category: "Database",
+		difficulty: "Very Important",
+		tags: ["Pagination", "Performance"],
+		question: "OFFSET pagination এবং Cursor pagination-এর পার্থক্য কী?",
+		answer: `OFFSET:
+
+SELECT *
+FROM products
+ORDER BY id
+LIMIT 20 OFFSET 100000;
+
+Large offset হলে database অনেক row skip করতে পারে।
+
+Cursor:
+
+WHERE id > last_seen_id
+ORDER BY id
+LIMIT 20;
+
+Large dataset-এ cursor pagination অনেক সময় বেশি efficient।
+
+Cursor pagination high-volume feed/order system-এ useful।
+
+তবে cursor design-এর জন্য stable ordering এবং unique tie-breaker দরকার।`,
+	},
+
+	{
+		id: "db-56",
+		category: "Database",
+		difficulty: "Senior",
+		tags: ["Read Replica", "Scaling"],
+		question: "Read Replica কী?",
+		answer: `Primary database write handle করে এবং replica read traffic serve করতে পারে।
+
+Architecture:
+
+Application
+   ↓
+Primary
+ ├── Write
+ └── Replication
+       ↓
+   Replica 1
+   Replica 2
+       ↓
+     Reads
+
+Benefits:
+
+- Read scaling
+- Reporting isolation
+- Reduced primary load
+
+Trade-off:
+
+Replication lag থাকতে পারে।
+
+তাই immediately-after-write read-এর consistency requirement বুঝতে হবে।`,
+	},
+
+	{
+		id: "db-57",
+		category: "Database",
+		difficulty: "Senior",
+		tags: ["Replication", "High Availability"],
+		question: "Database Replication কী?",
+		answer: `এক database-এর data অন্য database node-এ replicate করা হলো replication।
+
+Possible models:
+
+- Primary/Replica
+- Synchronous
+- Asynchronous
+- Multi-primary
+
+Use cases:
+
+- High availability
+- Read scaling
+- Disaster recovery
+- Geographic distribution
+
+Asynchronous replication-এ replication lag হতে পারে।`,
+	},
+
+	{
+		id: "db-58",
+		category: "Database",
+		difficulty: "Senior",
+		tags: ["Replication Lag", "Distributed Systems"],
+		question: "Replication Lag কী?",
+		answer: `Primary database-এর নতুন data replica-তে পৌঁছাতে সময় লাগলে replication lag হয়।
+
+Example:
+
+Primary:
+Order #100 created
+
+Replica:
+কিছু milliseconds/seconds পরে #100 দেখতে পাচ্ছে।
+
+যদি application immediately replica থেকে read করে, stale data পেতে পারে।
+
+Solution:
+
+- Read from primary where strong consistency needed
+- Lag monitoring
+- Routing strategy
+- Session consistency strategy`,
+	},
+
+	// ============================================================
+	// DATABASE SCALING
+	// ============================================================
+
+	{
+		id: "db-59",
+		category: "Database",
+		difficulty: "Senior",
+		tags: ["Sharding", "Scaling"],
+		question: "Database Sharding কী?",
+		answer: `Sharding হলো data horizontally multiple database node-এ distribute করা।
+
+Example:
+
+Users:
+
+Shard 1 → user_id 1-1M
+Shard 2 → user_id 1M-2M
+Shard 3 → user_id 2M-3M
+
+অথবা hash-based:
+
+hash(user_id) → shard
+
+Benefits:
+
+- Massive scale
+- Storage distribution
+- Write scaling
+
+Challenges:
+
+- Cross-shard query
+- Cross-shard transaction
+- Rebalancing
+- Hot shard
+- Complex operations
+
+Sharding প্রয়োজনের আগে simpler scaling techniques শেষ করা উচিত।`,
+	},
+
+	{
+		id: "db-60",
+		category: "Database",
+		difficulty: "Senior",
+		tags: ["Partitioning", "Scaling"],
+		question: "Database Partitioning কী?",
+		answer: `একটি logical table-এর data database-এর ভিতর multiple partitions-এ ভাগ করা হলে partitioning।
+
+Common:
+
+- Range partitioning
+- List partitioning
+- Hash partitioning
+
+Example:
+
+orders_2025
+orders_2026
+
+Date-based partitioning large time-series/order table-এ useful হতে পারে।
+
+Partition pruning query performance improve করতে পারে।`,
+	},
+
+	{
+		id: "db-61",
+		category: "Database",
+		difficulty: "Senior",
+		tags: ["Horizontal Scaling", "Vertical Scaling"],
+		question: "Vertical Scaling এবং Horizontal Scaling কী?",
+		answer: `Vertical scaling:
+
+একই server-এর resource বাড়ানো।
+
+CPU ↑
+RAM ↑
+Storage ↑
+
+Horizontal scaling:
+
+Multiple server/node যোগ করা।
+
+Node 1
+Node 2
+Node 3
+
+Database:
+
+Vertical:
+Bigger DB server
+
+Horizontal:
+Replication / Sharding / Distributed DB
+
+Vertical scaling সহজ।
+
+Horizontal scaling বেশি complex কিন্তু large scale-এর জন্য useful।`,
+	},
+
+	// ============================================================
+	// BACKUP & RECOVERY
+	// ============================================================
+
+	{
+		id: "db-62",
+		category: "Database",
+		difficulty: "Very Important",
+		tags: ["Backup", "Recovery"],
+		question: "Database Backup কী কী ধরনের হতে পারে?",
+		answer: `Common backup:
+
+1. Full Backup
+2. Incremental Backup
+3. Differential Backup
+4. Snapshot
+5. Logical Backup
+6. Physical Backup
+
+Full:
+পুরো database।
+
+Incremental:
+শেষ backup-এর পরের changes।
+
+Differential:
+শেষ full backup-এর পরের changes।
+
+Production system-এ backup strategy-এর সাথে restore testing-ও জরুরি।`,
+	},
+
+	{
+		id: "db-63",
+		category: "Database",
+		difficulty: "Very Important",
+		tags: ["RPO", "RTO", "Disaster Recovery"],
+		question: "RPO এবং RTO কী?",
+		answer: `RPO = Recovery Point Objective
+
+কতটা data loss acceptable?
+
+Example:
+
+RPO = 5 minutes
+
+সর্বোচ্চ প্রায় 5 মিনিটের data loss tolerate করা যেতে পারে।
+
+RTO = Recovery Time Objective
+
+কত সময়ের মধ্যে service recover করতে হবে?
+
+Example:
+
+RTO = 30 minutes
+
+Service 30 মিনিটের মধ্যে restore করতে হবে।
+
+High availability/disaster recovery planning-এ RPO এবং RTO গুরুত্বপূর্ণ।`,
+	},
+
+	// ============================================================
+	// SECURITY
+	// ============================================================
+
+	{
+		id: "db-64",
+		category: "Database",
+		difficulty: "Very Important",
+		tags: ["SQL Injection", "Security"],
+		question: "SQL Injection কী?",
+		answer: `User input directly SQL query-এর মধ্যে concatenate করলে attacker malicious SQL inject করতে পারে।
+
+Bad:
+
+"SELECT * FROM users WHERE email = '" + email + "'"
+
+Attacker malicious input দিয়ে query structure পরিবর্তন করতে পারে।
+
+Protection:
+
+- Parameterized queries
+- Prepared statements
+- ORM parameter binding
+- Input validation
+- Least privilege
+
+সবচেয়ে গুরুত্বপূর্ণ:
+
+User input কখনো raw SQL string-এর সাথে unsafeভাবে concatenate করবেন না।`,
+	},
+
+	{
+		id: "db-65",
+		category: "Database",
+		difficulty: "Very Important",
+		tags: ["Database Security", "Least Privilege"],
+		question: "Database security-এর গুরুত্বপূর্ণ principles কী?",
+		answer: `Important:
+
+- Least privilege
+- Strong authentication
+- Encryption in transit
+- Encryption at rest
+- Secret management
+- Network isolation
+- Firewall
+- Audit logging
+- Parameterized queries
+- Backup encryption
+- Rotation of credentials
+
+Application-এর DB user-কে প্রয়োজনের চেয়ে বেশি privilege দেওয়া উচিত নয়।
+
+Example:
+
+Read-only reporting service
+→ SELECT permission
+
+Write service
+→ প্রয়োজনীয় INSERT/UPDATE permission`,
+	},
+
+	// ============================================================
+	// VIEWS / PROCEDURES / TRIGGERS
+	// ============================================================
+
+	{
+		id: "db-66",
+		category: "SQL",
+		difficulty: "Important",
+		tags: ["View"],
+		question: "Database View কী?",
+		answer: `View হলো stored query-এর মতো logical table।
+
+Example:
+
+CREATE VIEW active_users AS
+SELECT id, name
+FROM users
+WHERE status = 'active';
+
+তারপর:
+
+SELECT *
+FROM active_users;
+
+Benefits:
+
+- Query abstraction
+- Security
+- Reusability
+
+Normal view সাধারণত data physically store করে না; materialized view আলাদা concept।`,
+	},
+
+	{
+		id: "db-67",
+		category: "Database",
+		difficulty: "Important",
+		tags: ["Materialized View", "Performance"],
+		question: "Materialized View কী?",
+		answer: `Materialized view query result physically store করে।
+
+Normal View:
+
+Query
+ ↓
+Calculate every time
+
+Materialized View:
+
+Query
+ ↓
+Stored result
+ ↓
+Read
+
+Complex reporting/aggregation workload-এ read performance improve করতে পারে।
+
+Trade-off:
+
+Data refresh করতে হয়।
+
+Freshness requirement অনুযায়ী refresh strategy design করতে হয়।`,
+	},
+
+	{
+		id: "db-68",
+		category: "Database",
+		difficulty: "Important",
+		tags: ["Stored Procedure"],
+		question: "Stored Procedure কী?",
+		answer: `Stored procedure হলো database-এর মধ্যে stored executable logic।
+
+Benefits:
+
+- Reusable DB-side logic
+- Reduced network round trips in some workloads
+- Centralized DB operations
+
+কিন্তু অতিরিক্ত business logic database-এ রাখলে:
+
+- Testing complexity
+- Version control complexity
+- Portability issues
+
+তাই application architecture অনুযায়ী সিদ্ধান্ত নিতে হয়।`,
+	},
+
+	{
+		id: "db-69",
+		category: "Database",
+		difficulty: "Important",
+		tags: ["Trigger"],
+		question: "Database Trigger কী?",
+		answer: `Trigger হলো নির্দিষ্ট database event ঘটলে automatically execute হওয়া logic।
+
+Example:
+
+INSERT
+UPDATE
+DELETE
+
+এর পর trigger execute হতে পারে।
+
+Use cases:
+
+- Audit
+- Derived data
+- Enforcement of certain DB rules
+
+কিন্তু অতিরিক্ত trigger hidden side effects তৈরি করতে পারে।
+
+Complex business workflow-এর জন্য application/service layer বা event-driven architecture অনেক সময় বেশি maintainable।`,
+	},
+
+	// ============================================================
+	// NOSQL
+	// ============================================================
+
+	{
+		id: "db-70",
+		category: "NoSQL",
+		difficulty: "Very Important",
+		tags: ["MongoDB", "Document Database"],
+		question: "MongoDB কী?",
+		answer: `MongoDB একটি document-oriented NoSQL database।
+
+Data BSON document আকারে store হয়।
+
+Example:
+
+{
+  "_id": 1,
+  "name": "Product",
+  "price": 100,
+  "tags": ["a", "b"]
+}
+
+MongoDB useful:
+
+- Flexible schema
+- Document-centric data
+- Rapid development
+- Horizontal scaling
+
+তবে complex relational workload হলে relational database অনেক সময় বেশি natural।`,
+	},
+
+	{
+		id: "db-71",
+		category: "NoSQL",
+		difficulty: "Very Important",
+		tags: ["MongoDB", "Embedding"],
+		question: "MongoDB-তে Embedding এবং Referencing কী?",
+		answer: `Embedding:
+
+Related data একই document-এর ভিতরে রাখা।
+
+{
+  user: {
+    name: "A",
+    address: {
+      city: "Dhaka"
+    }
   }
+}
+
+Referencing:
+
+অন্য document-এর ID reference করা।
+
+{
+  user_id: 123
+}
+
+Embedding useful যখন:
+
+- Data frequently together read হয়
+- Relationship bounded
+- Data size manageable
+
+Referencing useful যখন:
+
+- Data independently managed
+- Large/unbounded relationship
+- Frequent independent updates`,
+	},
+
+	{
+		id: "db-72",
+		category: "NoSQL",
+		difficulty: "Very Important",
+		tags: ["Redis", "Cache"],
+		question: "Redis কী এবং কোথায় ব্যবহার করবেন?",
+		answer: `Redis হলো in-memory data store।
+
+Data structures:
+
+- String
+- Hash
+- List
+- Set
+- Sorted Set
+- Stream
+
+Use cases:
+
+- Cache
+- Session
+- Rate limiting
+- Distributed locks
+- Pub/Sub
+- Counters
+- Queue-related workloads
+
+Redis fast কারণ primary data access memory-based।
+
+তবে durability requirement অনুযায়ী persistence configuration এবং architecture বিবেচনা করতে হবে।`,
+	},
+
+	{
+		id: "db-73",
+		category: "NoSQL",
+		difficulty: "Very Important",
+		tags: ["Redis", "Cache"],
+		question: "Cache Aside Pattern কী?",
+		answer: `Cache-aside-এর flow:
+
+Request
+ ↓
+Check Cache
+ ├── Hit → Return
+ └── Miss
+       ↓
+    Database
+       ↓
+    Set Cache
+       ↓
+    Return
+
+Update:
+
+Database update
+ ↓
+Invalidate cache
+
+এটি সবচেয়ে common application caching pattern-এর একটি।`,
+	},
+
+	// ============================================================
+	// DATABASE DESIGN
+	// ============================================================
+
+	{
+		id: "db-74",
+		category: "Database Design",
+		difficulty: "Very Important",
+		tags: ["ERD", "Design"],
+		question: "ERD কী?",
+		answer: `ERD = Entity Relationship Diagram।
+
+Database entities এবং তাদের relationships visualভাবে দেখায়।
+
+Example:
+
+User
+ |
+ | 1:N
+ ↓
+Order
+ |
+ | 1:N
+ ↓
+OrderItem
+ |
+ | N:1
+ ↓
+Product
+
+ERD database design করার আগে relationship বোঝার জন্য খুব useful।`,
+	},
+
+	{
+		id: "db-75",
+		category: "Database Design",
+		difficulty: "Very Important",
+		tags: ["Relationship"],
+		question: "One-to-One, One-to-Many এবং Many-to-Many relationship কী?",
+		answer: `One-to-One:
+
+User → Profile
+
+এক user-এর একটি profile।
+
+One-to-Many:
+
+User → Orders
+
+এক user-এর অনেক order।
+
+Many-to-Many:
+
+Students ↔ Courses
+
+এক student অনেক course নিতে পারে।
+
+এক course অনেক student থাকতে পারে।
+
+Many-to-many সাধারণত junction table দিয়ে model করা হয়:
+
+student_courses
+
+student_id
+course_id`,
+	},
+
+	{
+		id: "db-76",
+		category: "Database Design",
+		difficulty: "Very Important",
+		tags: ["Soft Delete", "Data Lifecycle"],
+		question: "Soft Delete কী?",
+		answer: `Physical DELETE না করে record-কে deleted হিসেবে mark করা হলে soft delete।
+
+Example:
+
+deleted_at = timestamp
+
+Query:
+
+WHERE deleted_at IS NULL
+
+Benefits:
+
+- Recovery
+- Audit
+- Historical records
+
+Trade-off:
+
+- Every query-তে filter দরকার
+- Unique constraint complexity
+- Table size বাড়তে পারে
+
+Large system-এ archive strategy-ও প্রয়োজন হতে পারে।`,
+	},
+
+	{
+		id: "db-77",
+		category: "Database Design",
+		difficulty: "Very Important",
+		tags: ["Audit", "Data Integrity"],
+		question: "Audit Trail কী?",
+		answer: `কোন user কখন কী পরিবর্তন করেছে তার historical record হলো audit trail।
+
+Example:
+
+audit_logs
+
+id
+user_id
+action
+entity
+entity_id
+old_value
+new_value
+created_at
+
+Useful:
+
+- Banking
+- ERP
+- Payment
+- Admin panel
+- Compliance
+
+Critical business systems-এ auditability গুরুত্বপূর্ণ।`,
+	},
+
+	// ============================================================
+	// ADVANCED DISTRIBUTED DATABASE
+	// ============================================================
+
+	{
+		id: "db-78",
+		category: "Distributed Database",
+		difficulty: "Senior",
+		tags: ["CAP Theorem", "Distributed Systems"],
+		question: "CAP Theorem কী?",
+		answer: `CAP theorem distributed system-এর তিনটি property নিয়ে কথা বলে:
+
+C = Consistency
+A = Availability
+P = Partition Tolerance
+
+Network partition হলে system একই সময়ে strong consistency এবং full availability দুটোই guarantee করতে পারে না—classic CAP framing অনুযায়ী।
+
+Distributed database design-এ network partition বাস্তব possibility, তাই trade-off বুঝতে হয়।
+
+এটি simple "choose any two" slogan-এর চেয়ে বেশি nuanced concept।`,
+	},
+
+	{
+		id: "db-79",
+		category: "Distributed Database",
+		difficulty: "Senior",
+		tags: ["Consistency", "Distributed Systems"],
+		question: "Strong Consistency এবং Eventual Consistency কী?",
+		answer: `Strong consistency:
+
+Write successful হওয়ার পরে subsequent reads expectedভাবে latest value দেখতে পায়।
+
+Eventual consistency:
+
+Immediately সব replica একই value নাও দেখতে পারে, কিন্তু সময়ের সাথে converge করবে।
+
+Strong consistency:
+
++ Easier reasoning
+- More coordination/latency
+
+Eventual consistency:
+
++ Better availability/scalability in some systems
+- Application complexity
+
+Use case অনুযায়ী choose করতে হয়।`,
+	},
+
+	{
+		id: "db-80",
+		category: "Distributed Database",
+		difficulty: "Senior",
+		tags: ["Distributed Transaction", "Saga"],
+		question: "Distributed transaction কী?",
+		answer: `একটি business operation যদি multiple independent database/service-এর data modify করে, সেটি distributed transaction problem তৈরি করে।
+
+Example:
+
+Order DB
++
+Payment DB
++
+Inventory DB
+
+একটি local database transaction সব service cover করতে পারে না।
+
+Common approaches:
+
+- Saga
+- Outbox
+- Compensation
+- 2PC in specific systems
+
+Microservices-এ Saga এবং eventual consistency বেশি common।`,
+	},
+
+	{
+		id: "db-81",
+		category: "Distributed Database",
+		difficulty: "Senior",
+		tags: ["Two Phase Commit", "2PC"],
+		question: "Two Phase Commit বা 2PC কী?",
+		answer: `2PC distributed transaction-এর জন্য coordinator-based protocol।
+
+Phase 1:
+
+Prepare
+
+সব participant জিজ্ঞেস করা হয় তারা commit করতে পারবে কি না।
+
+Phase 2:
+
+Commit/Abort
+
+সব ready হলে commit।
+
+Problem:
+
+- Blocking
+- Coordinator dependency
+- Performance overhead
+- Failure complexity
+
+Microservices-এ সাধারণ business workflow-এর জন্য Saga অনেক সময় বেশি practical।`,
+	},
+
+	// ============================================================
+	// PRODUCTION / INTERVIEW
+	// ============================================================
+
+	{
+		id: "db-82",
+		category: "Database",
+		difficulty: "Senior",
+		tags: ["Production", "Architecture"],
+		question: "Production database design করার সময় কী কী consider করবেন?",
+		answer: `Consider:
+
+1. Data model
+2. Relationships
+3. Normalization
+4. Indexing
+5. Transactions
+6. Isolation
+7. Locking
+8. Connection pooling
+9. Query performance
+10. Caching
+11. Replication
+12. Backup
+13. Recovery
+14. Security
+15. Monitoring
+16. Scaling
+17. Migration strategy
+18. Disaster recovery
+19. Data retention
+20. Auditability
+
+Database design শুধু table তৈরি করা নয়।
+
+Application workload বুঝে design করতে হয়।`,
+	},
+
+	{
+		id: "db-83",
+		category: "Database",
+		difficulty: "Senior",
+		tags: ["Migration", "Deployment"],
+		question: "Database Migration কী?",
+		answer: `Application-এর সাথে database schema safely evolve করার process হলো migration।
+
+Example:
+
+Version 1:
+
+users
+- id
+- name
+
+Version 2:
+
+users
+- id
+- name
+- email
+
+Migration:
+
+ALTER TABLE users
+ADD COLUMN email VARCHAR(255);
+
+Production migration-এ backward compatibility গুরুত্বপূর্ণ।
+
+Large table-এ blocking migration avoid করতে online/non-blocking migration strategy প্রয়োজন হতে পারে।`,
+	},
+
+	{
+		id: "db-84",
+		category: "Database",
+		difficulty: "Senior",
+		tags: ["Zero Downtime", "Migration"],
+		question: "Zero-downtime database migration কীভাবে করবেন?",
+		answer: `সরাসরি destructive schema change production-এ risky।
+
+Expand-and-contract pattern ব্যবহার করা যায়।
+
+Step 1:
+নতুন column add করুন।
+
+Step 2:
+Application পুরনো + নতুন structure support করবে।
+
+Step 3:
+Backfill data।
+
+Step 4:
+Application নতুন column use করবে।
+
+Step 5:
+Old column remove করুন।
+
+Flow:
+
+Expand
+ ↓
+Deploy compatible code
+ ↓
+Backfill
+ ↓
+Switch reads/writes
+ ↓
+Contract
+
+এটি large production system-এ খুব useful।`,
+	},
+
+	{
+		id: "db-85",
+		category: "Database",
+		difficulty: "Senior",
+		tags: ["System Design", "E-commerce"],
+		question: "একটি high-scale e-commerce database কীভাবে design করবেন?",
+		answer: `Core tables:
+
+users
+products
+categories
+inventory
+carts
+orders
+order_items
+payments
+shipments
+
+Core relationship:
+
+User
+ ↓
+Order
+ ↓
+OrderItem
+ ↓
+Product
+
+Inventory:
+
+Product
+ ↓
+Inventory
+
+Critical considerations:
+
+- Product indexes
+- Inventory concurrency
+- Order transaction
+- Payment idempotency
+- Cache
+- Read replicas
+- Search engine for product search
+- Queue/event system
+- Audit logs
+- Partitioning for large order tables
+- Backup/recovery
+
+High-scale architecture:
+
+API
+ ↓
+Cache
+ ↓
+Primary DB
+ ├── Read Replicas
+ └── Event/Queue
+        ↓
+    Async Workers`,
+	},
+
+	{
+		id: "db-86",
+		category: "Database",
+		difficulty: "Senior",
+		tags: ["System Design", "Banking"],
+		question: "Banking transaction system-এর database design-এ সবচেয়ে গুরুত্বপূর্ণ বিষয় কী?",
+		answer: `সবচেয়ে গুরুত্বপূর্ণ:
+
+- Strong consistency
+- ACID transaction
+- Double-entry ledger
+- Idempotency
+- Concurrency control
+- Audit trail
+- Immutable transaction history
+- Strict authorization
+- Encryption
+- Backup
+- Disaster recovery
+
+Money transfer:
+
+BEGIN
+ ↓
+Debit account A
+ ↓
+Credit account B
+ ↓
+Create ledger entries
+ ↓
+COMMIT
+
+কোনো step fail হলে rollback।
+
+Financial system-এ শুধু balance column-এর উপর নির্ভর না করে auditable ledger model গুরুত্বপূর্ণ।`,
+	},
+
+	{
+		id: "db-87",
+		category: "Database",
+		difficulty: "Senior",
+		tags: ["Interview", "Debugging"],
+		question: "Production database CPU 90-100% হলে কীভাবে investigate করবেন?",
+		answer: `Step 1:
+কোন query CPU consume করছে identify করুন।
+
+Step 2:
+Slow query / active query inspect করুন।
+
+Step 3:
+EXPLAIN করুন।
+
+Step 4:
+Check করুন:
+
+- Missing index
+- Wrong index
+- Full scan
+- Expensive joins
+- Large aggregation
+- Sort
+- Lock contention
+
+Step 5:
+Traffic/application changes check করুন।
+
+Step 6:
+Short-term mitigation:
+
+- Cache
+- Rate limiting
+- Read replica
+- Traffic reduction
+
+Step 7:
+Long-term:
+
+- Query optimization
+- Index
+- Schema optimization
+- Partitioning
+- Architecture change
+
+Monitoring ছাড়া blindly optimization করা উচিত নয়।`,
+	},
+
+	{
+		id: "db-88",
+		category: "Database",
+		difficulty: "Senior",
+		tags: ["Interview", "Concurrency"],
+		question:
+			"একই product-এর stock 1 থাকলে দুইজন একসাথে order করলে কীভাবে overselling prevent করবেন?",
+		answer: `Problem:
+
+Stock = 1
+
+Request A → read stock = 1
+Request B → read stock = 1
+
+দুইজনই order করলে stock -2 হয়ে যেতে পারে।
+
+Solutions:
+
+1. Atomic update:
+
+UPDATE products
+SET stock = stock - 1
+WHERE id = ?
+AND stock > 0;
+
+Affected rows = 1
+→ Success
+
+Affected rows = 0
+→ Out of stock
+
+অথবা:
+
+2. SELECT ... FOR UPDATE
+
+Transaction-এর মধ্যে row lock।
+
+অথবা:
+
+3. Optimistic locking
+
+version column।
+
+High-concurrency inventory system-এ atomic update/pessimistic বা optimistic strategy workload অনুযায়ী choose করতে হয়।`,
+	},
+
+	{
+		id: "db-89",
+		category: "Database",
+		difficulty: "Senior",
+		tags: ["Interview", "Deadlock"],
+		question: "Production-এ deadlock হচ্ছে। কীভাবে solve করবেন?",
+		answer: `প্রথমে deadlock-এর exact transaction pattern identify করতে হবে।
+
+Check:
+
+- Deadlock logs
+- Locked rows
+- Query order
+- Index
+- Transaction duration
+
+Example:
+
+Transaction A:
+Lock User → Order
+
+Transaction B:
+Lock Order → User
+
+Solution:
+
+সব জায়গায় consistent order:
+
+User
+ ↓
+Order
+
+অথবা:
+
+- Shorter transactions
+- Proper indexes
+- Avoid unnecessary locks
+- Reduce lock scope
+- Retry deadlocked transaction
+
+Deadlock পুরোপুরি impossible করার চেয়ে controlled handling + retry অনেক system-এ practical।`,
+	},
+
+	{
+		id: "db-90",
+		category: "Database",
+		difficulty: "Senior",
+		tags: ["Interview", "Architecture"],
+		question: "একটি application-এর database কখন Redis, SQL এবং MongoDB-এর মধ্যে ভাগ করবেন?",
+		answer: `SQL:
+
+Primary source of truth।
+
+Use:
+
+- Orders
+- Payments
+- Users
+- Financial data
+- Relationships
+- Transactions
+
+MongoDB:
+
+Document-oriented workload।
+
+Use:
+
+- Flexible document data
+- Content/catalog style data
+- Specific document access patterns
+
+Redis:
+
+Fast temporary/in-memory data।
+
+Use:
+
+- Cache
+- Session
+- Rate limit
+- Distributed lock
+- Counters
+
+Important principle:
+
+একই data-এর multiple sources of truth তৈরি করার আগে consistency strategy define করতে হবে।`,
+	},
+	// ============================================================
+	// ADVANCED SQL
+	// ============================================================
+
+	{
+		id: "db-91",
+		category: "Advanced SQL",
+		difficulty: "Very Important",
+		tags: ["SQL", "Execution Order"],
+		question: "SQL Query-এর logical execution order কী?",
+		answer: `SQL লেখার order এবং database-এর logical execution order এক নয়।
+
+সাধারণ logical order:
+
+1. FROM
+2. JOIN
+3. WHERE
+4. GROUP BY
+5. HAVING
+6. SELECT
+7. DISTINCT
+8. ORDER BY
+9. LIMIT/OFFSET
+
+Example:
+
+SELECT department_id, COUNT(*)
+FROM employees
+WHERE salary > 50000
+GROUP BY department_id
+HAVING COUNT(*) > 5
+ORDER BY COUNT(*) DESC
+LIMIT 10;
+
+Conceptually:
+
+FROM
+ ↓
+JOIN
+ ↓
+WHERE
+ ↓
+GROUP BY
+ ↓
+HAVING
+ ↓
+SELECT
+ ↓
+DISTINCT
+ ↓
+ORDER BY
+ ↓
+LIMIT
+
+এই order বুঝলে SQL query-এর অনেক interview question সহজ হয়ে যায়।`,
+	},
+
+	{
+		id: "db-92",
+		category: "Advanced SQL",
+		difficulty: "Very Important",
+		tags: ["SQL", "DISTINCT"],
+		question: "DISTINCT কী এবং কখন ব্যবহার করবেন?",
+		answer: `DISTINCT duplicate result remove করে।
+
+Example:
+
+SELECT DISTINCT department_id
+FROM employees;
+
+যদি department_id হয়:
+
+1
+1
+2
+2
+3
+
+Result:
+
+1
+2
+3
+
+কিন্তু DISTINCT performance cost তৈরি করতে পারে, কারণ database-কে duplicate values identify করতে হয়।
+
+শুধু duplicate সমস্যা hide করার জন্য blindly DISTINCT ব্যবহার করা উচিত নয়।`,
+	},
+
+	{
+		id: "db-93",
+		category: "Advanced SQL",
+		difficulty: "Very Important",
+		tags: ["SQL", "CASE"],
+		question: "SQL CASE expression কী?",
+		answer: `CASE conditional logic implement করতে ব্যবহৃত হয়।
+
+Example:
+
+SELECT
+  name,
+  CASE
+    WHEN salary >= 100000 THEN 'Senior'
+    WHEN salary >= 50000 THEN 'Mid'
+    ELSE 'Junior'
+  END AS level
+FROM employees;
+
+এটি SQL-এর মধ্যে if/else-এর মতো কাজ করে।
+
+Use cases:
+
+- Conditional formatting
+- Categorization
+- Reporting
+- Conditional aggregation`,
+	},
+
+	{
+		id: "db-94",
+		category: "Advanced SQL",
+		difficulty: "Very Important",
+		tags: ["SQL", "COALESCE", "NULL"],
+		question: "COALESCE কী?",
+		answer: `COALESCE প্রথম non-NULL value return করে।
+
+Example:
+
+SELECT COALESCE(phone, 'N/A')
+FROM users;
+
+যদি phone NULL হয়:
+
+N/A
+
+Multiple values:
+
+COALESCE(value1, value2, value3)
+
+এটি NULL handling এবং fallback value-এর জন্য খুব useful।`,
+	},
+
+	{
+		id: "db-95",
+		category: "Advanced SQL",
+		difficulty: "Important",
+		tags: ["SQL", "NULLIF"],
+		question: "NULLIF কী?",
+		answer: `NULLIF দুইটি value compare করে।
+
+যদি দুইটি equal হয় → NULL
+না হলে → প্রথম value।
+
+Example:
+
+NULLIF(quantity, 0)
+
+Division-এর ক্ষেত্রে useful:
+
+price / NULLIF(quantity, 0)
+
+এতে quantity = 0 হলে division-by-zero error avoid করা যায়।`,
+	},
+
+	{
+		id: "db-96",
+		category: "Advanced SQL",
+		difficulty: "Very Important",
+		tags: ["EXISTS", "Subquery"],
+		question: "EXISTS এবং IN-এর মধ্যে পার্থক্য কী?",
+		answer: `EXISTS check করে subquery অন্তত একটি row return করছে কি না।
+
+Example:
+
+SELECT *
+FROM users u
+WHERE EXISTS (
+  SELECT 1
+  FROM orders o
+  WHERE o.user_id = u.id
+);
+
+IN:
+
+WHERE id IN (
+  SELECT user_id
+  FROM orders
+);
+
+কোনটি faster হবে তা data distribution, indexes এবং optimizer-এর উপর নির্ভর করে।
+
+EXISTS correlated existence check-এর ক্ষেত্রে খুব natural এবং common।`,
+	},
+
+	{
+		id: "db-97",
+		category: "Advanced SQL",
+		difficulty: "Very Important",
+		tags: ["SQL", "Anti Join"],
+		question: "যেসব user-এর কোনো order নেই তাদের SQL-এ কীভাবে বের করবেন?",
+		answer: `দুইটি common approach:
+
+1. LEFT JOIN:
+
+SELECT u.*
+FROM users u
+LEFT JOIN orders o
+ON o.user_id = u.id
+WHERE o.id IS NULL;
+
+2. NOT EXISTS:
+
+SELECT u.*
+FROM users u
+WHERE NOT EXISTS (
+  SELECT 1
+  FROM orders o
+  WHERE o.user_id = u.id
+);
+
+NOT EXISTS সাধারণত intent-এর দিক থেকে পরিষ্কার।
+
+কিন্তু actual performance database optimizer এবং indexes-এর উপর নির্ভর করবে।`,
+	},
+
+	{
+		id: "db-98",
+		category: "Advanced SQL",
+		difficulty: "Very Important",
+		tags: ["SQL", "Duplicate"],
+		question: "Duplicate records কীভাবে identify করবেন?",
+		answer: `GROUP BY + HAVING ব্যবহার করা যায়।
+
+Example:
+
+SELECT email, COUNT(*)
+FROM users
+GROUP BY email
+HAVING COUNT(*) > 1;
+
+এতে duplicate email পাওয়া যাবে।
+
+Duplicate rows remove করার আগে অবশ্যই:
+
+- Business rule
+- Primary key
+- Foreign key
+- Referential impact
+
+check করতে হবে।`,
+	},
+
+	{
+		id: "db-99",
+		category: "Advanced SQL",
+		difficulty: "Very Important",
+		tags: ["SQL", "Top N"],
+		question: "প্রতিটি department-এর top 3 salary কীভাবে বের করবেন?",
+		answer: `Window function ব্যবহার করা সবচেয়ে clean approach।
+
+Example:
+
+SELECT *
+FROM (
+  SELECT
+    employee_id,
+    department_id,
+    salary,
+    ROW_NUMBER() OVER (
+      PARTITION BY department_id
+      ORDER BY salary DESC
+    ) AS rn
+  FROM employees
+) x
+WHERE rn <= 3;
+
+PARTITION BY department অনুযায়ী ranking reset করে।
+
+ROW_NUMBER-এর পরিবর্তে RANK/DENSE_RANK ব্যবহার করলে ties-এর behavior পরিবর্তিত হবে।`,
+	},
+
+	{
+		id: "db-100",
+		category: "Advanced SQL",
+		difficulty: "Very Important",
+		tags: ["SQL", "RANK", "DENSE_RANK"],
+		question: "ROW_NUMBER, RANK এবং DENSE_RANK-এর পার্থক্য কী?",
+		answer: `ধরা যাক salary:
+
+100
+100
+90
+80
+
+ROW_NUMBER:
+
+1
+2
+3
+4
+
+RANK:
+
+1
+1
+3
+4
+
+DENSE_RANK:
+
+1
+1
+2
+3
+
+ROW_NUMBER → প্রতিটি row unique number
+
+RANK → tie হলে gap তৈরি হয়
+
+DENSE_RANK → tie হলে gap তৈরি হয় না
+
+Ranking problem-এ কোনটি দরকার তা business requirement-এর উপর নির্ভর করে।`,
+	},
+
+	// ============================================================
+	// INDEX DEEP DIVE
+	// ============================================================
+
+	{
+		id: "db-101",
+		category: "Indexing",
+		difficulty: "Very Important",
+		tags: ["Index", "Selectivity"],
+		question: "Index Selectivity কী?",
+		answer: `Selectivity হলো একটি column-এর value কতটা unique বা filtering-এ কতটা effective তার ধারণা।
+
+Example:
+
+id:
+1
+2
+3
+4
+5
+
+id-এর selectivity high।
+
+gender:
+
+male
+male
+male
+female
+male
+
+gender-এর selectivity comparatively low।
+
+High-selectivity column সাধারণত filtering-এর জন্য বেশি useful।
+
+তবে optimizer শুধু selectivity নয়, data distribution, query shape, cost এবং অন্যান্য factors বিবেচনা করে।`,
+	},
+
+	{
+		id: "db-102",
+		category: "Indexing",
+		difficulty: "Very Important",
+		tags: ["Composite Index", "Leftmost Prefix"],
+		question: "Composite Index-এর Leftmost Prefix Rule কী?",
+		answer: `ধরা যাক index:
+
+(user_id, status, created_at)
+
+তাহলে index-এর প্রথম column থেকে prefix ব্যবহার করা সবচেয়ে natural।
+
+Useful:
+
+WHERE user_id = ?
+
+WHERE user_id = ?
+AND status = ?
+
+WHERE user_id = ?
+AND status = ?
+AND created_at > ?
+
+কিন্তু:
+
+WHERE status = ?
+
+শুধু status-এর query একই index থেকে সাধারণত efficientভাবে benefit নাও পেতে পারে।
+
+তাই composite index column order query pattern অনুযায়ী design করতে হয়।`,
+	},
+
+	{
+		id: "db-103",
+		category: "Indexing",
+		difficulty: "Very Important",
+		tags: ["Index", "ORDER BY"],
+		question: "Index কীভাবে ORDER BY optimize করতে পারে?",
+		answer: `ধরা যাক:
+
+CREATE INDEX idx_orders_created
+ON orders(created_at);
+
+Query:
+
+SELECT *
+FROM orders
+ORDER BY created_at DESC
+LIMIT 20;
+
+যদি index ordering query-এর সাথে compatible হয়, database index scan করে sorted result পেতে পারে।
+
+তাহলে আলাদা expensive sort operation avoid হতে পারে।
+
+তবে optimizer cost অনুযায়ী index ব্যবহার করবে কি না সেটি execution plan দিয়ে verify করতে হবে।`,
+	},
+
+	{
+		id: "db-104",
+		category: "Indexing",
+		difficulty: "Very Important",
+		tags: ["Index", "LIKE"],
+		question: "LIKE query-তে কখন index কাজ করতে পারে?",
+		answer: `Prefix search:
+
+WHERE name LIKE 'Naz%'
+
+অনেক B-tree implementation-এ index ব্যবহার করতে পারে।
+
+কিন্তু:
+
+WHERE name LIKE '%Naz'
+
+অথবা:
+
+WHERE name LIKE '%Naz%'
+
+সাধারণ B-tree index সাধারণত effectiveভাবে ব্যবহার করতে পারে না।
+
+Large-scale text search-এর জন্য:
+
+- Full-text index
+- Elasticsearch/OpenSearch
+- Database-specific text search
+
+ব্যবহার করা যেতে পারে।`,
+	},
+
+	{
+		id: "db-105",
+		category: "Indexing",
+		difficulty: "Senior",
+		tags: ["Index", "Write Performance"],
+		question: "অনেক বেশি index দিলে কী সমস্যা হয়?",
+		answer: `Index read performance improve করতে পারে, কিন্তু প্রতিটি write-এর সময় relevant indexes maintain করতে হয়।
+
+তাই অনেক index হলে:
+
+INSERT ↑ cost
+UPDATE ↑ cost
+DELETE ↑ cost
+Storage ↑
+Memory/cache pressure ↑
+
+Example:
+
+একটি table-এ 15টি index থাকলে নতুন row insert করার সময় multiple index update করতে হতে পারে।
+
+তাই index query workload অনুযায়ী design করতে হবে।`,
+	},
+
+	{
+		id: "db-106",
+		category: "Indexing",
+		difficulty: "Senior",
+		tags: ["Index", "Unused Index"],
+		question: "Unused index কেন remove করা উচিত?",
+		answer: `Unused index:
+
+- Storage consume করে
+- Write overhead তৈরি করে
+- Cache pressure বাড়ায়
+- Maintenance cost বাড়ায়
+
+তবে production-এ সরাসরি index drop করা উচিত নয়।
+
+আগে:
+
+- Query statistics
+- Application workload
+- Peak traffic
+- Historical usage
+
+analyze করতে হবে।
+
+কারণ একটি index daily workload-এ unused হলেও monthly reporting query-এর জন্য প্রয়োজনীয় হতে পারে।`,
+	},
+
+	// ============================================================
+	// QUERY OPTIMIZER
+	// ============================================================
+
+	{
+		id: "db-107",
+		category: "Query Optimization",
+		difficulty: "Senior",
+		tags: ["Optimizer", "Execution Plan"],
+		question: "Database Query Optimizer কী?",
+		answer: `Query optimizer SQL query-এর জন্য সম্ভাব্য execution strategy evaluate করে এবং cost অনুযায়ী একটি plan নির্বাচন করে।
+
+Example:
+
+SELECT *
+FROM orders o
+JOIN users u
+ON u.id = o.user_id
+WHERE o.status = 'paid';
+
+Possible plans:
+
+Plan A:
+Scan orders → join users
+
+Plan B:
+Use index → filter orders → join users
+
+Optimizer সাধারণত statistics এবং estimated cost ব্যবহার করে plan নির্বাচন করে।
+
+তাই একই SQL query different data distribution-এ different execution plan নিতে পারে।`,
+	},
+
+	{
+		id: "db-108",
+		category: "Query Optimization",
+		difficulty: "Senior",
+		tags: ["EXPLAIN", "Execution Plan"],
+		question: "EXPLAIN plan-এর কোন বিষয়গুলো সবচেয়ে গুরুত্বপূর্ণ?",
+		answer: `Database অনুযায়ী fields আলাদা হলেও সাধারণত দেখবেন:
+
+- Access method
+- Index used
+- Estimated rows
+- Actual rows
+- Join method
+- Filter
+- Sort
+- Temporary table
+- Full scan
+- Cost
+- Actual execution time
+
+বিশেষ করে compare করুন:
+
+Estimated rows
+vs
+Actual rows
+
+যদি estimate এবং actual অনেক আলাদা হয়, optimizer statistics/data distribution issue থাকতে পারে।`,
+	},
+
+	{
+		id: "db-109",
+		category: "Query Optimization",
+		difficulty: "Senior",
+		tags: ["Full Table Scan", "Index"],
+		question: "Full Table Scan কি সবসময় খারাপ?",
+		answer: `না।
+
+যদি table খুব ছোট হয়, full table scan index lookup-এর চেয়ে faster হতে পারে।
+
+Example:
+
+Table = 100 rows
+
+Index lookup-এর overhead-এর চেয়ে পুরো table scan সহজ হতে পারে।
+
+আবার যদি:
+
+Table = 100 million rows
+
+এবং query মাত্র 10 rows চায়, তখন appropriate index অনেক বেশি useful হতে পারে।
+
+তাই:
+
+Full Scan ≠ Always Bad
+
+Execution plan এবং actual workload দেখে সিদ্ধান্ত নিতে হবে।`,
+	},
+
+	{
+		id: "db-110",
+		category: "Query Optimization",
+		difficulty: "Senior",
+		tags: ["Statistics", "Optimizer"],
+		question: "Database Statistics কী এবং কেন গুরুত্বপূর্ণ?",
+		answer: `Optimizer data distribution সম্পর্কে statistics ব্যবহার করে execution plan তৈরি করতে পারে।
+
+Statistics-এর মাধ্যমে optimizer estimate করতে পারে:
+
+- কত rows match করবে
+- কোন index useful
+- কোন join order ভালো
+
+Statistics stale হলে optimizer ভুল estimate করতে পারে।
+
+তাই production database-এ statistics maintenance গুরুত্বপূর্ণ।`,
+	},
+
+	// ============================================================
+	// MYSQL / INNODB INTERNALS
+	// ============================================================
+
+	{
+		id: "db-111",
+		category: "MySQL",
+		difficulty: "Very Important",
+		tags: ["InnoDB", "MySQL"],
+		question: "InnoDB কী?",
+		answer: `InnoDB হলো MySQL-এর প্রধান transactional storage engine।
+
+Important features:
+
+- ACID transactions
+- Row-level locking
+- Foreign keys
+- MVCC
+- Crash recovery
+- Buffer pool
+- Redo log
+
+Modern transactional MySQL application-এ InnoDB সাধারণত default choice।`,
+	},
+
+	{
+		id: "db-112",
+		category: "MySQL",
+		difficulty: "Senior",
+		tags: ["InnoDB", "Clustered Index"],
+		question: "InnoDB-তে Primary Key কীভাবে data storage-এর সাথে সম্পর্কিত?",
+		answer: `InnoDB clustered index structure ব্যবহার করে।
+
+Primary key index-এর leaf pages-এ row data logically organized থাকে।
+
+Concept:
+
+Primary Key B+Tree
+        ↓
+Leaf Pages
+        ↓
+Row Data
+
+তাই:
+
+- ছোট primary key beneficial
+- Stable primary key beneficial
+- Randomly huge primary key storage/index cost বাড়াতে পারে
+
+Secondary index-এর মধ্যে primary key value-ও গুরুত্বপূর্ণ ভূমিকা রাখে, তাই primary key size secondary indexes-এর storage-কে প্রভাবিত করতে পারে।`,
+	},
+
+	{
+		id: "db-113",
+		category: "MySQL",
+		difficulty: "Senior",
+		tags: ["InnoDB", "Secondary Index"],
+		question: "InnoDB Secondary Index lookup কীভাবে কাজ করে?",
+		answer: `Conceptually:
+
+Secondary Index
+      ↓
+Matching index entry
+      ↓
+Primary Key
+      ↓
+Clustered Index
+      ↓
+Actual Row
+
+তাই query যদি secondary index থেকে শুরু করে এবং প্রয়োজনীয় columns index-এর মধ্যেই থাকে, covering index হলে extra clustered lookup avoid হতে পারে।
+
+এই কারণেই secondary index design গুরুত্বপূর্ণ।`,
+	},
+
+	{
+		id: "db-114",
+		category: "MySQL",
+		difficulty: "Senior",
+		tags: ["Buffer Pool", "InnoDB"],
+		question: "InnoDB Buffer Pool কীভাবে query performance improve করে?",
+		answer: `Database data disk pages হিসেবে store করে।
+
+Frequently used pages memory-তে রাখা হয়:
+
+Disk
+ ↓
+Buffer Pool
+ ↓
+Query
+
+যদি required page buffer pool-এ থাকে:
+
+Memory Hit
+ ↓
+Fast
+
+না থাকলে:
+
+Disk Read
+ ↓
+Buffer Pool
+ ↓
+Query
+
+তাই buffer pool database performance-এর অন্যতম গুরুত্বপূর্ণ component।`,
+	},
+
+	{
+		id: "db-115",
+		category: "MySQL",
+		difficulty: "Senior",
+		tags: ["Redo Log", "InnoDB"],
+		question: "InnoDB-তে Redo Log কেন দরকার?",
+		answer: `Database update করার পর data page immediately disk-এ write না হলেও durability maintain করতে redo log সাহায্য করে।
+
+Simplified:
+
+UPDATE
+ ↓
+Memory page changed
+ ↓
+Redo Log durable
+ ↓
+COMMIT
+ ↓
+Later data page flush
+
+Crash হলে redo log replay করে committed changes recover করা যায়।
+
+এটি write performance এবং durability-এর balance-এর অংশ।`,
+	},
+
+	{
+		id: "db-116",
+		category: "MySQL",
+		difficulty: "Senior",
+		tags: ["Undo Log", "MVCC"],
+		question: "Undo Log কী?",
+		answer: `Undo log মূলত previous row versions এবং rollback-related information ধরে রাখে।
+
+Use cases:
+
+1. Transaction rollback
+2. MVCC consistent reads
+
+Concept:
+
+Old Value
+   ↓
+Undo Log
+
+New Value
+   ↓
+Current Data
+
+এটি Redo Log-এর থেকে আলাদা উদ্দেশ্যে ব্যবহৃত হয়।
+
+Redo → recovery/redo changes
+
+Undo → rollback + old versions/MVCC`,
+	},
+
+	{
+		id: "db-117",
+		category: "MySQL",
+		difficulty: "Senior",
+		tags: ["Redo", "Undo"],
+		question: "Redo Log এবং Undo Log-এর পার্থক্য কী?",
+		answer: `Redo Log:
+
+Purpose:
+Committed changes recovery/replay।
+
+Question:
+Crash হলে committed changes কীভাবে recover করব?
+
+Undo Log:
+
+Purpose:
+Rollback এবং older row versions।
+
+Question:
+Transaction rollback বা consistent read-এর জন্য previous version কোথায় পাব?
+
+Simplified:
+
+Redo:
+"কি পরিবর্তন আবার apply করতে হবে"
+
+Undo:
+"আগের state/version কী ছিল"
+
+দুটোই transactional database internals-এর গুরুত্বপূর্ণ অংশ।`,
+	},
+
+	{
+		id: "db-118",
+		category: "MySQL",
+		difficulty: "Senior",
+		tags: ["Flush", "Durability"],
+		question: "Database COMMIT করার পর data কি সাথে সাথে table data file-এ লিখে যায়?",
+		answer: `অবশ্যই সব ক্ষেত্রে সরাসরি data page disk-এ write হয় না।
+
+Simplified flow:
+
+Application
+ ↓
+Transaction
+ ↓
+Buffer Pool
+ ↓
+Redo Log
+ ↓
+Commit
+ ↓
+Later page flush
+
+Durability-এর জন্য log mechanism এবং storage flush behavior গুরুত্বপূর্ণ।
+
+Exact behavior configuration, filesystem এবং storage engine-এর উপর নির্ভর করে।`,
+	},
+
+	{
+		id: "db-119",
+		category: "MySQL",
+		difficulty: "Senior",
+		tags: ["Crash Recovery", "InnoDB"],
+		question: "MySQL/InnoDB crash হলে কীভাবে recovery করে?",
+		answer: `Simplified:
+
+Database Crash
+ ↓
+Restart
+ ↓
+Recovery
+ ↓
+Read transaction logs
+ ↓
+Redo necessary changes
+ ↓
+Rollback incomplete transactions
+ ↓
+Consistent state
+
+এখানে:
+
+Redo → committed changes recover করতে সাহায্য করে
+
+Undo → incomplete transaction rollback এবং consistent reads-এর জন্য সাহায্য করে
+
+এটি database durability এবং crash recovery-এর core concept।`,
+	},
+
+	// ============================================================
+	// POSTGRESQL
+	// ============================================================
+
+	{
+		id: "db-120",
+		category: "PostgreSQL",
+		difficulty: "Very Important",
+		tags: ["PostgreSQL", "MVCC"],
+		question: "PostgreSQL-এর গুরুত্বপূর্ণ বৈশিষ্ট্য কী?",
+		answer: `PostgreSQL একটি advanced open-source relational database।
+
+Important features:
+
+- ACID transactions
+- MVCC
+- Powerful SQL
+- CTE
+- Window functions
+- JSON/JSONB
+- Arrays
+- Full-text search
+- Extensions
+- Strong indexing options
+- Replication
+- Partitioning
+
+Complex relational এবং data-intensive application-এর জন্য PostgreSQL খুব শক্তিশালী।`,
+	},
+
+	{
+		id: "db-121",
+		category: "PostgreSQL",
+		difficulty: "Senior",
+		tags: ["PostgreSQL", "WAL"],
+		question: "PostgreSQL WAL কীভাবে কাজ করে?",
+		answer: `WAL = Write-Ahead Log।
+
+Simplified:
+
+Transaction
+ ↓
+Generate WAL record
+ ↓
+WAL durable
+ ↓
+Commit
+ ↓
+Data pages later written
+
+Crash হলে WAL replay করে database recovery করতে পারে।
+
+WAL replication-এর ক্ষেত্রেও গুরুত্বপূর্ণ ভূমিকা রাখে।`,
+	},
+
+	{
+		id: "db-122",
+		category: "PostgreSQL",
+		difficulty: "Senior",
+		tags: ["PostgreSQL", "VACUUM"],
+		question: "PostgreSQL VACUUM কী?",
+		answer: `PostgreSQL MVCC-এর কারণে update/delete-এর পুরনো row versions থাকতে পারে।
+
+VACUUM dead tuples cleanup করতে সাহায্য করে।
+
+Concept:
+
+UPDATE/DELETE
+ ↓
+Old tuple remains
+ ↓
+VACUUM
+ ↓
+Cleanup/reclaim process
+
+VACUUM গুরুত্বপূর্ণ কারণ excessive dead tuples:
+
+- Storage বাড়াতে পারে
+- Query performance affect করতে পারে
+- Table bloat তৈরি করতে পারে
+
+Autovacuum production PostgreSQL-এর গুরুত্বপূর্ণ component।`,
+	},
+
+	{
+		id: "db-123",
+		category: "PostgreSQL",
+		difficulty: "Senior",
+		tags: ["PostgreSQL", "Analyze"],
+		question: "PostgreSQL ANALYZE কী?",
+		answer: `ANALYZE table-এর data distribution সম্পর্কে statistics collect করে।
+
+Optimizer এই statistics ব্যবহার করে execution plan তৈরি করে।
+
+Example:
+
+ANALYZE users;
+
+এটি বিশেষভাবে useful হতে পারে যখন:
+
+- অনেক data পরিবর্তন হয়েছে
+- Data distribution বদলেছে
+- Query plan unexpectedly poor
+
+Autovacuum system-এর সাথে automatic analyze-ও হতে পারে।`,
+	},
+
+	// ============================================================
+	// TRANSACTION DEEP DIVE
+	// ============================================================
+
+	{
+		id: "db-124",
+		category: "Transactions",
+		difficulty: "Very Important",
+		tags: ["Isolation", "Read Committed"],
+		question: "READ COMMITTED কী?",
+		answer: `READ COMMITTED সাধারণত একটি transaction-এর query-কে অন্য transaction-এর committed data দেখতে দেয়।
+
+Uncommitted changes দেখা যাবে না।
+
+Concept:
+
+Transaction A:
+UPDATE but not commit
+
+Transaction B:
+SELECT
+
+B সাধারণত A-এর uncommitted value দেখতে পাবে না।
+
+তবে একই transaction-এর দুই query-এর মধ্যে অন্য transaction commit করলে result change হতে পারে।
+
+Exact semantics database-specific।`,
+	},
+
+	{
+		id: "db-125",
+		category: "Transactions",
+		difficulty: "Very Important",
+		tags: ["Isolation", "Repeatable Read"],
+		question: "REPEATABLE READ কী?",
+		answer: `REPEATABLE READ একই transaction-এর repeated reads-এর জন্য consistent view maintain করার লক্ষ্য রাখে।
+
+Example:
+
+Transaction A:
+Read row → 100
+
+Transaction B:
+Update → 200
+Commit
+
+Transaction A:
+Read again
+
+REPEATABLE READ implementation অনুযায়ী আগের consistent value দেখতে পারে।
+
+MySQL InnoDB এবং PostgreSQL-এর semantics এক নয়, তাই database-specific behavior জানা গুরুত্বপূর্ণ।`,
+	},
+
+	{
+		id: "db-126",
+		category: "Transactions",
+		difficulty: "Very Important",
+		tags: ["Serializable", "Isolation"],
+		question: "SERIALIZABLE isolation level কী?",
+		answer: `SERIALIZABLE হলো strongest standard isolation level।
+
+Goal:
+
+Concurrent transactions এমনভাবে execute হবে যেন তারা serial order-এ execute হয়েছে।
+
+Benefits:
+
+- Strong consistency
+- Many concurrency anomalies prevent
+
+Trade-off:
+
+- More blocking/conflicts/retries
+- Lower throughput হতে পারে
+
+High-value financial operations-এ প্রয়োজন হতে পারে, কিন্তু blindly সব transaction SERIALIZABLE করা উচিত নয়।`,
+	},
+
+	{
+		id: "db-127",
+		category: "Transactions",
+		difficulty: "Very Important",
+		tags: ["Isolation", "Comparison"],
+		question: "Isolation level নির্বাচন কীভাবে করবেন?",
+		answer: `Requirement অনুযায়ী:
+
+READ UNCOMMITTED:
+Very weak isolation; uncommon for critical systems।
+
+READ COMMITTED:
+Common default-style choice।
+
+REPEATABLE READ:
+More stable reads।
+
+SERIALIZABLE:
+Strongest isolation।
+
+Consider:
+
+- Business correctness
+- Concurrency
+- Performance
+- Lock contention
+- Retry behavior
+
+Banking/payment system-এর সব operation-এ একই isolation level দরকার—এমন নয়।`,
+	},
+
+	// ============================================================
+	// LOCK DEEP DIVE
+	// ============================================================
+
+	{
+		id: "db-128",
+		category: "Locking",
+		difficulty: "Senior",
+		tags: ["Row Lock", "Table Lock"],
+		question: "Row Lock এবং Table Lock-এর পার্থক্য কী?",
+		answer: `Row lock:
+
+শুধু নির্দিষ্ট row lock করে।
+
+Table lock:
+
+পুরো table lock করতে পারে।
+
+Example:
+
+100 million row table-এ একটি row update করার সময় row-level locking concurrency বেশি allow করে।
+
+Table-level locking সহজ কিন্তু concurrency reduce করতে পারে।
+
+Exact lock behavior database engine-specific।`,
+	},
+
+	{
+		id: "db-129",
+		category: "Locking",
+		difficulty: "Senior",
+		tags: ["Gap Lock", "Next-Key Lock"],
+		question: "Gap Lock এবং Next-Key Lock কী?",
+		answer: `InnoDB-এর locking internals-এ gap lock এবং next-key lock গুরুত্বপূর্ণ।
+
+Gap Lock:
+
+Index records-এর মাঝের gap lock করে।
+
+Next-Key Lock:
+
+Record lock + preceding gap-এর combination হিসেবে কাজ করে।
+
+এগুলো বিশেষ isolation behavior এবং phantom prevention-এর সাথে সম্পর্কিত।
+
+High-concurrency InnoDB debugging-এর সময় এগুলো জানা useful।`,
+	},
+
+	{
+		id: "db-130",
+		category: "Locking",
+		difficulty: "Senior",
+		tags: ["Lock Wait", "Timeout"],
+		question: "Lock wait timeout কী?",
+		answer: `একটি transaction অন্য transaction-এর lock release হওয়ার জন্য অপেক্ষা করতে করতে configured timeout exceed করলে lock wait timeout হতে পারে।
+
+Example:
+
+Transaction A
+ ↓
+Lock row 10
+
+Transaction B
+ ↓
+UPDATE row 10
+ ↓
+WAIT
+ ↓
+Timeout
+
+Solutions:
+
+- Short transactions
+- Proper indexes
+- Consistent access order
+- Avoid unnecessary locks
+- Monitor blocking queries
+- Retry safely where appropriate`,
+	},
+
+	// ============================================================
+	// TRANSACTION DESIGN
+	// ============================================================
+
+	{
+		id: "db-131",
+		category: "Transaction Design",
+		difficulty: "Very Important",
+		tags: ["Transaction", "Best Practice"],
+		question: "Transaction কতক্ষণ open রাখা উচিত?",
+		answer: `Transaction যত short রাখা যায় তত ভালো।
+
+Long transaction:
+
+- Locks ধরে রাখে
+- Concurrency কমায়
+- Deadlock risk বাড়ায়
+- Undo/version storage বাড়াতে পারে
+- Connection occupied রাখে
+
+Bad:
+
+BEGIN
+ ↓
+DB operation
+ ↓
+External API call
+ ↓
+User processing
+ ↓
+Another DB operation
+ ↓
+COMMIT
+
+Better:
+
+External work আগে/পরে carefully handle করে DB transaction-এর critical section ছোট রাখা।
+
+বিশেষ করে network call transaction-এর ভিতরে রাখা সাধারণত avoid করা ভালো।`,
+	},
+
+	{
+		id: "db-132",
+		category: "Transaction Design",
+		difficulty: "Very Important",
+		tags: ["Atomicity", "Concurrency"],
+		question: "Atomic database update কী?",
+		answer: `একটি condition-এর সাথে update এক statement-এ safely করা যায়।
+
+Example:
+
+UPDATE inventory
+SET stock = stock - 1
+WHERE product_id = 10
+AND stock > 0;
+
+তারপর affected rows check:
+
+1 → success
+0 → stock unavailable
+
+এটি:
+
+Read stock
+→ Application logic
+→ Write stock
+
+এর চেয়ে race condition কমাতে সাহায্য করে।`,
+	},
+
+	// ============================================================
+	// SQL INTERVIEW PROBLEMS
+	// ============================================================
+
+	{
+		id: "db-133",
+		category: "SQL Interview",
+		difficulty: "Very Important",
+		tags: ["SQL", "Second Highest Salary"],
+		question: "Second highest salary কীভাবে বের করবেন?",
+		answer: `একটি approach:
+
+SELECT MAX(salary)
+FROM employees
+WHERE salary < (
+  SELECT MAX(salary)
+  FROM employees
+);
+
+আরেকটি approach:
+
+SELECT salary
+FROM (
+  SELECT
+    salary,
+    DENSE_RANK() OVER (
+      ORDER BY salary DESC
+    ) AS rnk
+  FROM employees
+) x
+WHERE rnk = 2;
+
+DENSE_RANK duplicate salary handle করতে সুবিধা দেয়।`,
+	},
+
+	{
+		id: "db-134",
+		category: "SQL Interview",
+		difficulty: "Very Important",
+		tags: ["SQL", "Nth Highest"],
+		question: "Nth highest salary কীভাবে বের করবেন?",
+		answer: `Window function:
+
+SELECT salary
+FROM (
+  SELECT
+    salary,
+    DENSE_RANK() OVER (
+      ORDER BY salary DESC
+    ) AS rnk
+  FROM employees
+) x
+WHERE rnk = N;
+
+এখানে N হলো desired rank।
+
+Duplicate salary-এর ক্ষেত্রে DENSE_RANK এবং ROW_NUMBER-এর difference বুঝতে হবে।`,
+	},
+
+	{
+		id: "db-135",
+		category: "SQL Interview",
+		difficulty: "Very Important",
+		tags: ["SQL", "Duplicate"],
+		question: "Duplicate email delete করার সময় কীভাবে একটি record রেখে বাকিগুলো delete করবেন?",
+		answer: `Conceptually:
+
+ROW_NUMBER() দিয়ে duplicate group-এর মধ্যে একটি row retain করা যায়।
+
+Example:
+
+WITH duplicates AS (
+  SELECT
+    id,
+    ROW_NUMBER() OVER (
+      PARTITION BY email
+      ORDER BY id
+    ) AS rn
+  FROM users
+)
+DELETE ...
+WHERE rn > 1;
+
+Actual DELETE syntax database অনুযায়ী আলাদা হতে পারে।
+
+Production-এ আগে SELECT দিয়ে affected rows verify করতে হবে এবং backup/transaction strategy বিবেচনা করতে হবে।`,
+	},
+
+	{
+		id: "db-136",
+		category: "SQL Interview",
+		difficulty: "Very Important",
+		tags: ["SQL", "Latest Record"],
+		question: "প্রতিটি user-এর latest order কীভাবে বের করবেন?",
+		answer: `ROW_NUMBER():
+
+SELECT *
+FROM (
+  SELECT
+    o.*,
+    ROW_NUMBER() OVER (
+      PARTITION BY user_id
+      ORDER BY created_at DESC, id DESC
+    ) AS rn
+  FROM orders o
+) x
+WHERE rn = 1;
+
+created_at-এর সাথে id tie-breaker রাখা useful যাতে ordering deterministic হয়।`,
+	},
+
+	{
+		id: "db-137",
+		category: "SQL Interview",
+		difficulty: "Very Important",
+		tags: ["SQL", "Aggregation"],
+		question: "প্রতি customer-এর total order amount কীভাবে বের করবেন?",
+		answer: `SELECT
+  user_id,
+  SUM(total) AS total_amount
+FROM orders
+GROUP BY user_id;
+
+যদি order না থাকা user-ও দেখতে হয়:
+
+users
+LEFT JOIN orders
+GROUP BY users.id
+
+এবং NULL amount-এর জন্য COALESCE ব্যবহার করা যায়।`,
+	},
+
+	{
+		id: "db-138",
+		category: "SQL Interview",
+		difficulty: "Very Important",
+		tags: ["SQL", "Date"],
+		question: "গত 30 দিনের orders কীভাবে বের করবেন?",
+		answer: `Database-specific date syntax আলাদা।
+
+Concept:
+
+WHERE created_at >= CURRENT_TIME_OR_DATE - INTERVAL 30 DAY
+
+MySQL-এ:
+
+WHERE created_at >= NOW() - INTERVAL 30 DAY
+
+PostgreSQL-এ:
+
+WHERE created_at >= NOW() - INTERVAL '30 days'
+
+Production query-তে timezone এবং timestamp semantics অবশ্যই consider করতে হবে।`,
+	},
+
+	{
+		id: "db-139",
+		category: "SQL Interview",
+		difficulty: "Very Important",
+		tags: ["SQL", "Aggregation"],
+		question: "প্রতি মাসে কত order হয়েছে কীভাবে বের করবেন?",
+		answer: `Database-specific date grouping ব্যবহার করা যায়।
+
+Concept:
+
+year + month
+ ↓
+GROUP BY
+ ↓
+COUNT(*)
+
+PostgreSQL example:
+
+SELECT
+  DATE_TRUNC('month', created_at) AS month,
+  COUNT(*)
+FROM orders
+GROUP BY DATE_TRUNC('month', created_at)
+ORDER BY month;
+
+Large dataset হলে function-based grouping-এর performance এবং pre-aggregation consider করা যায়।`,
+	},
+
+	// ============================================================
+	// DATABASE ARCHITECTURE
+	// ============================================================
+
+	{
+		id: "db-140",
+		category: "Database Architecture",
+		difficulty: "Senior",
+		tags: ["Read Write Split", "Scaling"],
+		question: "Read/Write Splitting কী?",
+		answer: `Application write request primary database-এ পাঠায় এবং read request replica-তে পাঠাতে পারে।
+
+Architecture:
+
+Application
+   |
+   +---- Write ----> Primary
+   |
+   +---- Read -----> Replica
+
+কিন্তু একটি সমস্যা:
+
+Write Primary-তে
+ ↓
+Immediately Read Replica
+ ↓
+Replication lag
+ ↓
+Stale data
+
+তাই strong read-after-write requirement থাকলে primary read করতে হতে পারে।`,
+	},
+
+	{
+		id: "db-141",
+		category: "Database Architecture",
+		difficulty: "Senior",
+		tags: ["Caching", "Database"],
+		question: "Database-এর আগে Redis cache ব্যবহার করলে কী কী সমস্যা হতে পারে?",
+		answer: `Cache performance improve করে, কিন্তু introduce করে:
+
+- Cache invalidation
+- Stale data
+- Cache stampede
+- Cache penetration
+- Cache avalanche
+- Memory limit
+- Serialization issues
+
+উদাহরণ:
+
+DB update হয়েছে
+ ↓
+Cache পুরনো
+ ↓
+User stale data পাচ্ছে
+
+তাই cache strategy-এর সাথে consistency strategy design করতে হবে।`,
+	},
+
+	{
+		id: "db-142",
+		category: "Database Architecture",
+		difficulty: "Senior",
+		tags: ["Cache Stampede", "Redis"],
+		question: "Cache Stampede কী?",
+		answer: `একটি popular cache key একই সময়ে অনেক request-এর জন্য expire করলে সবাই database-এ request পাঠাতে পারে।
+
+Example:
+
+Cache expired
+ ↓
+1000 requests
+ ↓
+1000 DB queries
+ ↓
+DB overloaded
+
+Solutions:
+
+- Locking
+- Request coalescing
+- Early refresh
+- Randomized TTL
+- Stale-while-revalidate
+
+High-traffic application-এ এটি গুরুত্বপূর্ণ cache problem।`,
+	},
+
+	{
+		id: "db-143",
+		category: "Database Architecture",
+		difficulty: "Senior",
+		tags: ["Cache Penetration", "Redis"],
+		question: "Cache Penetration কী?",
+		answer: `যে data database-এও নেই, attacker/user বারবার সেই key request করলে cache miss হয়ে database query হতে পারে।
+
+Example:
+
+GET user/999999999
+GET user/999999999
+GET user/999999999
+
+যদি record না থাকে এবং cache-ও না থাকে:
+
+Request
+ ↓
+Cache miss
+ ↓
+DB query
+ ↓
+Not found
+
+Solutions:
+
+- Negative caching
+- Input validation
+- Bloom filter
+- Rate limiting`,
+	},
+
+	// ============================================================
+	// DATABASE MONITORING
+	// ============================================================
+
+	{
+		id: "db-144",
+		category: "Database Monitoring",
+		difficulty: "Senior",
+		tags: ["Monitoring", "Production"],
+		question: "Production database-এর কোন metrics monitor করবেন?",
+		answer: `Important metrics:
+
+Performance:
+- Query latency
+- QPS
+- TPS
+- Slow queries
+
+Resources:
+- CPU
+- RAM
+- Disk
+- IOPS
+- Network
+
+Database:
+- Connections
+- Connection pool usage
+- Lock waits
+- Deadlocks
+- Buffer/cache hit ratio
+- Replication lag
+
+Storage:
+- Database size
+- Table growth
+- Index growth
+
+Availability:
+- Errors
+- Failover
+- Replica health
+
+Monitoring ছাড়া production database optimize করা কঠিন।`,
+	},
+
+	{
+		id: "db-145",
+		category: "Database Monitoring",
+		difficulty: "Senior",
+		tags: ["Slow Query", "Monitoring"],
+		question: "Slow Query Log কী?",
+		answer: `Slow query log এমন queries identify করতে সাহায্য করে যেগুলো configured threshold-এর বেশি সময় নেয়।
+
+Example:
+
+Query
+ ↓
+Execution time = 3.5 sec
+ ↓
+Slow query threshold = 1 sec
+ ↓
+Log
+
+তারপর:
+
+Slow query
+ ↓
+EXPLAIN
+ ↓
+Index/Query optimization
+
+Production performance tuning-এর জন্য slow query analysis অত্যন্ত useful।`,
+	},
+
+	// ============================================================
+	// BACKUP / RECOVERY DEEP DIVE
+	// ============================================================
+
+	{
+		id: "db-146",
+		category: "Backup & Recovery",
+		difficulty: "Senior",
+		tags: ["PITR", "Recovery"],
+		question: "Point-in-Time Recovery বা PITR কী?",
+		answer: `PITR হলো নির্দিষ্ট সময় পর্যন্ত database recover করার capability।
+
+Example:
+
+Database:
+
+10:00 → Good
+10:30 → Good
+11:00 → Bad accidental DELETE
+11:10 → Disaster noticed
+
+PITR থাকলে:
+
+Base Backup
+ +
+Transaction/WAL logs
+ ↓
+Recover to 10:59:59
+
+এটি production database disaster recovery-এর জন্য খুব গুরুত্বপূর্ণ।`,
+	},
+
+	{
+		id: "db-147",
+		category: "Backup & Recovery",
+		difficulty: "Senior",
+		tags: ["Backup", "Disaster Recovery"],
+		question: "Backup আছে কিন্তু restore test না করলে সমস্যা কী?",
+		answer: `Backup file exist করা এবং backup successfully restore করা দুইটি আলাদা বিষয়।
+
+Backup corrupt হতে পারে।
+
+Possible problems:
+
+- Missing files
+- Wrong credentials
+- Incompatible version
+- Incomplete backup
+- Broken restore process
+
+তাই:
+
+Backup
+ ↓
+Restore Test
+ ↓
+Validation
+ ↓
+Periodic Drill
+
+করতে হবে।
+
+Production disaster recovery-এর সবচেয়ে গুরুত্বপূর্ণ principle:
+
+"Backup is not proven until restore is tested."`,
+	},
+
+	// ============================================================
+	// DATABASE SECURITY
+	// ============================================================
+
+	{
+		id: "db-148",
+		category: "Database Security",
+		difficulty: "Very Important",
+		tags: ["Encryption", "Security"],
+		question: "Encryption at Rest এবং Encryption in Transit কী?",
+		answer: `Encryption at Rest:
+
+Disk/storage-এ থাকা data encrypted।
+
+Encryption in Transit:
+
+Application ↔ Database network communication encrypted।
+
+Typical:
+
+Application
+   |
+ TLS
+   |
+Database
+
+At Rest:
+Disk
+ ↓
+Encrypted storage
+
+Sensitive systems-এ দুই ধরনের encryption-ই গুরুত্বপূর্ণ।`,
+	},
+
+	{
+		id: "db-149",
+		category: "Database Security",
+		difficulty: "Very Important",
+		tags: ["Secrets", "Security"],
+		question: "Database password কীভাবে manage করা উচিত?",
+		answer: `Production source code-এ database password hardcode করা উচিত নয়।
+
+Bad:
+
+DB_PASSWORD = "my-secret"
+
+Better:
+
+Application
+ ↓
+Secret Manager / Environment / Vault
+ ↓
+Database credentials
+
+Important:
+
+- Secret rotation
+- Least privilege
+- Separate credentials per service/environment
+- No secrets in Git
+- Audit access
+
+Production-এ centralized secret management preferred।`,
+	},
+
+	// ============================================================
+	// FINAL SENIOR INTERVIEW SCENARIOS
+	// ============================================================
+
+	{
+		id: "db-150",
+		category: "Database Interview",
+		difficulty: "Senior",
+		tags: ["System Design", "Troubleshooting"],
+		question:
+			"একটি API suddenly 10ms থেকে 2 seconds latency দিচ্ছে। Database issue কিনা কীভাবে বুঝবেন?",
+		answer: `Step 1:
+
+Application metrics দেখুন।
+
+API latency:
+10ms → 2 sec
+
+Step 2:
+
+DB query latency check করুন।
+
+Step 3:
+
+Connection pool check করুন।
+
+Possible:
+
+Pool exhausted
+ ↓
+Requests waiting
+ ↓
+API slow
+
+Step 4:
+
+Slow query check করুন।
+
+Step 5:
+
+Lock wait check করুন।
+
+Step 6:
+
+Database CPU/IO check করুন।
+
+Step 7:
+
+Replication lag check করুন।
+
+Step 8:
+
+Recent deployment/index/schema change check করুন।
+
+Step 9:
+
+EXPLAIN slow queries।
+
+Step 10:
+
+Root cause অনুযায়ী fix:
+
+- Missing index
+- Bad query
+- Lock contention
+- Pool sizing
+- DB resource saturation
+- Replica issue
+- Network problem
+
+Senior engineer-এর answer শুধু "index add করব" হওয়া উচিত নয়।
+
+প্রথমে observe → measure → isolate → fix → verify করতে হবে।`,
+	},
+
+	{
+		id: "db-151",
+		category: "Database Interview",
+		difficulty: "Senior",
+		tags: ["System Design", "Scalability"],
+		question: "Database scaling-এর জন্য প্রথমে কী করবেন?",
+		answer: `সরাসরি sharding করা উচিত নয়।
+
+Typical progression:
+
+1. Fix bad queries
+2. Add correct indexes
+3. Optimize schema
+4. Connection pooling
+5. Add caching
+6. Vertical scaling
+7. Read replicas
+8. Partition large tables
+9. Archive old data
+10. Sharding
+
+Principle:
+
+Optimize first
+ ↓
+Scale second
+ ↓
+Distribute when necessary
+
+Premature sharding architecture অনেক complex করে দিতে পারে।`,
+	},
+
+	{
+		id: "db-152",
+		category: "Database Interview",
+		difficulty: "Senior",
+		tags: ["System Design", "Consistency"],
+		question: "Database consistency এবং performance-এর মধ্যে trade-off কী?",
+		answer: `Strong consistency সাধারণত বেশি coordination/locking/communication চাইতে পারে।
+
+Performance/scalability-এর জন্য system কখনও:
+
+- Caching
+- Async processing
+- Read replicas
+- Eventual consistency
+
+ব্যবহার করে।
+
+Example:
+
+Payment balance:
+→ Strong consistency
+
+Product view count:
+→ Eventual consistency acceptable হতে পারে
+
+সব data-এর জন্য একই consistency level দরকার হয় না।
+
+Business requirement অনুযায়ী consistency boundary define করতে হয়।`,
+	},
+
+	{
+		id: "db-153",
+		category: "Database Interview",
+		difficulty: "Senior",
+		tags: ["System Design", "Data Integrity"],
+		question: "Application validation এবং Database constraint—দুটোই কেন দরকার?",
+		answer: `Application validation user-friendly error এবং business validation দেয়।
+
+Database constraint শেষ layer হিসেবে data integrity enforce করে।
+
+Example:
+
+Application:
+email format validate
+
+Database:
+email UNIQUE
+
+কারণ অন্য service বা bug database-এ duplicate email insert করার চেষ্টা করতে পারে।
+
+Layer:
+
+API Validation
+ ↓
+Service Validation
+ ↓
+Database Constraint
+
+Defense in depth হিসেবে এটি গুরুত্বপূর্ণ।`,
+	},
+
+	{
+		id: "db-154",
+		category: "Database Interview",
+		difficulty: "Senior",
+		tags: ["Architecture", "Microservices"],
+		question: "Microservice architecture-এ কেন Database per Service ব্যবহার করা হয়?",
+		answer: `প্রতিটি service নিজের data-এর owner হলে coupling কমে।
+
+Example:
+
+User Service
+ ↓
+User DB
+
+Order Service
+ ↓
+Order DB
+
+Payment Service
+ ↓
+Payment DB
+
+Benefits:
+
+- Loose coupling
+- Independent deployment
+- Independent scaling
+- Service ownership
+
+কিন্তু problem:
+
+- Cross-service query
+- Distributed transaction
+- Data duplication
+- Eventual consistency
+
+তাই microservice database architecture relational monolith-এর চেয়ে বেশি complex।`,
+	},
+
+	{
+		id: "db-155",
+		category: "Database Interview",
+		difficulty: "Senior",
+		tags: ["Microservices", "Database"],
+		question: "Microservices-এ অন্য service-এর database direct query করা উচিত কি?",
+		answer: `সাধারণভাবে উচিত নয়।
+
+Bad:
+
+Order Service
+ ↓
+Payment Service DB
+
+এতে tight coupling তৈরি হয়।
+
+Better:
+
+Order Service
+ ↓
+Order DB
+
+Payment Service
+ ↓
+Payment DB
+
+Communication:
+
+Order Service
+   ↓
+API / Event
+   ↓
+Payment Service
+
+এতে service ownership এবং boundaries পরিষ্কার থাকে।
+
+বিশেষ ক্ষেত্রে analytics/reporting-এর জন্য separate read model তৈরি করা যেতে পারে।`,
+	},
+
+	{
+		id: "db-156",
+		category: "Database Interview",
+		difficulty: "Senior",
+		tags: ["Outbox", "Microservices"],
+		question: "Database update এবং event publish একসাথে reliableভাবে কীভাবে করবেন?",
+		answer: `Problem:
+
+DB update successful
+ ↓
+Event publish failed
+
+তাহলে database এবং message broker inconsistent হয়ে যায়।
+
+Outbox Pattern:
+
+BEGIN
+ ↓
+Update business data
+ ↓
+Insert event into outbox table
+ ↓
+COMMIT
+ ↓
+Outbox worker
+ ↓
+Publish event
+ ↓
+Mark event published
+
+একই local transaction-এর মধ্যে business data এবং outbox event commit করা যায়।
+
+এটি microservices-এ reliable event publishing-এর খুব common pattern।`,
+	},
+
+	{
+		id: "db-157",
+		category: "Database Interview",
+		difficulty: "Senior",
+		tags: ["CQRS", "Database"],
+		question: "CQRS database architecture-এ কীভাবে ব্যবহার করা হয়?",
+		answer: `CQRS:
+
+Command Query Responsibility Segregation
+
+Write model:
+
+Command
+ ↓
+Write DB
+
+Read model:
+
+Query
+ ↓
+Read DB / Projection
+
+Example:
+
+Orders write model
+        ↓
+     Events
+        ↓
+Read Model
+        ↓
+Dashboard
+
+Benefits:
+
+- Read optimization
+- Independent scaling
+- Specialized projections
+
+Trade-off:
+
+- Complexity
+- Eventual consistency
+- Multiple data models
+
+Simple CRUD application-এ CQRS প্রয়োজন নাও হতে পারে।`,
+	},
+
+	{
+		id: "db-158",
+		category: "Database Interview",
+		difficulty: "Senior",
+		tags: ["Event Sourcing", "Database"],
+		question: "Event Sourcing কী?",
+		answer: `Event Sourcing-এ current state-এর বদলে state পরিবর্তনের events source of truth হিসেবে store করা হয়।
+
+Example:
+
+AccountCreated
+MoneyDeposited(1000)
+MoneyWithdrawn(200)
+MoneyDeposited(500)
+
+Current balance:
+
+1000 - 200 + 500 = 1300
+
+Benefits:
+
+- Complete history
+- Auditability
+- Replay capability
+
+Challenges:
+
+- Event schema evolution
+- Storage growth
+- Query complexity
+- Eventual consistency
+
+Banking/domain-heavy systems-এ useful হতে পারে, কিন্তু সাধারণ CRUD-এর জন্য overkill হতে পারে।`,
+	},
+
+	{
+		id: "db-159",
+		category: "Database Interview",
+		difficulty: "Senior",
+		tags: ["Interview", "Architecture"],
+		question: "Database interview-এ একজন Senior Backend Engineer-এর কী কী গভীরভাবে জানা উচিত?",
+		answer: `Minimum strong areas:
+
+1. SQL
+2. JOIN
+3. GROUP BY
+4. Subquery
+5. CTE
+6. Window functions
+7. Index
+8. B-Tree/B+Tree
+9. Composite index
+10. Covering index
+11. EXPLAIN
+12. Query optimization
+13. ACID
+14. Transactions
+15. Isolation levels
+16. MVCC
+17. Locks
+18. Deadlocks
+19. Optimistic locking
+20. Pessimistic locking
+21. Buffer pool
+22. Redo/WAL
+23. Undo
+24. Replication
+25. Replication lag
+26. Read replica
+27. Partitioning
+28. Sharding
+29. Caching
+30. Redis
+31. Backup
+32. PITR
+33. RPO/RTO
+34. Security
+35. SQL injection
+36. Database migrations
+37. Zero-downtime migration
+38. Microservice database ownership
+39. Outbox
+40. Distributed transaction
+41. CQRS
+42. Event sourcing
+
+Senior level-এ শুধু definition নয়।
+
+আপনাকে explain করতে হবে:
+
+"What happens internally?"
+"Why?"
+"When should I use it?"
+"What are the trade-offs?"
+"How would I debug it in production?"`,
+	},
 ];
