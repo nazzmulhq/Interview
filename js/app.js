@@ -17,16 +17,19 @@ let userProgress = {
 
 document.addEventListener("DOMContentLoaded", () => {
   // Load All 14 Data Files
-  if (typeof javascriptQuestions !== 'undefined') allQuestions.push(...javascriptQuestions);
-  if (typeof reactjsQuestions !== 'undefined') allQuestions.push(...reactjsQuestions);
-  if (typeof nextjsQuestions !== 'undefined') allQuestions.push(...nextjsQuestions);
-  if (typeof nodejsQuestions !== 'undefined') allQuestions.push(...nodejsQuestions);
-  if (typeof expressjsQuestions !== 'undefined') allQuestions.push(...expressjsQuestions);
-  if (typeof nestjsQuestions !== 'undefined') allQuestions.push(...nestjsQuestions);
-  if (typeof databaseQuestions !== 'undefined') allQuestions.push(...databaseQuestions);
+  if (typeof javascriptInterviewQuestions !== 'undefined') allQuestions.push(...javascriptInterviewQuestions);
+  if (typeof reactJsInterviewQuestions !== 'undefined') allQuestions.push(...reactJsInterviewQuestions);
+  if (typeof nextJsInterviewQuestions !== 'undefined') allQuestions.push(...nextJsInterviewQuestions);
+  if (typeof nodejsInterviewQuestions !== 'undefined') allQuestions.push(...nodejsInterviewQuestions);
+  if (typeof expressInterviewQuestions !== 'undefined') allQuestions.push(...expressInterviewQuestions);
+  if (typeof nestjsInterviewQuestions !== 'undefined') allQuestions.push(...nestjsInterviewQuestions);
+  if (typeof databaseInterviewQuestionsPart1 !== 'undefined') allQuestions.push(...databaseInterviewQuestionsPart1);
   if (typeof systemDesignInfraQuestions !== 'undefined') allQuestions.push(...systemDesignInfraQuestions);
   if (typeof seniorFullstackQuestions !== 'undefined') allQuestions.push(...seniorFullstackQuestions.map(q => ({...q, category: `Full-Stack - ${q.category}`})));
   if (typeof pythonQuestions !== 'undefined') allQuestions.push(...pythonQuestions);
+  if (typeof django !== 'undefined') allQuestions.push(...django);
+  if (typeof fastApi !== 'undefined') allQuestions.push(...fastApi);
+  if (typeof microservice !== 'undefined') allQuestions.push(...microservice);
 
   // Initialize UI & Sidebar Sublists
   initMermaid();
@@ -119,6 +122,9 @@ function renderSidebarCategories() {
     { name: "React.js", label: "⚛️ React.js" },
     { name: "Next.js", label: "▲ Next.js" },
     { name: "Python", label: "🐍 Python" },
+    { name: "Django", label: "🎸 Django" },
+    { name: "FastAPI", label: "🚀 FastAPI" },
+    { name: "Microservices", label: "🧩 Microservices" },
     { name: "Full-Stack", label: "🌐 Full-Stack" },
     { name: "System Design", label: "🏗️ System Design" }
   ];
@@ -133,6 +139,7 @@ function renderSidebarCategories() {
         return q.category === "Database" || q.category.startsWith("Database");
       }
       if (cat.name === "Full-Stack") return q.category.startsWith("Full-Stack");
+      if (cat.name === "Node.js") return q.id.startsWith("node-");
       return q.category === cat.name;
     });
     const count = catQuestions.length;
@@ -251,6 +258,10 @@ function renderQuestions() {
         if (q.category !== "Database" && !q.category.startsWith("Database")) return false;
       } else if (currentCategory === "Full-Stack") {
         if (!q.category.startsWith("Full-Stack")) return false;
+      } else if (currentCategory === "Node.js") {
+        if (!q.id.startsWith("node-")) return false;
+      } else if (currentCategory === "System Design") {
+        if (q.category !== "System Design" && !q.category.startsWith("System Design")) return false;
       } else if (q.category !== currentCategory) {
         return false;
       }

@@ -447,7 +447,7 @@ import { useState } from "react";
     category: "Next.js",
     difficulty: "Beginner",
     tags: ["Client Components"],
-    question: `"use client"` কী করে?",
+    question: "\"use client\" কী করে?",
     answer: `"use client" file-এর top-এ দিলে সেই module একটি Client Component boundary হিসেবে treated হয়।
 
 এটি প্রয়োজন হতে পারে:

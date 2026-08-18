@@ -288,7 +288,7 @@ nextTick queue সাধারণ event loop progression-এর আগে proces
     id: "node-10",
     category: "Event Loop",
     difficulty: "Very Important",
-    tags ["Promise", "Microtask"],
+    tags: ["Promise", "Microtask"],
     question: "Promise microtask এবং process.nextTick-এর relationship কী?",
     answer: `Node.js-এ process.nextTick queue এবং Promise microtask queue খুব high priority asynchronous queues।
 
