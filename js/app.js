@@ -30,6 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (typeof django !== 'undefined') allQuestions.push(...django);
   if (typeof fastApi !== 'undefined') allQuestions.push(...fastApi);
   if (typeof microservice !== 'undefined') allQuestions.push(...microservice);
+  if (typeof dsaQuestions !== 'undefined') allQuestions.push(...dsaQuestions);
 
   // Initialize UI & Sidebar Sublists
   initMermaid();
@@ -125,6 +126,7 @@ function renderSidebarCategories() {
     { name: "Django", label: "🎸 Django" },
     { name: "FastAPI", label: "🚀 FastAPI" },
     { name: "Microservices", label: "🧩 Microservices" },
+    { name: "DSA", label: "🧮 DSA (Algorithms)" },
     { name: "Full-Stack", label: "🌐 Full-Stack" },
     { name: "System Design", label: "🏗️ System Design" }
   ];
