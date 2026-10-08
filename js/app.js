@@ -16,7 +16,7 @@ let userProgress = {
 };
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Load All 14 Data Files
+  // Load All 16 Data Files
   if (typeof javascriptInterviewQuestions !== 'undefined') allQuestions.push(...javascriptInterviewQuestions);
   if (typeof reactJsInterviewQuestions !== 'undefined') allQuestions.push(...reactJsInterviewQuestions);
   if (typeof nextJsInterviewQuestions !== 'undefined') allQuestions.push(...nextJsInterviewQuestions);
@@ -30,6 +30,8 @@ document.addEventListener("DOMContentLoaded", () => {
   if (typeof django !== 'undefined') allQuestions.push(...django);
   if (typeof fastApi !== 'undefined') allQuestions.push(...fastApi);
   if (typeof microservice !== 'undefined') allQuestions.push(...microservice);
+  if (typeof awsQuestions !== 'undefined') allQuestions.push(...awsQuestions);
+  if (typeof kubernetesQuestions !== 'undefined') allQuestions.push(...kubernetesQuestions);
   if (typeof dsaQuestions !== 'undefined') allQuestions.push(...dsaQuestions);
 
   // Initialize UI & Sidebar Sublists
@@ -126,6 +128,8 @@ function renderSidebarCategories() {
     { name: "Django", label: "🎸 Django" },
     { name: "FastAPI", label: "🚀 FastAPI" },
     { name: "Microservices", label: "🧩 Microservices" },
+    { name: "AWS", label: "☁️ AWS" },
+    { name: "Kubernetes", label: "☸️ Kubernetes" },
     { name: "DSA", label: "🧮 DSA (Algorithms)" },
     { name: "Full-Stack", label: "🌐 Full-Stack" },
     { name: "System Design", label: "🏗️ System Design" }
